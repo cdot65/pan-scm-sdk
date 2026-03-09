@@ -18,15 +18,15 @@ All models use `extra="forbid"` to reject undefined fields.
 
 | Attribute                      | Type         | Required | Default | Description                               |
 |--------------------------------|--------------|----------|---------|-------------------------------------------|
-| `name`                         | str          | Yes      | None    | Interface name (e.g., "loopback.1")       |
-| `comment`                      | str          | No       | None    | Description (max 1023 chars)              |
-| `ip`                           | List[str]    | No       | None    | IPv4 addresses (e.g., ["10.0.0.1/32"])    |
-| `ipv6`                         | Ipv6Config   | No       | None    | IPv6 configuration                        |
-| `mtu`                          | int          | No       | 1500    | MTU (576-9216)                            |
-| `interface_management_profile` | str          | No       | None    | Management profile (max 31 chars)         |
-| `folder`                       | str          | No*      | None    | Folder container                          |
-| `snippet`                      | str          | No*      | None    | Snippet container                         |
-| `device`                       | str          | No*      | None    | Device container                          |
+| `name`                         | `str` | Yes      | None    | Interface name (e.g., "loopback.1")       |
+| `comment`                      | `str` | No       | None    | Description (max 1023 chars)              |
+| `ip`                           | `List[str]` | No       | None    | IPv4 addresses (e.g., ["10.0.0.1/32"])    |
+| `ipv6`                         | `Ipv6Config` | No       | None    | IPv6 configuration                        |
+| `mtu`                          | `int` | No       | 1500    | MTU (576-9216)                            |
+| `interface_management_profile` | `str` | No       | None    | Management profile (max 31 chars)         |
+| `folder`                       | `str` | No*      | None    | Folder container                          |
+| `snippet`                      | `str` | No*      | None    | Snippet container                         |
+| `device`                       | `str` | No*      | None    | Device container                          |
 
 \* Exactly one container required for create operations
 
@@ -34,8 +34,8 @@ All models use `extra="forbid"` to reject undefined fields.
 
 | Attribute | Type             | Default | Description                    |
 |-----------|------------------|---------|--------------------------------|
-| `enabled` | bool             | False   | Enable IPv6                    |
-| `address` | List[Ipv6Address]| None    | IPv6 addresses                 |
+| `enabled` | `bool` | False   | Enable IPv6                    |
+| `address` | `List[Ipv6Address]` | None    | IPv6 addresses                 |
 
 ## Usage Examples
 

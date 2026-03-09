@@ -1,15 +1,6 @@
 # Route Prefix List Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Supporting Models](#supporting-models)
-4. [Exceptions](#exceptions)
-5. [Model Validators](#model-validators)
-6. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The Route Prefix List models provide a structured way to represent and validate route prefix list configuration data for Palo Alto Networks' Strata Cloud Manager. Route prefix lists are used for prefix-based route filtering in BGP and OSPF routing policies. Each entry can match a specific network with optional greater-than-or-equal (ge) and less-than-or-equal (le) prefix length modifiers, or match any network using the special `any` keyword.
 
@@ -36,12 +27,12 @@ This is the base model containing fields common to all route prefix list operati
 
 | Attribute   | Type                 | Required | Default | Description                                                     |
 |-------------|----------------------|----------|---------|-----------------------------------------------------------------|
-| name        | str                  | Yes      | None    | Filter prefix list name.                                        |
-| description | str                  | No       | None    | Description.                                                    |
-| ipv4        | RoutePrefixListIpv4  | No       | None    | IPv4 prefix list configuration.                                 |
-| folder      | str                  | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
-| snippet     | str                  | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
-| device      | str                  | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `name` | `str` | Yes      | None    | Filter prefix list name.                                        |
+| `description` | `str` | No       | None    | Description.                                                    |
+| `ipv4` | `RoutePrefixListIpv4` | No       | None    | IPv4 prefix list configuration.                                 |
+| `folder` | `str` | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `snippet` | `str` | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
+| `device` | `str` | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
 
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
@@ -55,7 +46,7 @@ Extends `RoutePrefixListBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                    |
 |-----------|------|----------|---------|------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the route prefix list |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the route prefix list |
 
 ### RoutePrefixListResponseModel
 
@@ -63,9 +54,10 @@ Extends `RoutePrefixListBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                    |
 |-----------|------|----------|---------|------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the route prefix list |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the route prefix list |
 
-> **Note:** The `RoutePrefixListResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
+!!! note
+    The `RoutePrefixListResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
 
 ## Supporting Models
 
@@ -75,7 +67,7 @@ IPv4 prefix list container holding the list of entries.
 
 | Attribute  | Type                           | Required | Default | Description              |
 |------------|--------------------------------|----------|---------|--------------------------|
-| ipv4_entry | List[RoutePrefixListIpv4Entry] | No       | None    | IPv4 prefix list entries.|
+| `ipv4_entry` | `List[RoutePrefixListIpv4Entry]` | No       | None    | IPv4 prefix list entries.|
 
 ### RoutePrefixListIpv4Entry
 
@@ -83,9 +75,9 @@ Individual IPv4 prefix list entry with sequence number, action, and prefix match
 
 | Attribute | Type                  | Required | Default | Description                                           |
 |-----------|-----------------------|----------|---------|-------------------------------------------------------|
-| name      | int                   | No       | None    | Sequence number (1-65535).                             |
-| action    | str                   | No       | None    | Action: `deny` or `permit`. Pattern: `^(deny\|permit)$` |
-| prefix    | RoutePrefixListPrefix | No       | None    | Prefix configuration.                                 |
+| `name` | `int` | No       | None    | Sequence number (1-65535).                             |
+| `action` | `str` | No       | None    | Action: `deny` or `permit`. Pattern: `^(deny\|permit)$` |
+| `prefix` | `RoutePrefixListPrefix` | No       | None    | Prefix configuration.                                 |
 
 ### RoutePrefixListPrefix
 
@@ -93,8 +85,8 @@ Prefix configuration. Uses oneOf semantics: `network` and `entry` are mutually e
 
 | Attribute | Type                       | Required | Default | Description                                              |
 |-----------|----------------------------|----------|---------|----------------------------------------------------------|
-| network   | str                        | No*      | None    | Network keyword (must be `any`). Pattern: `^any$`        |
-| entry     | RoutePrefixListPrefixEntry | No*      | None    | Prefix entry with network address and optional ge/le.    |
+| `network` | `str` | No*      | None    | Network keyword (must be `any`). Pattern: `^any$`        |
+| `entry` | `RoutePrefixListPrefixEntry` | No*      | None    | Prefix entry with network address and optional ge/le.    |
 
 \* `network` and `entry` are mutually exclusive.
 
@@ -104,9 +96,9 @@ Prefix entry with network address and optional ge/le modifiers.
 
 | Attribute              | Type | Required | Default | Description                                    |
 |------------------------|------|----------|---------|------------------------------------------------|
-| network                | str  | No       | None    | Network address (e.g., "10.0.0.0/8").          |
-| greater_than_or_equal  | int  | No       | None    | Greater than or equal to prefix length (0-32). |
-| less_than_or_equal     | int  | No       | None    | Less than or equal to prefix length (0-32).    |
+| `network` | `str` | No       | None    | Network address (e.g., "10.0.0.0/8").          |
+| `greater_than_or_equal` | `int` | No       | None    | Greater than or equal to prefix length (0-32). |
+| `less_than_or_equal` | `int` | No       | None    | Less than or equal to prefix length (0-32).    |
 
 ## Exceptions
 

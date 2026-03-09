@@ -1,30 +1,12 @@
 # Internal DNS Servers Configuration Object
 
-## Table of Contents
+Manages internal DNS server objects for domain name resolution in Palo Alto Networks Strata Cloud Manager.
 
-1. [Overview](#overview)
-2. [Core Methods](#core-methods)
-3. [Internal DNS Servers Model Attributes](#internal-dns-servers-model-attributes)
-4. [Exceptions](#exceptions)
-5. [Basic Configuration](#basic-configuration)
-6. [Usage Examples](#usage-examples)
-    - [Creating Internal DNS Servers](#creating-internal-dns-servers)
-    - [Retrieving Internal DNS Servers](#retrieving-internal-dns-servers)
-    - [Updating Internal DNS Servers](#updating-internal-dns-servers)
-    - [Listing Internal DNS Servers](#listing-internal-dns-servers)
-    - [Filtering Internal DNS Servers](#filtering-internal-dns-servers)
-    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
-    - [Deleting Internal DNS Servers](#deleting-internal-dns-servers)
-7. [Error Handling](#error-handling)
-8. [Best Practices](#best-practices)
-9. [Full Script Examples](#full-script-examples)
-10. [Related Models](#related-models)
+## Class Overview
 
-## Overview
+The `InternalDnsServers` class inherits from `BaseObject` and provides CRUD operations for internal DNS server configurations.
 
-The `InternalDnsServers` class provides functionality to manage internal DNS server objects in Palo Alto Networks' Strata Cloud Manager. This class inherits from `BaseObject` and provides methods for creating, retrieving, updating, and deleting internal DNS server configurations.
-
-## Core Methods
+### Methods
 
 | Method     | Description                              | Parameters                                  | Return Type                             |
 |------------|------------------------------------------|---------------------------------------------|-----------------------------------------|
@@ -35,380 +17,173 @@ The `InternalDnsServers` class provides functionality to manage internal DNS ser
 | `list()`   | Lists DNS servers with filtering         | `name: str`, `**filters`                    | `List[InternalDnsServersResponseModel]` |
 | `fetch()`  | Gets DNS server by name                  | `name: str`                                 | `InternalDnsServersResponseModel`       |
 
-## Internal DNS Servers Model Attributes
+### Model Attributes
 
-| Attribute      | Type           | Required | Description                                   |
-|----------------|----------------|----------|-----------------------------------------------|
-| `name`         | str            | Yes      | Name of the DNS server (max 63 chars)         |
-| `id`           | UUID           | Yes*     | Unique identifier (*response only)            |
-| `domain_name`  | List[str]      | Yes      | List of DNS domain names                      |
-| `primary`      | IPvAnyAddress  | Yes      | IP address of the primary DNS server          |
-| `secondary`    | IPvAnyAddress  | No       | IP address of the secondary DNS server        |
+| Attribute     | Type          | Required | Default | Description                            |
+|---------------|---------------|----------|---------|----------------------------------------|
+| `name`        | str           | Yes      | None    | Name of the DNS server (max 63 chars)  |
+| `id`          | UUID          | Yes*     | None    | Unique identifier (*response only)     |
+| `domain_name` | List[str]     | Yes      | None    | List of DNS domain names               |
+| `primary`     | IPvAnyAddress | Yes      | None    | IP address of the primary DNS server   |
+| `secondary`   | IPvAnyAddress | No       | None    | IP address of the secondary DNS server |
 
-## Exceptions
+\* Only required for response models
 
-| Exception                    | HTTP Code | Description                         |
-|------------------------------|-----------|-------------------------------------|
-| `InvalidObjectError`         | 400       | Invalid DNS server data or format   |
-| `MissingQueryParameterError` | 400       | Missing required parameters         |
-| `ObjectNotPresentError`      | 404       | DNS server not found                |
-| `AuthenticationError`        | 401       | Authentication failed               |
-| `ServerError`                | 500       | Internal server error               |
+### Exceptions
 
-## Basic Configuration
+| Exception                    | HTTP Code | Description                       |
+|------------------------------|-----------|-----------------------------------|
+| `InvalidObjectError`         | 400       | Invalid DNS server data or format |
+| `MissingQueryParameterError` | 400       | Missing required parameters       |
+| `ObjectNotPresentError`      | 404       | DNS server not found              |
+| `AuthenticationError`        | 401       | Authentication failed             |
+| `ServerError`                | 500       | Internal server error             |
 
-The Internal DNS Servers service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
-
-### Unified Client Interface (Recommended)
+### Basic Configuration
 
 ```python
 from scm.client import ScmClient
 
-# Initialize client
 client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
 )
 
-# Access the Internal DNS Servers service directly through the client
-# No need to create a separate InternalDnsServers instance
 dns_servers = client.internal_dns_server
 ```
 
-### Traditional Service Instantiation (Legacy)
+## Methods
+
+### List Internal DNS Servers
 
 ```python
-from scm.client import Scm
-from scm.config.deployment import InternalDnsServers
-
-# Initialize client
-client = Scm(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
-
-# Initialize InternalDnsServers object explicitly
-dns_servers = InternalDnsServers(client)
-```
-
-!!! note
-    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
-
-## Usage Examples
-
-### Creating Internal DNS Servers
-
-```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-# Prepare DNS server configuration
-dns_server_config = {
-   "name": "main-dns-server",
-   "domain_name": ["example.com", "internal.example.com"],
-   "primary": "192.168.1.10",
-   "secondary": "192.168.1.11"
-}
-
-# Create the DNS server object using the unified client interface
-dns_server = client.internal_dns_server.create(dns_server_config)
-
-print(f"Created DNS server: {dns_server.name} with ID: {dns_server.id}")
-```
-
-### Retrieving Internal DNS Servers
-
-```python
-# Fetch by name
-dns_server = client.internal_dns_server.fetch(name="main-dns-server")
-print(f"Found DNS server: {dns_server.name}")
-print(f"Domain names: {dns_server.domain_name}")
-print(f"Primary DNS: {dns_server.primary}")
-print(f"Secondary DNS: {dns_server.secondary}")
-
-# Get by ID
-dns_server_id = "123e4567-e89b-12d3-a456-426655440000"
-dns_server_by_id = client.internal_dns_server.get(dns_server_id)
-print(f"Retrieved DNS server: {dns_server_by_id.name}")
-```
-
-### Updating Internal DNS Servers
-
-```python
-# Fetch existing DNS server
-existing_dns_server = client.internal_dns_server.fetch(name="main-dns-server")
-
-# Modify attributes using dot notation
-existing_dns_server.domain_name = ["example.com", "internal.example.com", "new-domain.example.com"]
-existing_dns_server.secondary = "192.168.1.12"
-
-# Pass modified object to update()
-updated_dns_server = client.internal_dns_server.update(existing_dns_server)
-
-print(f"Updated DNS server: {updated_dns_server.name}")
-print(f"Updated domain names: {updated_dns_server.domain_name}")
-print(f"Updated secondary DNS: {updated_dns_server.secondary}")
-```
-
-### Listing Internal DNS Servers
-
-```python
-# List all DNS servers
 all_dns_servers = client.internal_dns_server.list()
 
-# Process results
 for dns in all_dns_servers:
-   print(f"Name: {dns.name}, Primary DNS: {dns.primary}")
+    print(f"Name: {dns.name}, Primary DNS: {dns.primary}")
+```
 
+**Filtering responses:**
+
+```python
 # Filter by name
 filtered_dns_servers = client.internal_dns_server.list(name="main")
 
-# Process filtered results
-for dns in filtered_dns_servers:
-   print(f"Filtered DNS server: {dns.name}")
-   print(f"Domain names: {dns.domain_name}")
-```
-
-### Filtering Internal DNS Servers
-
-```python
 # Filter by primary IP address
 primary_ip_filter = client.internal_dns_server.list(primary="192.168.1.10")
-print(f"DNS servers with primary IP 192.168.1.10: {len(primary_ip_filter)}")
-
-# Filter by domain name (partial match)
-domain_filter = client.internal_dns_server.list(domain_name="example")
-print(f"DNS servers with 'example' in domain name: {len(domain_filter)}")
 
 # Combine multiple filters
 combined_filter = client.internal_dns_server.list(
     primary="192.168.1.10",
     domain_name="example"
 )
-print(f"DNS servers matching both filters: {len(combined_filter)}")
-
-# Process filtered results
-for dns in combined_filter:
-    print(f"Filtered DNS server: {dns.name}")
-    print(f"Primary IP: {dns.primary}")
-    print(f"Domain names: {dns.domain_name}")
 ```
 
-### Controlling Pagination with max_limit
-
-The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved.
-
-**Example:**
+**Controlling pagination with max_limit:**
 
 ```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-# Configure max_limit using the property setter
 client.internal_dns_server.max_limit = 4000
 
-# List all DNS servers - auto-paginates through results
 all_dns_servers = client.internal_dns_server.list()
-
-# The DNS servers are fetched in chunks according to the max_limit.
-# All results are returned as a single list.
 ```
 
-### Deleting Internal DNS Servers
+### Fetch an Internal DNS Server
 
 ```python
-# Delete by ID
-dns_server_id = "123e4567-e89b-12d3-a456-426655440000"
-client.internal_dns_server.delete(dns_server_id)
-print(f"Deleted DNS server with ID: {dns_server_id}")
-
-# Fetch by name, then delete by ID
 dns_server = client.internal_dns_server.fetch(name="main-dns-server")
-client.internal_dns_server.delete(dns_server.id)
-print(f"Deleted DNS server: {dns_server.name}")
+print(f"Found DNS server: {dns_server.name}")
+print(f"Domain names: {dns_server.domain_name}")
+```
+
+### Create an Internal DNS Server
+
+```python
+dns_server_config = {
+    "name": "main-dns-server",
+    "domain_name": ["example.com", "internal.example.com"],
+    "primary": "192.168.1.10",
+    "secondary": "192.168.1.11"
+}
+dns_server = client.internal_dns_server.create(dns_server_config)
+print(f"Created DNS server: {dns_server.name} with ID: {dns_server.id}")
+```
+
+### Update an Internal DNS Server
+
+```python
+existing_dns_server = client.internal_dns_server.fetch(name="main-dns-server")
+
+existing_dns_server.domain_name = ["example.com", "internal.example.com", "new-domain.example.com"]
+existing_dns_server.secondary = "192.168.1.12"
+
+updated_dns_server = client.internal_dns_server.update(existing_dns_server)
+```
+
+### Delete an Internal DNS Server
+
+```python
+client.internal_dns_server.delete("123e4567-e89b-12d3-a456-426655440000")
+```
+
+### Get an Internal DNS Server by ID
+
+```python
+dns_server_by_id = client.internal_dns_server.get("123e4567-e89b-12d3-a456-426655440000")
+print(f"Retrieved DNS server: {dns_server_by_id.name}")
+```
+
+## Use Cases
+
+### Committing Changes
+
+```python
+result = client.commit(
+    description="Updated internal DNS servers",
+    sync=True,
+    timeout=300
+)
+print(f"Commit job ID: {result.job_id}")
+```
+
+### Monitoring Jobs
+
+```python
+job_status = client.get_job_status(result.job_id)
+print(f"Job status: {job_status.data[0].status_str}")
+
+recent_jobs = client.list_jobs(limit=10)
+for job in recent_jobs.data:
+    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
 ## Error Handling
 
 ```python
-from scm.client import ScmClient
-from scm.exceptions import (
-   InvalidObjectError,
-   MissingQueryParameterError,
-   ObjectNotPresentError
-)
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-try:
-   # Create DNS server configuration
-   dns_config = {
-      "name": "test-dns-server",
-      "domain_name": ["example.com"],
-      "primary": "192.168.1.10"
-   }
-
-   # Create the DNS server using the unified client interface
-   new_dns_server = client.internal_dns_server.create(dns_config)
-   print(f"Created DNS server: {new_dns_server.name}")
-
-   # Try to retrieve non-existent DNS server
-   try:
-      non_existent = client.internal_dns_server.fetch(name="non-existent-server")
-   except ObjectNotPresentError as e:
-      print(f"DNS server not found: {e.message}")
-
-except InvalidObjectError as e:
-   print(f"Invalid DNS server data: {e.message}")
-except MissingQueryParameterError as e:
-   print(f"Missing parameter: {e.message}")
-except Exception as e:
-   print(f"Unexpected error: {str(e)}")
-```
-
-## Best Practices
-
-1. **Client Usage**
-    - Use the unified client interface (`client.internal_dns_server`) for streamlined code
-    - Create a single client instance and reuse it across your application
-    - For custom max_limit settings, create a dedicated service instance if needed
-
-2. **Data Validation**
-    - Always provide all required fields: `name`, `domain_name`, and `primary`
-    - Ensure domain_name is a valid list of domain names
-    - Validate IP addresses before creating or updating
-    - Use appropriate error handling for validation failures
-
-3. **Error Handling**
-    - Implement comprehensive error handling for all operations
-    - Handle specific exceptions before generic ones
-    - Log error details for troubleshooting
-
-4. **Performance**
-    - Reuse client instances
-    - Use appropriate pagination for list operations
-    - Implement proper retry mechanisms for network failures
-    - Cache frequently accessed objects
-
-5. **Security**
-    - Follow the principle of least privilege
-    - Validate input data
-    - Use secure connection settings
-    - Implement proper authentication handling
-
-## Full Script Examples
-
-```python
-from scm.client import ScmClient
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
     ObjectNotPresentError
 )
 
-# Initialize client
-client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
+try:
+    dns_config = {
+        "name": "test-dns-server",
+        "domain_name": ["example.com"],
+        "primary": "192.168.1.10"
+    }
+    new_dns_server = client.internal_dns_server.create(dns_config)
 
-def create_dns_server():
-    """Create a new internal DNS server."""
-    try:
-        # Prepare DNS server configuration
-        dns_config = {
-            "name": "main-dns-server",
-            "domain_name": ["example.com", "internal.example.com"],
-            "primary": "192.168.1.10",
-            "secondary": "192.168.1.11"
-        }
-
-        # Create the DNS server
-        dns_server = client.internal_dns_server.create(dns_config)
-        print(f"Created DNS server: {dns_server.name} with ID: {dns_server.id}")
-        return dns_server.id
-    except InvalidObjectError as e:
-        print(f"Invalid DNS server data: {e.message}")
-        return None
-
-def update_dns_server(dns_name):
-    """Update an existing internal DNS server."""
-    try:
-        # Fetch existing DNS server
-        existing = client.internal_dns_server.fetch(name=dns_name)
-
-        # Modify attributes using dot notation
-        existing.domain_name = ["example.com", "internal.example.com", "new-domain.example.com"]
-        existing.secondary = "192.168.1.12"
-
-        # Pass modified object to update()
-        updated = client.internal_dns_server.update(existing)
-        print(f"Updated DNS server: {updated.name}")
-        print(f"Updated domain names: {updated.domain_name}")
-        print(f"Updated secondary DNS: {updated.secondary}")
-    except ObjectNotPresentError as e:
-        print(f"DNS server not found: {e.message}")
-    except InvalidObjectError as e:
-        print(f"Invalid update data: {e.message}")
-
-def list_dns_servers():
-    """List all internal DNS servers."""
-    dns_servers = client.internal_dns_server.list()
-    print(f"Found {len(dns_servers)} DNS servers:")
-    for dns in dns_servers:
-        print(f"  - {dns.name}: Primary={dns.primary}, Domains={dns.domain_name}")
-
-def delete_dns_server(dns_id):
-    """Delete an internal DNS server by ID."""
-    try:
-        client.internal_dns_server.delete(dns_id)
-        print(f"Deleted DNS server with ID: {dns_id}")
-    except ObjectNotPresentError as e:
-        print(f"DNS server not found: {e.message}")
-
-def main():
-    """Main function to demonstrate DNS server operations."""
-    # Create a new DNS server
-    dns_id = create_dns_server()
-    if not dns_id:
-        return
-
-    # Update the DNS server by name
-    update_dns_server("main-dns-server")
-
-    # List all DNS servers
-    list_dns_servers()
-
-    # Delete the DNS server
-    delete_dns_server(dns_id)
-
-if __name__ == "__main__":
-    main()
+except InvalidObjectError as e:
+    print(f"Invalid DNS server data: {e.message}")
+except ObjectNotPresentError as e:
+    print(f"DNS server not found: {e.message}")
+except MissingQueryParameterError as e:
+    print(f"Missing parameter: {e.message}")
 ```
 
-## Related Models
+## Related Topics
 
-- [InternalDnsServersBaseModel](../../models/deployment/internal_dns_servers_models.md#Overview)
-- [InternalDnsServersCreateModel](../../models/deployment/internal_dns_servers_models.md#Overview)
-- [InternalDnsServersUpdateModel](../../models/deployment/internal_dns_servers_models.md#Overview)
-- [InternalDnsServersResponseModel](../../models/deployment/internal_dns_servers_models.md#Overview)
+- [Internal DNS Server Models](../../models/deployment/internal_dns_servers_models.md#Overview)
+- [Deployment Overview](index.md)
+- [API Client](../../client.md)

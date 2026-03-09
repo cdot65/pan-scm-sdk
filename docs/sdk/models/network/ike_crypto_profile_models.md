@@ -1,16 +1,6 @@
 # IKE Crypto Profile Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Enum Types](#enum-types)
-4. [Lifetime Models](#lifetime-models)
-5. [Exceptions](#exceptions)
-6. [Model Validators](#model-validators)
-7. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The IKE Crypto Profile models provide data validation and serialization for IKE Crypto Profiles in Palo Alto Networks' Strata Cloud Manager. These models define encryption, authentication, and key exchange parameters used for IPsec VPN tunnels.
 
@@ -36,16 +26,16 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 | Attribute                | Type                       | Required | Default | Description                                                    |
 |--------------------------|----------------------------|----------|---------|----------------------------------------------------------------|
-| `name`                   | str                        | Yes      | None    | Profile name. Max 31 chars. Pattern: `^[0-9a-zA-Z._-]+$`       |
-| `id`                     | UUID                       | Yes*     | None    | Unique identifier (*response/update only)                      |
-| `hash`                   | List[HashAlgorithm]        | Yes      | None    | Hashing algorithms                                             |
-| `encryption`             | List[EncryptionAlgorithm]  | Yes      | None    | Encryption algorithms                                          |
-| `dh_group`               | List[DHGroup]              | Yes      | None    | Phase-1 DH groups                                              |
-| `lifetime`               | LifetimeType               | No       | None    | Lifetime configuration (seconds, minutes, hours, or days)      |
-| `authentication_multiple`| int                        | No       | 0       | IKEv2 SA reauthentication interval multiplier (0-50)           |
-| `folder`                 | str                        | No**     | None    | Folder containing the profile. Max 64 chars                    |
-| `snippet`                | str                        | No**     | None    | Snippet containing the profile. Max 64 chars                   |
-| `device`                 | str                        | No**     | None    | Device containing the profile. Max 64 chars                    |
+| `name`                   | `str` | Yes      | None    | Profile name. Max 31 chars. Pattern: `^[0-9a-zA-Z._-]+$`       |
+| `id`                     | `UUID` | Yes*     | None    | Unique identifier (*response/update only)                      |
+| `hash`                   | `List[HashAlgorithm]` | Yes      | None    | Hashing algorithms                                             |
+| `encryption`             | `List[EncryptionAlgorithm]` | Yes      | None    | Encryption algorithms                                          |
+| `dh_group`               | `List[DHGroup]` | Yes      | None    | Phase-1 DH groups                                              |
+| `lifetime`               | `LifetimeType` | No       | None    | Lifetime configuration (seconds, minutes, hours, or days)      |
+| `authentication_multiple`| `int` | No       | 0       | IKEv2 SA reauthentication interval multiplier (0-50)           |
+| `folder`                 | `str` | No**     | None    | Folder containing the profile. Max 64 chars                    |
+| `snippet`                | `str` | No**     | None    | Snippet containing the profile. Max 64 chars                   |
+| `device`                 | `str` | No**     | None    | Device containing the profile. Max 64 chars                    |
 
 \* Only required for update and response models
 \** Exactly one container field (folder/snippet/device) must be provided for create operations
@@ -100,25 +90,25 @@ IKE Crypto Profiles support four different lifetime units. Each has its own mode
 
 | Attribute | Type | Required | Default | Description                         |
 |-----------|------|----------|---------|-------------------------------------|
-| `seconds` | int  | Yes      | None    | Lifetime in seconds (range: 180-65535) |
+| `seconds` | `int` | Yes      | None    | Lifetime in seconds (range: 180-65535) |
 
 ### LifetimeMinutes
 
 | Attribute | Type | Required | Default | Description                         |
 |-----------|------|----------|---------|-------------------------------------|
-| `minutes` | int  | Yes      | None    | Lifetime in minutes (range: 3-65535) |
+| `minutes` | `int` | Yes      | None    | Lifetime in minutes (range: 3-65535) |
 
 ### LifetimeHours
 
 | Attribute | Type | Required | Default | Description                         |
 |-----------|------|----------|---------|-------------------------------------|
-| `hours`   | int  | Yes      | None    | Lifetime in hours (range: 1-65535)  |
+| `hours`   | `int` | Yes      | None    | Lifetime in hours (range: 1-65535)  |
 
 ### LifetimeDays
 
 | Attribute | Type | Required | Default | Description                         |
 |-----------|------|----------|---------|-------------------------------------|
-| `days`    | int  | Yes      | None    | Lifetime in days (range: 1-365)     |
+| `days`    | `int` | Yes      | None    | Lifetime in days (range: 1-365)     |
 
 ### LifetimeType
 

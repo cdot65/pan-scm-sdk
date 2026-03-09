@@ -1,14 +1,6 @@
 # Interface Management Profile Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Exceptions](#exceptions)
-4. [Model Validators](#model-validators)
-5. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The Interface Management Profile models provide a structured way to represent and validate interface management profile configuration data for Palo Alto Networks' Strata Cloud Manager. These models ensure data integrity when creating and updating interface management profiles, enforcing proper management service settings, container specifications, and field validations.
 
@@ -23,7 +15,8 @@ The module provides the following Pydantic models:
 
 The `InterfaceManagementProfileBaseModel` and `InterfaceManagementProfileCreateModel` / `InterfaceManagementProfileUpdateModel` use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model. The `InterfaceManagementProfileResponseModel` uses `extra="ignore"` to provide resilience against unexpected fields returned by the API.
 
-> **Note:** Several fields in this model use aliases for kebab-case API field names (e.g., `http_ocsp` maps to `http-ocsp`, `response_pages` maps to `response-pages`). When working with dictionaries, use the kebab-case names. When working with model attributes directly, use the underscore names.
+!!! note
+    Several fields in this model use aliases for kebab-case API field names (e.g., `http_ocsp` maps to `http-ocsp`, `response_pages` maps to `response-pages`). When working with dictionaries, use the kebab-case names. When working with model attributes directly, use the underscore names.
 
 ## Model Attributes
 
@@ -33,21 +26,21 @@ This is the base model containing fields common to all interface management prof
 
 | Attribute                     | Type           | Required | Default | Description                                                                   |
 |-------------------------------|----------------|----------|---------|-------------------------------------------------------------------------------|
-| name                          | str            | Yes      | None    | Name of the profile. Pattern: `^[0-9a-zA-Z._\- ]+$`. Max 63 chars.           |
-| http                          | bool           | No       | None    | Enable HTTP management.                                                       |
-| https                         | bool           | No       | None    | Enable HTTPS management.                                                      |
-| telnet                        | bool           | No       | None    | Enable Telnet management.                                                     |
-| ssh                           | bool           | No       | None    | Enable SSH management.                                                        |
-| ping                          | bool           | No       | None    | Enable ping.                                                                  |
-| http_ocsp                     | bool           | No       | None    | Enable HTTP OCSP. Alias: `http-ocsp`.                                         |
-| response_pages                | bool           | No       | None    | Enable response pages. Alias: `response-pages`.                               |
-| userid_service                | bool           | No       | None    | Enable User-ID service. Alias: `userid-service`.                              |
-| userid_syslog_listener_ssl    | bool           | No       | None    | Enable User-ID syslog listener SSL. Alias: `userid-syslog-listener-ssl`.      |
-| userid_syslog_listener_udp    | bool           | No       | None    | Enable User-ID syslog listener UDP. Alias: `userid-syslog-listener-udp`.      |
-| permitted_ip                  | List[str]      | No       | None    | List of permitted IP addresses. Alias: `permitted-ip`.                        |
-| folder                        | str            | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.                |
-| snippet                       | str            | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.               |
-| device                        | str            | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.                |
+| `name` | `str` | Yes      | None    | Name of the profile. Pattern: `^[0-9a-zA-Z._\- ]+$`. Max 63 chars.           |
+| `http` | `bool` | No       | None    | Enable HTTP management.                                                       |
+| `https` | `bool` | No       | None    | Enable HTTPS management.                                                      |
+| `telnet` | `bool` | No       | None    | Enable Telnet management.                                                     |
+| `ssh` | `bool` | No       | None    | Enable SSH management.                                                        |
+| `ping` | `bool` | No       | None    | Enable ping.                                                                  |
+| `http_ocsp` | `bool` | No       | None    | Enable HTTP OCSP. Alias: `http-ocsp`.                                         |
+| `response_pages` | `bool` | No       | None    | Enable response pages. Alias: `response-pages`.                               |
+| `userid_service` | `bool` | No       | None    | Enable User-ID service. Alias: `userid-service`.                              |
+| `userid_syslog_listener_ssl` | `bool` | No       | None    | Enable User-ID syslog listener SSL. Alias: `userid-syslog-listener-ssl`.      |
+| `userid_syslog_listener_udp` | `bool` | No       | None    | Enable User-ID syslog listener UDP. Alias: `userid-syslog-listener-udp`.      |
+| `permitted_ip` | `List[str]` | No       | None    | List of permitted IP addresses. Alias: `permitted-ip`.                        |
+| `folder` | `str` | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.                |
+| `snippet` | `str` | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.               |
+| `device` | `str` | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.                |
 
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
@@ -61,7 +54,7 @@ Extends `InterfaceManagementProfileBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                            |
 |-----------|------|----------|---------|--------------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the interface management profile |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the interface management profile |
 
 ### InterfaceManagementProfileResponseModel
 
@@ -69,9 +62,10 @@ Extends `InterfaceManagementProfileBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                            |
 |-----------|------|----------|---------|--------------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the interface management profile |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the interface management profile |
 
-> **Note:** The `InterfaceManagementProfileResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
+!!! note
+    The `InterfaceManagementProfileResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
 
 ## Exceptions
 

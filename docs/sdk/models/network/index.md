@@ -1,23 +1,6 @@
-# Network Data Models
+# Network Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Types](#model-types)
-3. [Common Model Patterns](#common-model-patterns)
-4. [Usage Examples](#usage-examples)
-5. [Models by Category](#models-by-category)
-   1. [Network Interfaces](#network-interfaces)
-   2. [Network Services](#network-services)
-   3. [VPN Configuration](#vpn-configuration)
-   4. [Other Network Models](#other-network-models)
-   5. [Routing Configuration](#routing-configuration)
-   6. [Routing Profile Models](#routing-profile-models)
-6. [Best Practices](#best-practices)
-7. [Related Documentation](#related-documentation)
-
-## Overview {#Overview}
-<span id="overview"></span>
+## Overview
 
 The Strata Cloud Manager SDK uses Pydantic models for data validation and serialization of network configurations. These models ensure that the data being sent to and received from the Strata Cloud Manager API adheres to the expected structure and constraints. This section documents the models for network configuration resources.
 

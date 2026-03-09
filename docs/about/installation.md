@@ -19,15 +19,15 @@ It's good practice to use a virtual environment to manage dependencies.
 **On macOS and Linux:**
 
 ```bash
-$ python3 -m venv scm-env
-$ source scm-env/bin/activate
+python3 -m venv scm-env
+source scm-env/bin/activate
 ```
 
 **On Windows:**
 
 ```bash
-$ python3 -m venv scm-env
-$ scm-env\Scripts\activate
+python3 -m venv scm-env
+scm-env\Scripts\activate
 ```
 
 ### 2. Install `pan-scm-sdk` via pip
@@ -35,12 +35,8 @@ $ scm-env\Scripts\activate
 Within the activated environment, install the package using pip:
 
 ```bash
-$ pip install pan-scm-sdk
----> 100%
-Successfully pan-scm-sdk
+pip install pan-scm-sdk
 ```
 
----
-
-Now you're ready to use `pan-scm-sdk`. Proceed to the [Getting Started](getting-started.md) guide to begin cloning
+Now you're ready to use `pan-scm-sdk`. Proceed to the [Getting Started](getting-started.md) guide to begin managing
 configurations.

@@ -1,15 +1,6 @@
 # Snippet Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Supporting Models](#supporting-models)
-4. [Exceptions](#exceptions)
-5. [Model Validators](#model-validators)
-6. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The Snippet models provide a structured way to manage snippet resources in Palo Alto Networks' Strata Cloud Manager.
 These models represent reusable configuration elements that can be applied across multiple folders. The models handle
@@ -32,10 +23,10 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 | Attribute     | Type      | Required | Default | Description                                |
 |---------------|-----------|----------|---------|--------------------------------------------|
-| name          | str       | Yes      | None    | Name of the snippet                        |
-| description   | str       | No       | None    | Description of the snippet                 |
-| labels        | List[str] | No       | None    | List of labels to apply to the snippet     |
-| enable_prefix | bool      | No       | None    | Whether to enable prefix for this snippet  |
+| `name` | `str` | Yes      | None    | Name of the snippet                        |
+| `description` | `str` | No       | None    | Description of the snippet                 |
+| `labels` | `List[str]` | No       | None    | List of labels to apply to the snippet     |
+| `enable_prefix` | `bool` | No       | None    | Whether to enable prefix for this snippet  |
 
 ### SnippetCreateModel
 
@@ -47,7 +38,7 @@ Extends `SnippetBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                           |
 |-----------|------|----------|---------|---------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the snippet  |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the snippet  |
 
 ### SnippetResponseModel
 
@@ -55,13 +46,13 @@ Extends `SnippetBaseModel` by adding:
 
 | Attribute    | Type                  | Required | Default | Description                                        |
 |--------------|-----------------------|----------|---------|----------------------------------------------------|
-| id           | UUID                  | Yes      | None    | The unique identifier of the snippet               |
-| type         | str                   | No       | None    | Snippet type: 'predefined', 'custom', or 'readonly' |
-| display_name | str                   | No       | None    | Display name of the snippet                        |
-| last_update  | str                   | No       | None    | ISO timestamp of last update                       |
-| created_in   | str                   | No       | None    | ISO timestamp of creation                          |
-| folders      | List[FolderReference] | No       | None    | Folders the snippet is applied to                  |
-| shared_in    | str                   | No       | None    | Sharing scope (e.g., 'local')                      |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the snippet               |
+| `type` | `str` | No       | None    | Snippet type: 'predefined', 'custom', or 'readonly' |
+| `display_name` | `str` | No       | None    | Display name of the snippet                        |
+| `last_update` | `str` | No       | None    | ISO timestamp of last update                       |
+| `created_in` | `str` | No       | None    | ISO timestamp of creation                          |
+| `folders` | `List[FolderReference]` | No       | None    | Folders the snippet is applied to                  |
+| `shared_in` | `str` | No       | None    | Sharing scope (e.g., 'local')                      |
 
 ## Supporting Models
 
@@ -71,8 +62,8 @@ Reference to a folder that a snippet is applied to.
 
 | Attribute | Type | Required | Default | Description                    |
 |-----------|------|----------|---------|--------------------------------|
-| id        | UUID | Yes      | None    | The UUID of the folder         |
-| name      | str  | Yes      | None    | The name of the folder         |
+| `id` | `UUID` | Yes      | None    | The UUID of the folder         |
+| `name` | `str` | Yes      | None    | The name of the folder         |
 
 ## Exceptions
 

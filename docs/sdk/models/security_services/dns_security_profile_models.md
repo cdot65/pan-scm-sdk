@@ -1,20 +1,10 @@
 # DNS Security Profile Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Enum Types](#enum-types)
-4. [Supporting Models](#supporting-models)
-5. [Exceptions](#exceptions)
-6. [Model Validators](#model-validators)
-7. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The DNS Security Profile models provide a structured way to manage DNS Security profiles in Palo Alto Networks' Strata Cloud Manager. These models support configuration of profiles that protect against DNS-based threats, including domain filtering and DNS sinkhole operations. The models handle validation of inputs and outputs when interacting with the SCM API.
 
-### Models
+## Models
 
 The module provides the following Pydantic models:
 
@@ -119,7 +109,7 @@ Defines the allowed IPv6 sinkhole addresses:
 |-------|-------------|
 | `::1` | Localhost   |
 
-## Supporting Models
+## Component Models
 
 ### BotnetDomainsModel
 

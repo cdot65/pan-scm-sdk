@@ -1,33 +1,22 @@
-# IPsec Tunnel Configuration Object
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Core Methods](#core-methods)
-3. [IPsec Tunnel Model Attributes](#ipsec-tunnel-model-attributes)
-4. [Auto Key Configuration](#auto-key-configuration)
-5. [Exceptions](#exceptions)
-6. [Basic Configuration](#basic-configuration)
-7. [Usage Examples](#usage-examples)
-    - [Creating IPsec Tunnels](#creating-ipsec-tunnels)
-    - [Retrieving IPsec Tunnels](#retrieving-ipsec-tunnels)
-    - [Updating IPsec Tunnels](#updating-ipsec-tunnels)
-    - [Listing IPsec Tunnels](#listing-ipsec-tunnels)
-    - [Filtering Responses](#filtering-responses)
-    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
-    - [Deleting IPsec Tunnels](#deleting-ipsec-tunnels)
-8. [Managing Configuration Changes](#managing-configuration-changes)
-    - [Performing Commits](#performing-commits)
-    - [Monitoring Jobs](#monitoring-jobs)
-9. [Error Handling](#error-handling)
-10. [Best Practices](#best-practices)
-11. [Related Models](#related-models)
-
-## Overview
+# IPsec Tunnel
 
 The `IPsecTunnel` class manages IPsec tunnel objects in Palo Alto Networks' Strata Cloud Manager. It extends from `BaseObject` and offers methods to create, retrieve, update, list, fetch, and delete IPsec tunnels. IPsec tunnels provide encrypted connectivity between sites and complete the VPN stack alongside the existing IKE Gateway and IPsec Crypto Profile services. Each tunnel requires an `auto_key` configuration that references one or more IKE gateways and an IPsec crypto profile.
 
-## Core Methods
+## Class Overview
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
+# Access the IPsec Tunnel service directly through the client
+ipsec_tunnels = client.ipsec_tunnel
+```
 
 | Method     | Description                                                     | Parameters                                                                                                                       | Return Type                        |
 |------------|-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|------------------------------------|
@@ -38,7 +27,7 @@ The `IPsecTunnel` class manages IPsec tunnel objects in Palo Alto Networks' Stra
 | `fetch()`  | Fetches a single IPsec tunnel by name within a container        | `name: str`, `folder: Optional[str]`, `snippet: Optional[str]`, `device: Optional[str]`                                          | `IPsecTunnelResponseModel`         |
 | `delete()` | Deletes an IPsec tunnel by its ID                               | `object_id: str`                                                                                                                 | `None`                             |
 
-## IPsec Tunnel Model Attributes
+### IPsec Tunnel Model Attributes
 
 | Attribute                   | Type           | Required | Default | Description                                         |
 |-----------------------------|----------------|----------|---------|-----------------------------------------------------|
@@ -56,11 +45,11 @@ The `IPsecTunnel` class manages IPsec tunnel objects in Palo Alto Networks' Stra
 \* Only required for update and response models
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
-## Auto Key Configuration
+### Auto Key Configuration
 
 The `auto_key` attribute is required for all IPsec tunnels and contains the IKE gateway references and crypto profile settings.
 
-### AutoKey
+#### AutoKey
 
 | Attribute              | Type                | Required | Description                              |
 |------------------------|---------------------|----------|------------------------------------------|
@@ -69,13 +58,13 @@ The `auto_key` attribute is required for all IPsec tunnels and contains the IKE 
 | `proxy_id`             | List[ProxyId]       | No       | List of proxy IDs                        |
 | `proxy_id_v6`          | List[ProxyId]       | No       | List of IPv6 proxy IDs                   |
 
-### IkeGatewayRef
+#### IkeGatewayRef
 
 | Attribute | Type | Required | Description                    |
 |-----------|------|----------|--------------------------------|
 | `name`    | str  | Yes      | The name of the IKE gateway    |
 
-### ProxyId
+#### ProxyId
 
 | Attribute  | Type            | Required | Description                     |
 |------------|-----------------|----------|---------------------------------|
@@ -84,7 +73,7 @@ The `auto_key` attribute is required for all IPsec tunnels and contains the IKE 
 | `remote`   | str             | No       | Remote address or subnet        |
 | `protocol` | ProxyIdProtocol | No       | Protocol configuration          |
 
-### TunnelMonitor
+#### TunnelMonitor
 
 | Attribute        | Type | Required | Default | Description                                |
 |------------------|------|----------|---------|--------------------------------------------|
@@ -92,7 +81,7 @@ The `auto_key` attribute is required for all IPsec tunnels and contains the IKE 
 | `destination_ip` | str  | Yes      | None    | Destination IP for tunnel monitoring       |
 | `proxy_id`       | str  | No       | None    | Proxy ID for tunnel monitoring             |
 
-## Exceptions
+### Exceptions
 
 | Exception                    | HTTP Code | Description                                                                   |
 |------------------------------|-----------|-------------------------------------------------------------------------------|
@@ -104,11 +93,76 @@ The `auto_key` attribute is required for all IPsec tunnels and contains the IKE 
 | `AuthenticationError`        | 401       | Authentication failed                                                         |
 | `ServerError`                | 500       | Internal server error                                                         |
 
-## Basic Configuration
+## Methods
 
-The IPsec Tunnel service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+### List IPsec Tunnels
 
-### Unified Client Interface (Recommended)
+```python
+# List all IPsec tunnels in a folder
+tunnels = client.ipsec_tunnel.list(
+   folder="Texas"
+)
+
+# Process results
+for tunnel in tunnels:
+   print(f"Name: {tunnel.name}")
+   print(f"  IKE Gateway(s): {', '.join(gw.name for gw in tunnel.auto_key.ike_gateway)}")
+   print(f"  Crypto Profile: {tunnel.auto_key.ipsec_crypto_profile}")
+   print(f"  Anti-Replay: {tunnel.anti_replay}")
+   if tunnel.tunnel_monitor:
+      print(f"  Tunnel Monitor: {tunnel.tunnel_monitor.destination_ip}")
+
+# List with crypto profile filter
+filtered_tunnels = client.ipsec_tunnel.list(
+   folder="Texas",
+   ipsec_crypto_profile=["aes256-sha256", "suite-b-gcm-256"]
+)
+
+for tunnel in filtered_tunnels:
+   print(f"Filtered tunnel: {tunnel.name} ({tunnel.auto_key.ipsec_crypto_profile})")
+```
+
+#### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
+you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control
+which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
+
+```python
+# Only return tunnels defined exactly in 'Texas'
+exact_tunnels = client.ipsec_tunnel.list(
+   folder='Texas',
+   exact_match=True
+)
+
+for tunnel in exact_tunnels:
+   print(f"Exact match: {tunnel.name} in {tunnel.folder}")
+
+# Exclude all tunnels from the 'All' folder
+no_all_tunnels = client.ipsec_tunnel.list(
+   folder='Texas',
+   exclude_folders=['All']
+)
+
+for tunnel in no_all_tunnels:
+   assert tunnel.folder != 'All'
+   print(f"Filtered out 'All': {tunnel.name}")
+```
+
+#### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
+
+**Example:**
 
 ```python
 from scm.client import ScmClient
@@ -120,33 +174,31 @@ client = ScmClient(
    tsg_id="your_tsg_id"
 )
 
-# Access the IPsec Tunnel service directly through the client
-ipsec_tunnels = client.ipsec_tunnel
+# Configure max_limit using the property setter
+client.ipsec_tunnel.max_limit = 4000
+
+# List all tunnels - auto-paginates through results
+all_tunnels = client.ipsec_tunnel.list(folder='Texas')
 ```
 
-### Traditional Service Instantiation (Legacy)
+### Fetch an IPsec Tunnel
 
 ```python
-from scm.client import Scm
-from scm.config.network import IPsecTunnel
-
-# Initialize client
-client = Scm(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
+# Fetch by name and folder
+tunnel = client.ipsec_tunnel.fetch(
+   name="site-a-to-site-b",
+   folder="Texas"
 )
+print(f"Found tunnel: {tunnel.name}")
+print(f"  IKE Gateway: {tunnel.auto_key.ike_gateway[0].name}")
+print(f"  Crypto Profile: {tunnel.auto_key.ipsec_crypto_profile}")
 
-# Initialize IPsecTunnel object explicitly
-ipsec_tunnels = IPsecTunnel(client)
+# Get by ID
+tunnel_by_id = client.ipsec_tunnel.get(tunnel.id)
+print(f"Retrieved tunnel: {tunnel_by_id.name}")
 ```
 
-!!! note
-    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
-
-## Usage Examples
-
-### Creating IPsec Tunnels
+### Create an IPsec Tunnel
 
 ```python
 from scm.client import ScmClient
@@ -222,24 +274,7 @@ gre_tunnel = client.ipsec_tunnel.create(gre_tunnel_data)
 print(f"Created GRE-over-IPsec tunnel with ID: {gre_tunnel.id}")
 ```
 
-### Retrieving IPsec Tunnels
-
-```python
-# Fetch by name and folder
-tunnel = client.ipsec_tunnel.fetch(
-   name="site-a-to-site-b",
-   folder="Texas"
-)
-print(f"Found tunnel: {tunnel.name}")
-print(f"  IKE Gateway: {tunnel.auto_key.ike_gateway[0].name}")
-print(f"  Crypto Profile: {tunnel.auto_key.ipsec_crypto_profile}")
-
-# Get by ID
-tunnel_by_id = client.ipsec_tunnel.get(tunnel.id)
-print(f"Retrieved tunnel: {tunnel_by_id.name}")
-```
-
-### Updating IPsec Tunnels
+### Update an IPsec Tunnel
 
 ```python
 # Fetch existing tunnel
@@ -262,93 +297,7 @@ existing_tunnel.auto_key.ipsec_crypto_profile = "suite-b-gcm-256"
 updated_tunnel = client.ipsec_tunnel.update(existing_tunnel)
 ```
 
-### Listing IPsec Tunnels
-
-```python
-# List all IPsec tunnels in a folder
-tunnels = client.ipsec_tunnel.list(
-   folder="Texas"
-)
-
-# Process results
-for tunnel in tunnels:
-   print(f"Name: {tunnel.name}")
-   print(f"  IKE Gateway(s): {', '.join(gw.name for gw in tunnel.auto_key.ike_gateway)}")
-   print(f"  Crypto Profile: {tunnel.auto_key.ipsec_crypto_profile}")
-   print(f"  Anti-Replay: {tunnel.anti_replay}")
-   if tunnel.tunnel_monitor:
-      print(f"  Tunnel Monitor: {tunnel.tunnel_monitor.destination_ip}")
-
-# List with crypto profile filter
-filtered_tunnels = client.ipsec_tunnel.list(
-   folder="Texas",
-   ipsec_crypto_profile=["aes256-sha256", "suite-b-gcm-256"]
-)
-
-for tunnel in filtered_tunnels:
-   print(f"Filtered tunnel: {tunnel.name} ({tunnel.auto_key.ipsec_crypto_profile})")
-```
-
-### Filtering Responses
-
-The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
-you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control
-which objects are included or excluded after the initial API response is fetched.
-
-**Parameters:**
-
-- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
-- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
-- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
-- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
-
-**Examples:**
-
-```python
-# Only return tunnels defined exactly in 'Texas'
-exact_tunnels = client.ipsec_tunnel.list(
-   folder='Texas',
-   exact_match=True
-)
-
-for tunnel in exact_tunnels:
-   print(f"Exact match: {tunnel.name} in {tunnel.folder}")
-
-# Exclude all tunnels from the 'All' folder
-no_all_tunnels = client.ipsec_tunnel.list(
-   folder='Texas',
-   exclude_folders=['All']
-)
-
-for tunnel in no_all_tunnels:
-   assert tunnel.folder != 'All'
-   print(f"Filtered out 'All': {tunnel.name}")
-```
-
-### Controlling Pagination with max_limit
-
-The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
-
-**Example:**
-
-```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-# Configure max_limit using the property setter
-client.ipsec_tunnel.max_limit = 4000
-
-# List all tunnels - auto-paginates through results
-all_tunnels = client.ipsec_tunnel.list(folder='Texas')
-```
-
-### Deleting IPsec Tunnels
+### Delete an IPsec Tunnel
 
 ```python
 # Delete by ID
@@ -356,9 +305,9 @@ tunnel_id = "123e4567-e89b-12d3-a456-426655440000"
 client.ipsec_tunnel.delete(tunnel_id)
 ```
 
-## Managing Configuration Changes
+## Use Cases
 
-### Performing Commits
+#### Performing Commits
 
 ```python
 # Prepare commit parameters
@@ -375,7 +324,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-### Monitoring Jobs
+#### Monitoring Jobs
 
 ```python
 # Get status of specific job directly from the client
@@ -446,49 +395,7 @@ except MissingQueryParameterError as e:
    print(f"Missing parameter: {e.message}")
 ```
 
-## Best Practices
-
-1. **Client Usage**
-   - Use the unified client interface (`client.ipsec_tunnel`) for streamlined code
-   - Create a single client instance and reuse it across your application
-   - Perform commit operations directly on the client object (`client.commit()`)
-
-2. **VPN Stack Configuration**
-   - Create IKE crypto profiles and IPsec crypto profiles before creating tunnels
-   - Configure IKE gateways before referencing them in IPsec tunnels
-   - Use descriptive tunnel names that identify the connection endpoints
-   - Follow the VPN configuration order: IKE Crypto Profile -> IPsec Crypto Profile -> IKE Gateway -> IPsec Tunnel
-
-3. **Tunnel Configuration**
-   - Always enable `anti_replay` for security against replay attacks
-   - Use tunnel monitoring to detect and recover from tunnel failures
-   - Configure proxy IDs when connecting to third-party VPN devices
-   - Use GRE encapsulation only when routing protocols need to run over the tunnel
-   - Set `copy_tos` when QoS preservation across the tunnel is required
-
-4. **Container Management**
-   - Always specify exactly one container (folder, snippet, or device)
-   - Use consistent container names across operations
-   - Validate container existence before operations
-
-5. **Error Handling**
-   - Implement comprehensive error handling for all operations
-   - Check job status after commits
-   - Handle specific exceptions before generic ones
-   - Log error details for troubleshooting
-
-6. **Performance**
-   - Use appropriate pagination for list operations
-   - Cache frequently accessed tunnel configurations
-   - Implement proper retry mechanisms
-
-7. **Security**
-   - Use strong crypto profiles (AES-256, SHA-256 or better)
-   - Regularly rotate IKE and IPsec keys
-   - Monitor tunnel status for unexpected disconnections
-   - Review and audit tunnel configurations periodically
-
-## Related Models
+## Related Topics
 
 - [IPsecTunnelBaseModel](../../models/network/ipsec_tunnel_models.md#Overview)
 - [IPsecTunnelCreateModel](../../models/network/ipsec_tunnel_models.md#Overview)

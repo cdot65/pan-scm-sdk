@@ -1,13 +1,13 @@
 # Tag Models
 
-## Overview {#Overview}
+## Overview
 
 The Tag models provide a structured way to manage tags in Palo Alto Networks' Strata Cloud Manager.
 These models support defining tags with names, colors, and comments that can be applied to various objects
 in the system. Tags can be defined in folders, snippets, or devices. The models handle validation of inputs
 and outputs when interacting with the SCM API.
 
-### Models
+## Models
 
 The module provides the following Pydantic models:
 

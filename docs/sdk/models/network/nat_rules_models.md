@@ -1,16 +1,6 @@
 # NAT Rules Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Enum Types](#enum-types)
-4. [Supporting Models](#supporting-models)
-5. [Exceptions](#exceptions)
-6. [Model Validators](#model-validators)
-7. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The NAT Rules models provide a structured way to represent and validate NAT rule configuration data for Palo Alto Networks' Strata Cloud Manager. These models support configuration of source and destination address translation with various options including static IP mappings, dynamic IP and port allocation, and DNS rewrite functionality. The models handle validation of inputs and outputs when interacting with the SCM API.
 
@@ -49,23 +39,23 @@ This is the base model containing fields common to all NAT rule operations.
 
 | Attribute                      | Type                   | Required | Default   | Description                                                         |
 |--------------------------------|------------------------|----------|-----------|---------------------------------------------------------------------|
-| `name`                         | str                    | Yes      | None      | The name of the NAT rule. Pattern: `^[a-zA-Z0-9_ \.-]+$`           |
-| `description`                  | str                    | No       | None      | Description of the NAT rule                                        |
-| `tag`                          | List[TagName]          | No       | []        | Tags associated with the NAT rule. Max 127 chars per tag           |
-| `disabled`                     | bool                   | No       | False     | Whether the NAT rule is disabled                                   |
-| `nat_type`                     | NatType                | No       | ipv4      | Type of NAT operation (ipv4, nat64, nptv6)                         |
-| `from_` (alias: `from`)       | List[str]              | No       | ["any"]   | Source zone(s) for the NAT rule                                    |
-| `to_` (alias: `to`)           | List[str]              | No       | ["any"]   | Destination zone(s) for the NAT rule                               |
-| `to_interface`                 | str                    | No       | None      | Destination interface of the original packet                       |
-| `source`                       | List[str]              | No       | ["any"]   | Source address(es) for the NAT rule                                |
-| `destination`                  | List[str]              | No       | ["any"]   | Destination address(es) for the NAT rule                           |
-| `service`                      | str                    | No       | "any"     | The TCP/UDP service associated with the NAT rule                   |
-| `source_translation`           | SourceTranslation      | No       | None      | Configuration for source address translation                       |
-| `destination_translation`      | DestinationTranslation | No       | None      | Configuration for destination address translation                  |
-| `active_active_device_binding` | str                    | No       | None      | Active/Active device binding                                       |
-| `folder`                       | str                    | No**     | None      | Folder where NAT rule is defined. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars |
-| `snippet`                      | str                    | No**     | None      | Snippet where NAT rule is defined. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars |
-| `device`                       | str                    | No**     | None      | Device where NAT rule is defined. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars |
+| `name`                         | `str` | Yes      | None      | The name of the NAT rule. Pattern: `^[a-zA-Z0-9_ \.-]+$`           |
+| `description`                  | `str` | No       | None      | Description of the NAT rule                                        |
+| `tag`                          | `List[TagName]` | No       | []        | Tags associated with the NAT rule. Max 127 chars per tag           |
+| `disabled`                     | `bool` | No       | False     | Whether the NAT rule is disabled                                   |
+| `nat_type`                     | `NatType` | No       | ipv4      | Type of NAT operation (ipv4, nat64, nptv6)                         |
+| `from_` (alias: `from`)       | `List[str]` | No       | ["any"]   | Source zone(s) for the NAT rule                                    |
+| `to_` (alias: `to`)           | `List[str]` | No       | ["any"]   | Destination zone(s) for the NAT rule                               |
+| `to_interface`                 | `str` | No       | None      | Destination interface of the original packet                       |
+| `source`                       | `List[str]` | No       | ["any"]   | Source address(es) for the NAT rule                                |
+| `destination`                  | `List[str]` | No       | ["any"]   | Destination address(es) for the NAT rule                           |
+| `service`                      | `str` | No       | "any"     | The TCP/UDP service associated with the NAT rule                   |
+| `source_translation`           | `SourceTranslation` | No       | None      | Configuration for source address translation                       |
+| `destination_translation`      | `DestinationTranslation` | No       | None      | Configuration for destination address translation                  |
+| `active_active_device_binding` | `str` | No       | None      | Active/Active device binding                                       |
+| `folder`                       | `str` | No**     | None      | Folder where NAT rule is defined. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars |
+| `snippet`                      | `str` | No**     | None      | Snippet where NAT rule is defined. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars |
+| `device`                       | `str` | No**     | None      | Device where NAT rule is defined. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars |
 
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
@@ -79,7 +69,7 @@ Extends `NatRuleBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                          |
 |-----------|------|----------|---------|--------------------------------------|
-| `id`      | UUID | Yes      | None    | The unique identifier of the NAT rule |
+| `id`      | `UUID` | Yes      | None    | The unique identifier of the NAT rule |
 
 ### NatRuleResponseModel
 
@@ -87,7 +77,7 @@ Extends `NatRuleBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                          |
 |-----------|------|----------|---------|--------------------------------------|
-| `id`      | UUID | Yes      | None    | The unique identifier of the NAT rule |
+| `id`      | `UUID` | Yes      | None    | The unique identifier of the NAT rule |
 
 Note: `NatRuleResponseModel` uses `extra="ignore"` configuration instead of `extra="forbid"`, allowing it to accept additional fields returned by the API without raising validation errors.
 
@@ -161,9 +151,9 @@ Main container for source translation configurations. Exactly one translation ty
 
 | Attribute             | Type             | Required | Default | Description                                   |
 |-----------------------|------------------|----------|---------|-----------------------------------------------|
-| `dynamic_ip_and_port` | DynamicIpAndPort | No*      | None    | Dynamic IP and port translation configuration |
-| `dynamic_ip`          | DynamicIp        | No*      | None    | Dynamic IP translation configuration          |
-| `static_ip`           | StaticIp         | No*      | None    | Static IP translation configuration           |
+| `dynamic_ip_and_port` | `DynamicIpAndPort` | No*      | None    | Dynamic IP and port translation configuration |
+| `dynamic_ip`          | `DynamicIp` | No*      | None    | Dynamic IP translation configuration          |
+| `static_ip`           | `StaticIp` | No*      | None    | Static IP translation configuration           |
 
 \* Exactly one of these translation types must be provided
 
@@ -173,9 +163,9 @@ Dynamic IP and port (PAT) translation configuration. Either `translated_address`
 
 | Attribute           | Type             | Required | Default              | Description                             |
 |---------------------|------------------|----------|----------------------|-----------------------------------------|
-| `type`              | Literal          | No       | "dynamic_ip_and_port"| Type identifier                         |
-| `translated_address`| List[str]        | No*      | None                 | Translated source IP addresses          |
-| `interface_address` | InterfaceAddress | No*      | None                 | Interface configuration for translation |
+| `type`              | `Literal` | No       | "dynamic_ip_and_port"| Type identifier                         |
+| `translated_address`| `List[str]` | No*      | None                 | Translated source IP addresses          |
+| `interface_address` | `InterfaceAddress` | No*      | None                 | Interface configuration for translation |
 
 \* Exactly one of `translated_address` or `interface_address` must be provided
 
@@ -185,7 +175,7 @@ Container model for dynamic IP and port translated address configuration.
 
 | Attribute            | Type      | Required | Default | Description                    |
 |----------------------|-----------|----------|---------|--------------------------------|
-| `translated_address` | List[str] | Yes      | None    | Translated source IP addresses |
+| `translated_address` | `List[str]` | Yes      | None    | Translated source IP addresses |
 
 ### DynamicIpAndPortInterfaceAddress
 
@@ -193,9 +183,9 @@ Container model for dynamic IP and port interface address configuration.
 
 | Attribute     | Type | Required | Default | Description           |
 |---------------|------|----------|---------|-----------------------|
-| `interface`   | str  | Yes      | None    | Interface name        |
-| `ip`          | str  | No       | None    | Translated source IP address |
-| `floating_ip` | str  | No       | None    | Floating IP address   |
+| `interface`   | `str` | Yes      | None    | Interface name        |
+| `ip`          | `str` | No       | None    | Translated source IP address |
+| `floating_ip` | `str` | No       | None    | Floating IP address   |
 
 ### InterfaceAddress
 
@@ -203,9 +193,9 @@ Interface address configuration for translation.
 
 | Attribute     | Type | Required | Default | Description         |
 |---------------|------|----------|---------|---------------------|
-| `interface`   | str  | Yes      | None    | Interface name      |
-| `ip`          | str  | No       | None    | IP address          |
-| `floating_ip` | str  | No       | None    | Floating IP address |
+| `interface`   | `str` | Yes      | None    | Interface name      |
+| `ip`          | `str` | No       | None    | IP address          |
+| `floating_ip` | `str` | No       | None    | Floating IP address |
 
 ### DynamicIp
 
@@ -213,11 +203,11 @@ Dynamic IP translation configuration with optional fallback settings.
 
 | Attribute            | Type      | Required | Default | Description                                                      |
 |----------------------|-----------|----------|---------|------------------------------------------------------------------|
-| `translated_address` | List[str] | Yes      | None    | Translated IP addresses                                          |
-| `fallback_type`      | str       | No       | None    | Type of fallback configuration (translated_address or interface_address) |
-| `fallback_address`   | List[str] | No       | None    | Fallback IP addresses (when fallback_type is translated_address) |
-| `fallback_interface` | str       | No       | None    | Fallback interface name (when fallback_type is interface_address) |
-| `fallback_ip`        | str       | No       | None    | Fallback IP address (when fallback_type is interface_address)    |
+| `translated_address` | `List[str]` | Yes      | None    | Translated IP addresses                                          |
+| `fallback_type`      | `str` | No       | None    | Type of fallback configuration (translated_address or interface_address) |
+| `fallback_address`   | `List[str]` | No       | None    | Fallback IP addresses (when fallback_type is translated_address) |
+| `fallback_interface` | `str` | No       | None    | Fallback interface name (when fallback_type is interface_address) |
+| `fallback_ip`        | `str` | No       | None    | Fallback IP address (when fallback_type is interface_address)    |
 
 ### StaticIp
 
@@ -225,8 +215,8 @@ Static IP translation configuration.
 
 | Attribute            | Type          | Required | Default | Description                                |
 |----------------------|---------------|----------|---------|--------------------------------------------|
-| `translated_address` | str           | Yes      | None    | Translated IP address                      |
-| `bi_directional`     | BiDirectional | No       | None    | Enable bi-directional translation (yes/no) |
+| `translated_address` | `str` | Yes      | None    | Translated IP address                      |
+| `bi_directional`     | `BiDirectional` | No       | None    | Enable bi-directional translation (yes/no) |
 
 ### DestinationTranslation
 
@@ -234,9 +224,9 @@ Destination translation configuration.
 
 | Attribute            | Type       | Required | Default | Description                           |
 |----------------------|------------|----------|---------|---------------------------------------|
-| `translated_address` | str        | No       | None    | Translated destination IP address     |
-| `translated_port`    | int        | No       | None    | Translated destination port (1-65535) |
-| `dns_rewrite`        | DnsRewrite | No       | None    | DNS rewrite configuration             |
+| `translated_address` | `str` | No       | None    | Translated destination IP address     |
+| `translated_port`    | `int` | No       | None    | Translated destination port (1-65535) |
+| `dns_rewrite`        | `DnsRewrite` | No       | None    | DNS rewrite configuration             |
 
 ### DnsRewrite
 
@@ -244,7 +234,7 @@ DNS rewrite configuration.
 
 | Attribute   | Type                | Required | Default | Description           |
 |-------------|---------------------|----------|---------|-----------------------|
-| `direction` | DnsRewriteDirection | Yes      | None    | DNS rewrite direction |
+| `direction` | `DnsRewriteDirection` | Yes      | None    | DNS rewrite direction |
 
 ### NatRuleMoveModel
 
@@ -252,9 +242,9 @@ Model for NAT rule move operations.
 
 | Attribute          | Type               | Required | Default | Description                                         |
 |--------------------|--------------------|----------|---------|-----------------------------------------------------|
-| `destination`      | NatMoveDestination | Yes      | None    | Where to move the rule (top, bottom, before, after) |
-| `rulebase`         | NatRulebase        | Yes      | None    | Which rulebase to use (pre or post)                 |
-| `destination_rule` | UUID               | No*      | None    | UUID of the reference rule for before/after moves   |
+| `destination`      | `NatMoveDestination` | Yes      | None    | Where to move the rule (top, bottom, before, after) |
+| `rulebase`         | `NatRulebase` | Yes      | None    | Which rulebase to use (pre or post)                 |
+| `destination_rule` | `UUID` | No*      | None    | UUID of the reference rule for before/after moves   |
 
 \* Required when destination is `before` or `after`; must not be provided when destination is `top` or `bottom`
 

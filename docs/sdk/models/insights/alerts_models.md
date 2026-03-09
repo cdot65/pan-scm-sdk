@@ -14,22 +14,22 @@ The main alert model representing individual security or operational alerts.
 
 | Attribute             | Type                     | Required | Description                                                     |
 |-----------------------|--------------------------|----------|-----------------------------------------------------------------|
-| id                    | str                      | Yes      | Unique alert identifier (mapped from `alert_id`)               |
-| name                  | Optional[str]            | No       | Alert message/description (mapped from `message`)              |
-| severity              | Optional[str]            | No       | Alert severity level (see AlertSeverity constants)             |
-| severity_id           | Optional[int]            | No       | Numeric severity identifier                                     |
-| status                | Optional[str]            | No       | Current alert state (mapped from `state`, see AlertStatus)     |
-| timestamp             | Optional[str]            | No       | When alert was raised (mapped from `raised_time`)              |
-| updated_time          | Optional[str]            | No       | Last update timestamp                                           |
-| description           | Optional[str]            | No       | Detailed alert description                                      |
-| folder                | Optional[str]            | No       | Associated folder location                                      |
-| source                | Optional[str]            | No       | Source system that generated the alert                         |
-| category              | Optional[str]            | No       | Alert category (e.g., "Remote Networks", "GlobalProtect")      |
-| code                  | Optional[str]            | No       | Internal alert code                                             |
-| impacted_resources    | Optional[List[str]]      | No       | List of affected resources (mapped from `primary_impacted_objects`) |
-| metadata              | Optional[Dict[str, Any]] | No       | Additional context data (mapped from `resource_context`)       |
-| clear_reason          | Optional[str]            | No       | Reason the alert was cleared (if applicable)                   |
-| age                   | Optional[int]            | No       | Alert age in days                                              |
+| `id` | `str` | Yes      | Unique alert identifier (mapped from `alert_id`)               |
+| `name` | `Optional[str]` | No       | Alert message/description (mapped from `message`)              |
+| `severity` | `Optional[str]` | No       | Alert severity level (see AlertSeverity constants)             |
+| `severity_id` | `Optional[int]` | No       | Numeric severity identifier                                     |
+| `status` | `Optional[str]` | No       | Current alert state (mapped from `state`, see AlertStatus)     |
+| `timestamp` | `Optional[str]` | No       | When alert was raised (mapped from `raised_time`)              |
+| `updated_time` | `Optional[str]` | No       | Last update timestamp                                           |
+| `description` | `Optional[str]` | No       | Detailed alert description                                      |
+| `folder` | `Optional[str]` | No       | Associated folder location                                      |
+| `source` | `Optional[str]` | No       | Source system that generated the alert                         |
+| `category` | `Optional[str]` | No       | Alert category (e.g., "Remote Networks", "GlobalProtect")      |
+| `code` | `Optional[str]` | No       | Internal alert code                                             |
+| `impacted_resources` | `Optional[List[str]]` | No       | List of affected resources (mapped from `primary_impacted_objects`) |
+| `metadata` | `Optional[Dict[str, Any]]` | No       | Additional context data (mapped from `resource_context`)       |
+| `clear_reason` | `Optional[str]` | No       | Reason the alert was cleared (if applicable)                   |
+| `age` | `Optional[int]` | No       | Alert age in days                                              |
 
 #### Field Mapping
 
@@ -70,11 +70,11 @@ Model for aggregated alert statistics returned by statistical queries.
 
 | Attribute    | Type          | Required | Description                          |
 |--------------|---------------|----------|--------------------------------------|
-| severity     | Optional[str] | No       | Severity level for grouped data      |
-| severity_id  | Optional[int] | No       | Numeric severity identifier          |
-| category     | Optional[str] | No       | Category for grouped data            |
-| state        | Optional[str] | No       | Alert state for grouped data         |
-| count        | Optional[int] | No       | Count of alerts in this group        |
+| `severity` | `Optional[str]` | No       | Severity level for grouped data      |
+| `severity_id` | `Optional[int]` | No       | Numeric severity identifier          |
+| `category` | `Optional[str]` | No       | Category for grouped data            |
+| `state` | `Optional[str]` | No       | Alert state for grouped data         |
+| `count` | `Optional[int]` | No       | Count of alerts in this group        |
 
 The model uses `ConfigDict(extra="allow")` to accept additional fields that might be returned by the API.
 

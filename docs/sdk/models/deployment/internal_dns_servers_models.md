@@ -1,6 +1,6 @@
 # Internal DNS Servers Models
 
-## Overview {#Overview}
+## Overview
 
 The Internal DNS Servers models provide a structured way to manage DNS server configurations in Palo Alto Networks' Strata Cloud Manager. These models handle validation of inputs and outputs when interacting with the SCM API for internal DNS server resources.
 
@@ -19,11 +19,11 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 | Attribute     | Type           | Required | Default | Description                                                                       |
 |---------------|----------------|----------|---------|-----------------------------------------------------------------------------------|
-| name          | str            | Yes      | None    | Name of the DNS server. Max length: 63 chars. Must match pattern: ^[0-9a-zA-Z._\- ]+$ |
-| domain_name   | List[str]      | Yes      | None    | List of DNS domain names. Cannot be empty.                                        |
-| primary       | IPvAnyAddress  | Yes      | None    | IP address of the primary DNS server                                              |
-| secondary     | IPvAnyAddress  | No       | None    | IP address of the secondary DNS server                                            |
-| id            | UUID           | Yes*     | None    | UUID of the DNS server (required for update and response models)                  |
+| `name` | `str` | Yes      | None    | Name of the DNS server. Max length: 63 chars. Must match pattern: ^[0-9a-zA-Z._\- ]+$ |
+| `domain_name` | `List[str]` | Yes      | None    | List of DNS domain names. Cannot be empty.                                        |
+| `primary` | `IPvAnyAddress` | Yes      | None    | IP address of the primary DNS server                                              |
+| `secondary` | `IPvAnyAddress` | No       | None    | IP address of the secondary DNS server                                            |
+| `id` | `UUID` | Yes*     | None    | UUID of the DNS server (required for update and response models)                  |
 
 \* Only required for update and response models
 

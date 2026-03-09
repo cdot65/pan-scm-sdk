@@ -1,32 +1,22 @@
-# Interface Management Profile Configuration Object
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Core Methods](#core-methods)
-3. [Interface Management Profile Model Attributes](#interface-management-profile-model-attributes)
-4. [Exceptions](#exceptions)
-5. [Basic Configuration](#basic-configuration)
-6. [Usage Examples](#usage-examples)
-    - [Creating Interface Management Profiles](#creating-interface-management-profiles)
-    - [Retrieving Interface Management Profiles](#retrieving-interface-management-profiles)
-    - [Updating Interface Management Profiles](#updating-interface-management-profiles)
-    - [Listing Interface Management Profiles](#listing-interface-management-profiles)
-    - [Filtering Responses](#filtering-responses)
-    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
-    - [Deleting Interface Management Profiles](#deleting-interface-management-profiles)
-7. [Managing Configuration Changes](#managing-configuration-changes)
-    - [Performing Commits](#performing-commits)
-    - [Monitoring Jobs](#monitoring-jobs)
-8. [Error Handling](#error-handling)
-9. [Best Practices](#best-practices)
-10. [Related Models](#related-models)
-
-## Overview
+# Interface Management Profile
 
 The `InterfaceManagementProfile` class manages interface management profile objects in Palo Alto Networks' Strata Cloud Manager. It extends from `BaseObject` and offers methods to create, retrieve, update, list, fetch, and delete interface management profiles. These profiles control which management services (HTTP, HTTPS, SSH, Telnet, ping, etc.) are accessible on a firewall interface.
 
-## Core Methods
+## Class Overview
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
+# Access the Interface Management Profile service directly through the client
+profiles = client.interface_management_profile
+```
 
 | Method     | Description                                                                | Parameters                                                                                                                       | Return Type                                    |
 |------------|----------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------|
@@ -37,7 +27,7 @@ The `InterfaceManagementProfile` class manages interface management profile obje
 | `fetch()`  | Fetches a single interface management profile by name within a container   | `name: str`, `folder: Optional[str]`, `snippet: Optional[str]`, `device: Optional[str]`                                          | `InterfaceManagementProfileResponseModel`      |
 | `delete()` | Deletes an interface management profile by its ID                          | `object_id: str`                                                                                                                 | `None`                                         |
 
-## Interface Management Profile Model Attributes
+### Interface Management Profile Model Attributes
 
 | Attribute                       | Type           | Required      | Default | Description                                                 |
 |---------------------------------|----------------|---------------|---------|-------------------------------------------------------------|
@@ -64,7 +54,7 @@ The `InterfaceManagementProfile` class manages interface management profile obje
 !!! note
     Several fields use aliases with hyphens in the API (e.g., `http-ocsp`, `response-pages`, `userid-service`). The SDK models are configured with `populate_by_name=True`, so you can use either the Python attribute name (underscore) or the API alias (hyphen) when constructing dictionaries.
 
-## Exceptions
+### Exceptions
 
 | Exception                    | HTTP Code | Description                                                                   |
 |------------------------------|-----------|-------------------------------------------------------------------------------|
@@ -76,11 +66,74 @@ The `InterfaceManagementProfile` class manages interface management profile obje
 | `AuthenticationError`        | 401       | Authentication failed                                                         |
 | `ServerError`                | 500       | Internal server error                                                         |
 
-## Basic Configuration
+## Methods
 
-The Interface Management Profile service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+### List Interface Management Profiles
 
-### Unified Client Interface (Recommended)
+```python
+# List all profiles in a folder
+profiles = client.interface_management_profile.list(
+   folder="Texas"
+)
+
+# Process results
+for profile in profiles:
+   print(f"Name: {profile.name}")
+   print(f"  HTTPS: {profile.https}")
+   print(f"  SSH: {profile.ssh}")
+   print(f"  Ping: {profile.ping}")
+
+# List with boolean filters
+ssh_profiles = client.interface_management_profile.list(
+   folder="Texas",
+   ssh=True
+)
+
+for profile in ssh_profiles:
+   print(f"SSH-enabled profile: {profile.name}")
+```
+
+#### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
+you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control
+which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
+
+```python
+# Only return profiles defined exactly in 'Texas'
+exact_profiles = client.interface_management_profile.list(
+   folder='Texas',
+   exact_match=True
+)
+
+for profile in exact_profiles:
+   print(f"Exact match: {profile.name} in {profile.folder}")
+
+# Exclude all profiles from the 'All' folder
+no_all_profiles = client.interface_management_profile.list(
+   folder='Texas',
+   exclude_folders=['All']
+)
+
+for profile in no_all_profiles:
+   assert profile.folder != 'All'
+   print(f"Filtered out 'All': {profile.name}")
+```
+
+#### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
+
+**Example:**
 
 ```python
 from scm.client import ScmClient
@@ -92,33 +145,29 @@ client = ScmClient(
    tsg_id="your_tsg_id"
 )
 
-# Access the Interface Management Profile service directly through the client
-profiles = client.interface_management_profile
+# Configure max_limit using the property setter
+client.interface_management_profile.max_limit = 4000
+
+# List all profiles - auto-paginates through results
+all_profiles = client.interface_management_profile.list(folder='Texas')
 ```
 
-### Traditional Service Instantiation (Legacy)
+### Fetch an Interface Management Profile
 
 ```python
-from scm.client import Scm
-from scm.config.network import InterfaceManagementProfile
-
-# Initialize client
-client = Scm(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
+# Fetch by name and folder
+profile = client.interface_management_profile.fetch(
+   name="allow-https-ssh",
+   folder="Texas"
 )
+print(f"Found profile: {profile.name}")
 
-# Initialize InterfaceManagementProfile object explicitly
-profiles = InterfaceManagementProfile(client)
+# Get by ID
+profile_by_id = client.interface_management_profile.get(profile.id)
+print(f"Retrieved profile: {profile_by_id.name}")
 ```
 
-!!! note
-    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
-
-## Usage Examples
-
-### Creating Interface Management Profiles
+### Create an Interface Management Profile
 
 ```python
 from scm.client import ScmClient
@@ -164,22 +213,7 @@ full_profile = client.interface_management_profile.create(full_mgmt_profile)
 print(f"Created full management profile with ID: {full_profile.id}")
 ```
 
-### Retrieving Interface Management Profiles
-
-```python
-# Fetch by name and folder
-profile = client.interface_management_profile.fetch(
-   name="allow-https-ssh",
-   folder="Texas"
-)
-print(f"Found profile: {profile.name}")
-
-# Get by ID
-profile_by_id = client.interface_management_profile.get(profile.id)
-print(f"Retrieved profile: {profile_by_id.name}")
-```
-
-### Updating Interface Management Profiles
+### Update an Interface Management Profile
 
 ```python
 # Fetch existing profile
@@ -202,91 +236,7 @@ else:
 updated_profile = client.interface_management_profile.update(existing_profile)
 ```
 
-### Listing Interface Management Profiles
-
-```python
-# List all profiles in a folder
-profiles = client.interface_management_profile.list(
-   folder="Texas"
-)
-
-# Process results
-for profile in profiles:
-   print(f"Name: {profile.name}")
-   print(f"  HTTPS: {profile.https}")
-   print(f"  SSH: {profile.ssh}")
-   print(f"  Ping: {profile.ping}")
-
-# List with boolean filters
-ssh_profiles = client.interface_management_profile.list(
-   folder="Texas",
-   ssh=True
-)
-
-for profile in ssh_profiles:
-   print(f"SSH-enabled profile: {profile.name}")
-```
-
-### Filtering Responses
-
-The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
-you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control
-which objects are included or excluded after the initial API response is fetched.
-
-**Parameters:**
-
-- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
-- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
-- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
-- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
-
-**Examples:**
-
-```python
-# Only return profiles defined exactly in 'Texas'
-exact_profiles = client.interface_management_profile.list(
-   folder='Texas',
-   exact_match=True
-)
-
-for profile in exact_profiles:
-   print(f"Exact match: {profile.name} in {profile.folder}")
-
-# Exclude all profiles from the 'All' folder
-no_all_profiles = client.interface_management_profile.list(
-   folder='Texas',
-   exclude_folders=['All']
-)
-
-for profile in no_all_profiles:
-   assert profile.folder != 'All'
-   print(f"Filtered out 'All': {profile.name}")
-```
-
-### Controlling Pagination with max_limit
-
-The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
-
-**Example:**
-
-```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-# Configure max_limit using the property setter
-client.interface_management_profile.max_limit = 4000
-
-# List all profiles - auto-paginates through results
-all_profiles = client.interface_management_profile.list(folder='Texas')
-```
-
-### Deleting Interface Management Profiles
+### Delete an Interface Management Profile
 
 ```python
 # Delete by ID
@@ -294,9 +244,9 @@ profile_id = "123e4567-e89b-12d3-a456-426655440000"
 client.interface_management_profile.delete(profile_id)
 ```
 
-## Managing Configuration Changes
+## Use Cases
 
-### Performing Commits
+#### Performing Commits
 
 ```python
 # Prepare commit parameters
@@ -313,7 +263,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-### Monitoring Jobs
+#### Monitoring Jobs
 
 ```python
 # Get status of specific job directly from the client
@@ -381,42 +331,7 @@ except MissingQueryParameterError as e:
    print(f"Missing parameter: {e.message}")
 ```
 
-## Best Practices
-
-1. **Client Usage**
-   - Use the unified client interface (`client.interface_management_profile`) for streamlined code
-   - Create a single client instance and reuse it across your application
-   - Perform commit operations directly on the client object (`client.commit()`)
-
-2. **Profile Configuration**
-   - Enable only the management services that are required for your use case
-   - Always restrict access with `permitted_ip` to limit management access to trusted networks
-   - Avoid enabling insecure protocols like Telnet and HTTP in production environments
-   - Use descriptive profile names that indicate which services are enabled
-
-3. **Container Management**
-   - Always specify exactly one container (folder, snippet, or device)
-   - Use consistent container names across operations
-   - Validate container existence before operations
-
-4. **Error Handling**
-   - Implement comprehensive error handling for all operations
-   - Check job status after commits
-   - Handle specific exceptions before generic ones
-   - Log error details for troubleshooting
-
-5. **Performance**
-   - Use appropriate pagination for list operations
-   - Cache frequently accessed profiles
-   - Implement proper retry mechanisms
-
-6. **Security**
-   - Follow the least privilege principle when enabling management services
-   - Always use `permitted_ip` to restrict management access
-   - Prefer HTTPS over HTTP and SSH over Telnet
-   - Regularly audit interface management profiles
-
-## Related Models
+## Related Topics
 
 - [InterfaceManagementProfileBaseModel](../../models/network/interface_management_profile_models.md#Overview)
 - [InterfaceManagementProfileCreateModel](../../models/network/interface_management_profile_models.md#Overview)

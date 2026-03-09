@@ -1,23 +1,8 @@
 # Objects Data Models
 
-## Table of Contents
+Pydantic models for validating and serializing object configuration resources in the Strata Cloud Manager SDK.
 
-1. [Overview](#overview)
-2. [Model Types](#model-types)
-3. [Common Model Patterns](#common-model-patterns)
-4. [Usage Examples](#usage-examples)
-5. [Models by Category](#models-by-category)
-   1. [Address Objects](#address-objects)
-   2. [Service Objects](#service-objects)
-   3. [Application Objects](#application-objects)
-   4. [Group Objects](#group-objects)
-   5. [Profile Objects](#profile-objects)
-   6. [Tag Objects](#tag-objects)
-6. [Best Practices](#best-practices)
-7. [Related Documentation](#related-documentation)
-
-## Overview {#Overview}
-<span id="overview"></span>
+## Overview
 
 The Strata Cloud Manager SDK uses Pydantic models for data validation and serialization. These models ensure that the data being sent to and received from the Strata Cloud Manager API adheres to the expected structure and constraints. This section documents the models for object configuration resources.
 
@@ -43,6 +28,8 @@ Object models share common patterns:
 
 ## Usage Examples
 
+### Creating an Object
+
 ```python
 from scm.client import ScmClient
 from scm.models.objects import AddressCreateModel, AddressUpdateModel
@@ -65,7 +52,11 @@ address = AddressCreateModel(
 # Convert the model to a dictionary for the API call
 address_dict = address.model_dump(exclude_unset=True)
 result = client.address.create(address_dict)
+```
 
+### Updating an Object
+
+```python
 # Update an existing object using a model
 update_address = AddressUpdateModel(
    id=result.id,
@@ -112,31 +103,3 @@ updated_result = client.address.update(update_dict)
 ### Tag Objects
 
 - [Tag Models](tag_models.md) - Object categorization and organization tags
-
-## Best Practices
-
-1. **Model Validation**
-   - Always validate input data with models before sending to the API
-   - Handle validation errors appropriately
-   - Use model_dump(exclude_unset=True) to avoid sending default values
-
-2. **Container Consistency**
-   - Maintain consistent container usage (folder/snippet/device)
-   - Remember that exactly one container type must be specified
-   - Use the same container type for related objects
-
-3. **Model Conversion**
-   - Convert API responses to response models for type safety
-   - Use model_dump() for serialization to JSON or dictionaries
-   - Leverage model validators for complex validation logic
-
-4. **Error Handling**
-   - Catch and handle ValueError exceptions from model validation
-   - Implement proper error messages for validation failures
-   - Validate model data before executing API calls
-
-## Related Documentation
-
-- [Object Configuration](../../config/objects/index.md) - Working with object configurations
-- [Address Configuration](../../config/objects/address.md) - Address object operations
-- [Service Configuration](../../config/objects/service.md) - Service object operations

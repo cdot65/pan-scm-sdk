@@ -1,29 +1,22 @@
-# Aggregate Interface Configuration Object
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Core Methods](#core-methods)
-3. [Aggregate Interface Model Attributes](#aggregate-interface-model-attributes)
-4. [Interface Modes](#interface-modes)
-5. [Exceptions](#exceptions)
-6. [Basic Configuration](#basic-configuration)
-7. [Usage Examples](#usage-examples)
-    - [Creating Aggregate Interfaces](#creating-aggregate-interfaces)
-    - [Retrieving Aggregate Interfaces](#retrieving-aggregate-interfaces)
-    - [Updating Aggregate Interfaces](#updating-aggregate-interfaces)
-    - [Listing Aggregate Interfaces](#listing-aggregate-interfaces)
-    - [Deleting Aggregate Interfaces](#deleting-aggregate-interfaces)
-8. [Managing Configuration Changes](#managing-configuration-changes)
-9. [Error Handling](#error-handling)
-10. [Best Practices](#best-practices)
-11. [Related Models](#related-models)
-
-## Overview
+# Aggregate Interface
 
 The `AggregateInterface` class manages aggregate ethernet interface (ae) objects in Palo Alto Networks' Strata Cloud Manager. Aggregate interfaces bundle multiple physical interfaces into a single logical interface for link redundancy and increased bandwidth. They support Layer 2 and Layer 3 modes with LACP (Link Aggregation Control Protocol) configuration.
 
-## Core Methods
+## Class Overview
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Access aggregate interfaces via the client
+aggregate_interfaces = client.aggregate_interface
+```
 
 | Method     | Description                                                     | Parameters                                   | Return Type                          |
 |------------|-----------------------------------------------------------------|----------------------------------------------|--------------------------------------|
@@ -34,7 +27,7 @@ The `AggregateInterface` class manages aggregate ethernet interface (ae) objects
 | `fetch()`  | Fetches a single aggregate interface by name within a container | `name: str`, `folder`, `snippet`, `device`   | `AggregateInterfaceResponseModel`    |
 | `delete()` | Deletes an aggregate interface by ID                            | `object_id: str`                             | `None`                               |
 
-## Aggregate Interface Model Attributes
+### Aggregate Interface Model Attributes
 
 | Attribute      | Type            | Required | Default | Description                                      |
 |----------------|-----------------|----------|---------|--------------------------------------------------|
@@ -62,9 +55,9 @@ The `AggregateInterface` class manages aggregate ethernet interface (ae) objects
 | `system_priority`   | int    | 32768    | System priority (1-65535)                |
 | `max_ports`         | int    | 8        | Maximum ports (1-8)                      |
 
-## Interface Modes
+### Interface Modes
 
-### Layer 2 Mode
+#### Layer 2 Mode
 
 Layer 2 mode with VLAN tagging and LACP support.
 
@@ -82,7 +75,7 @@ interface_data = {
 }
 ```
 
-### Layer 3 Mode with Static IP
+#### Layer 3 Mode with Static IP
 
 Layer 3 mode with static IP addresses.
 
@@ -102,7 +95,7 @@ interface_data = {
 }
 ```
 
-### Layer 3 Mode with DHCP
+#### Layer 3 Mode with DHCP
 
 Layer 3 mode using DHCP for dynamic IP assignment.
 
@@ -120,7 +113,7 @@ interface_data = {
 }
 ```
 
-## Exceptions
+### Exceptions
 
 | Exception                    | HTTP Code | Description                            |
 |------------------------------|-----------|----------------------------------------|
@@ -130,25 +123,45 @@ interface_data = {
 | `AuthenticationError`        | 401       | Authentication failed                  |
 | `ServerError`                | 500       | Internal server error                  |
 
-## Basic Configuration
+## Methods
+
+### List Aggregate Interfaces
 
 ```python
-from scm.client import ScmClient
+# List all aggregate interfaces
+interfaces = client.aggregate_interface.list(folder="Interfaces")
 
-# Initialize client
-client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
+for iface in interfaces:
+    print(f"Name: {iface.name}")
+    if iface.layer2:
+        print(f"  Mode: Layer 2")
+    elif iface.layer3:
+        print(f"  Mode: Layer 3")
+        if iface.layer3.lacp:
+            print(f"  LACP: {iface.layer3.lacp.mode}")
+
+# Filter by mode
+layer3_only = client.aggregate_interface.list(
+    folder="Interfaces",
+    mode="layer3"
 )
-
-# Access aggregate interfaces via the client
-aggregate_interfaces = client.aggregate_interface
 ```
 
-## Usage Examples
+### Fetch an Aggregate Interface
 
-### Creating Aggregate Interfaces
+```python
+# Fetch by name
+interface = client.aggregate_interface.fetch(
+    name="ae1",
+    folder="Interfaces"
+)
+print(f"Found aggregate interface: {interface.name}")
+
+# Get by ID
+interface_by_id = client.aggregate_interface.get(interface.id)
+```
+
+### Create an Aggregate Interface
 
 ```python
 # Create Layer 3 aggregate with LACP
@@ -185,21 +198,7 @@ layer2_aggregate = {
 result = client.aggregate_interface.create(layer2_aggregate)
 ```
 
-### Retrieving Aggregate Interfaces
-
-```python
-# Fetch by name
-interface = client.aggregate_interface.fetch(
-    name="ae1",
-    folder="Interfaces"
-)
-print(f"Found aggregate interface: {interface.name}")
-
-# Get by ID
-interface_by_id = client.aggregate_interface.get(interface.id)
-```
-
-### Updating Aggregate Interfaces
+### Update an Aggregate Interface
 
 ```python
 # Fetch existing interface
@@ -217,35 +216,15 @@ if existing.layer3 and existing.layer3.lacp:
 updated = client.aggregate_interface.update(existing)
 ```
 
-### Listing Aggregate Interfaces
-
-```python
-# List all aggregate interfaces
-interfaces = client.aggregate_interface.list(folder="Interfaces")
-
-for iface in interfaces:
-    print(f"Name: {iface.name}")
-    if iface.layer2:
-        print(f"  Mode: Layer 2")
-    elif iface.layer3:
-        print(f"  Mode: Layer 3")
-        if iface.layer3.lacp:
-            print(f"  LACP: {iface.layer3.lacp.mode}")
-
-# Filter by mode
-layer3_only = client.aggregate_interface.list(
-    folder="Interfaces",
-    mode="layer3"
-)
-```
-
-### Deleting Aggregate Interfaces
+### Delete an Aggregate Interface
 
 ```python
 client.aggregate_interface.delete("123e4567-e89b-12d3-a456-426655440000")
 ```
 
-## Managing Configuration Changes
+## Use Cases
+
+#### Managing Configuration Changes
 
 ```python
 result = client.commit(
@@ -273,15 +252,7 @@ except InvalidObjectError as e:
     print(f"Invalid configuration: {e.message}")
 ```
 
-## Best Practices
-
-1. **LACP Configuration** - Enable LACP for proper link aggregation with bonded interfaces
-2. **Mode Selection** - Choose only one mode (layer2 or layer3) per aggregate interface
-3. **Fast Failover** - Enable fast_failover for critical links
-4. **Port Limits** - Set max_ports based on your physical port availability
-5. **Container Management** - Always specify exactly one container
-
-## Related Models
+## Related Topics
 
 - [AggregateInterfaceCreateModel](../../models/network/aggregate_interface_models.md)
 - [AggregateInterfaceUpdateModel](../../models/network/aggregate_interface_models.md)

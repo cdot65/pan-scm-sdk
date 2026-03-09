@@ -1,15 +1,6 @@
 # Route Access List Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Supporting Models](#supporting-models)
-4. [Exceptions](#exceptions)
-5. [Model Validators](#model-validators)
-6. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The Route Access List models provide a structured way to represent and validate route access list configuration data for Palo Alto Networks' Strata Cloud Manager. Route access lists are used to filter routes based on source and destination IP addresses with optional wildcard masks, commonly applied in BGP and OSPF routing policies.
 
@@ -37,12 +28,12 @@ This is the base model containing fields common to all route access list operati
 
 | Attribute   | Type                 | Required | Default | Description                                                     |
 |-------------|----------------------|----------|---------|-----------------------------------------------------------------|
-| name        | str                  | Yes      | None    | Route access list name.                                         |
-| description | str                  | No       | None    | Description.                                                    |
-| type        | RouteAccessListType  | No       | None    | Access list type configuration.                                 |
-| folder      | str                  | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
-| snippet     | str                  | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
-| device      | str                  | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `name` | `str` | Yes      | None    | Route access list name.                                         |
+| `description` | `str` | No       | None    | Description.                                                    |
+| `type` | `RouteAccessListType` | No       | None    | Access list type configuration.                                 |
+| `folder` | `str` | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `snippet` | `str` | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
+| `device` | `str` | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
 
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
@@ -56,7 +47,7 @@ Extends `RouteAccessListBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                     |
 |-----------|------|----------|---------|-------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the route access list  |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the route access list  |
 
 ### RouteAccessListResponseModel
 
@@ -64,9 +55,10 @@ Extends `RouteAccessListBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                     |
 |-----------|------|----------|---------|-------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the route access list  |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the route access list  |
 
-> **Note:** The `RouteAccessListResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
+!!! note
+    The `RouteAccessListResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
 
 ## Supporting Models
 
@@ -76,7 +68,7 @@ Container for the access list type.
 
 | Attribute | Type                | Required | Default | Description          |
 |-----------|---------------------|----------|---------|----------------------|
-| ipv4      | RouteAccessListIpv4 | No       | None    | IPv4 access list.    |
+| `ipv4` | `RouteAccessListIpv4` | No       | None    | IPv4 access list.    |
 
 ### RouteAccessListIpv4
 
@@ -84,7 +76,7 @@ IPv4 access list container holding the list of entries.
 
 | Attribute  | Type                          | Required | Default | Description               |
 |------------|-------------------------------|----------|---------|---------------------------|
-| ipv4_entry | List[RouteAccessListIpv4Entry] | No       | None    | IPv4 access list entries. |
+| `ipv4_entry` | `List[RouteAccessListIpv4Entry]` | No       | None    | IPv4 access list entries. |
 
 ### RouteAccessListIpv4Entry
 
@@ -92,10 +84,10 @@ Individual IPv4 access list entry with sequence number, action, and address matc
 
 | Attribute           | Type                              | Required | Default | Description                                     |
 |---------------------|-----------------------------------|----------|---------|-------------------------------------------------|
-| name                | int                               | No       | None    | Sequence number (1-65535).                       |
-| action              | str                               | No       | None    | Action: `deny` or `permit`. Pattern: `^(deny\|permit)$` |
-| source_address      | RouteAccessListSourceAddress      | No       | None    | Source address configuration.                    |
-| destination_address | RouteAccessListDestinationAddress | No       | None    | Destination address configuration.               |
+| `name` | `int` | No       | None    | Sequence number (1-65535).                       |
+| `action` | `str` | No       | None    | Action: `deny` or `permit`. Pattern: `^(deny\|permit)$` |
+| `source_address` | `RouteAccessListSourceAddress` | No       | None    | Source address configuration.                    |
+| `destination_address` | `RouteAccessListDestinationAddress` | No       | None    | Destination address configuration.               |
 
 ### RouteAccessListSourceAddress
 
@@ -103,8 +95,8 @@ Source address configuration with optional wildcard mask.
 
 | Attribute | Type | Required | Default | Description              |
 |-----------|------|----------|---------|--------------------------|
-| address   | str  | No       | None    | Source IP address.        |
-| wildcard  | str  | No       | None    | Source IP wildcard mask.  |
+| `address` | `str` | No       | None    | Source IP address.        |
+| `wildcard` | `str` | No       | None    | Source IP wildcard mask.  |
 
 ### RouteAccessListDestinationAddress
 
@@ -112,8 +104,8 @@ Destination address configuration with optional wildcard mask.
 
 | Attribute | Type | Required | Default | Description                   |
 |-----------|------|----------|---------|-------------------------------|
-| address   | str  | No       | None    | Destination IP address.        |
-| wildcard  | str  | No       | None    | Destination IP wildcard mask.  |
+| `address` | `str` | No       | None    | Destination IP address.        |
+| `wildcard` | `str` | No       | None    | Destination IP wildcard mask.  |
 
 ## Exceptions
 

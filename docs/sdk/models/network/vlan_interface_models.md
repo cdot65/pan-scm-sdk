@@ -18,18 +18,18 @@ All models use `extra="forbid"` to reject undefined fields.
 
 | Attribute                      | Type                    | Required | Default | Description                               |
 |--------------------------------|-------------------------|----------|---------|-------------------------------------------|
-| `name`                         | str                     | Yes      | None    | Interface name (e.g., "vlan.100")         |
-| `vlan_tag`                     | str                     | No       | None    | VLAN tag (1-4096)                         |
-| `comment`                      | str                     | No       | None    | Description (max 1023 chars)              |
-| `ip`                           | List[StaticIpEntry]     | No*      | None    | Static IP addresses                       |
-| `dhcp_client`                  | DhcpClient              | No*      | None    | DHCP client configuration                 |
-| `mtu`                          | int                     | No       | 1500    | MTU (576-9216)                            |
-| `interface_management_profile` | str                     | No       | None    | Management profile (max 31 chars)         |
-| `arp`                          | List[ArpEntryWithInterface] | No   | None    | Static ARP entries                        |
-| `ddns_config`                  | DdnsConfig              | No       | None    | Dynamic DNS configuration                 |
-| `folder`                       | str                     | No**     | None    | Folder container                          |
-| `snippet`                      | str                     | No**     | None    | Snippet container                         |
-| `device`                       | str                     | No**     | None    | Device container                          |
+| `name`                         | `str` | Yes      | None    | Interface name (e.g., "vlan.100")         |
+| `vlan_tag`                     | `str` | No       | None    | VLAN tag (1-4096)                         |
+| `comment`                      | `str` | No       | None    | Description (max 1023 chars)              |
+| `ip`                           | `List[StaticIpEntry]` | No*      | None    | Static IP addresses                       |
+| `dhcp_client`                  | `DhcpClient` | No*      | None    | DHCP client configuration                 |
+| `mtu`                          | `int` | No       | 1500    | MTU (576-9216)                            |
+| `interface_management_profile` | `str` | No       | None    | Management profile (max 31 chars)         |
+| `arp`                          | `List[ArpEntryWithInterface]` | No   | None    | Static ARP entries                        |
+| `ddns_config`                  | `DdnsConfig` | No       | None    | Dynamic DNS configuration                 |
+| `folder`                       | `str` | No**     | None    | Folder container                          |
+| `snippet`                      | `str` | No**     | None    | Snippet container                         |
+| `device`                       | `str` | No**     | None    | Device container                          |
 
 \* Only one IP mode (static or DHCP) can be configured
 \** Exactly one container required for create operations
@@ -38,9 +38,9 @@ All models use `extra="forbid"` to reject undefined fields.
 
 | Attribute   | Type | Required | Description                   |
 |-------------|------|----------|-------------------------------|
-| `name`      | str  | Yes      | IP address                    |
-| `hw_address`| str  | No       | MAC address                   |
-| `interface` | str  | No       | Associated interface          |
+| `name`      | `str` | Yes      | IP address                    |
+| `hw_address`| `str` | No       | MAC address                   |
+| `interface` | `str` | No       | Associated interface          |
 
 ## Model Validators
 

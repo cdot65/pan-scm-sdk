@@ -1,10 +1,10 @@
 # Syslog Server Profile Models
 
-## Overview {#Overview}
+## Overview
 
 The Syslog Server Profile models provide a structured way to manage syslog server profile objects in Palo Alto Networks' Strata Cloud Manager. These models support defining configurations for syslog servers that can receive logs from the Strata Cloud Manager. The models handle validation of inputs and outputs when interacting with the SCM API.
 
-### Models
+## Models
 
 The module provides the following Pydantic models:
 
@@ -18,7 +18,9 @@ The module provides the following Pydantic models:
 
 All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
 
-## EscapingModel
+## Component Models
+
+### EscapingModel
 
 The `EscapingModel` represents character escaping configuration for syslog messages.
 
@@ -27,7 +29,7 @@ The `EscapingModel` represents character escaping configuration for syslog messa
 | escape_character | Optional[str] | No | None | Escape sequence delimiter (max length: 1) |
 | escaped_characters | Optional[str] | No | None | Characters to be escaped without spaces (max length: 255) |
 
-## FormatModel
+### FormatModel
 
 The `FormatModel` represents format settings for different log types in a syslog server profile.
 
@@ -52,7 +54,7 @@ The `FormatModel` represents format settings for different log types in a syslog
 | hip_match | Optional[str] | No | None | Format for HIP match logs |
 | correlation | Optional[str] | No | None | Format for correlation logs |
 
-## SyslogServerModel
+### SyslogServerModel
 
 The `SyslogServerModel` represents a server configuration within a syslog server profile.
 
@@ -65,7 +67,9 @@ The `SyslogServerModel` represents a server configuration within a syslog server
 | format | Literal["BSD", "IETF"] | Yes | None | Syslog format |
 | facility | Literal["LOG_USER", ...] | Yes | None | Syslog facility |
 
-## SyslogServerProfileBaseModel
+## Base Models
+
+### SyslogServerProfileBaseModel
 
 The `SyslogServerProfileBaseModel` contains fields common to all syslog server profile CRUD operations.
 
@@ -80,7 +84,7 @@ The `SyslogServerProfileBaseModel` contains fields common to all syslog server p
 
 \* Exactly one container type (folder/snippet/device) must be provided for create operations
 
-## SyslogServerProfileCreateModel
+### SyslogServerProfileCreateModel
 
 The `SyslogServerProfileCreateModel` extends the base model and includes validation to ensure that exactly one container type is provided.
 
@@ -88,35 +92,9 @@ The `SyslogServerProfileCreateModel` extends the base model and includes validat
 |-----------|------|----------|---------|-------------|
 | *All attributes from SyslogServerProfileBaseModel* |  |  |  |  |
 
-### Container Type Validation
+When creating a syslog server profile, exactly one container type (`folder`, `snippet`, or `device`) must be provided.
 
-When creating a syslog server profile, exactly one of the following container types must be provided:
-- `folder`: The folder in which the resource is defined
-- `snippet`: The snippet in which the resource is defined
-- `device`: The device in which the resource is defined
-
-This validation is enforced by the `validate_container_type` model validator.
-
-```python
-@model_validator(mode="after")
-def validate_container_type(self) -> "SyslogServerProfileCreateModel":
-    """Validates that exactly one container type is provided."""
-    container_fields = [
-        "folder",
-        "snippet",
-        "device",
-    ]
-    provided = [
-        field for field in container_fields if getattr(self, field) is not None
-    ]
-    if len(provided) != 1:
-        raise ValueError(
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-        )
-    return self
-```
-
-## SyslogServerProfileUpdateModel
+#### SyslogServerProfileUpdateModel
 
 The `SyslogServerProfileUpdateModel` extends the base model and adds the ID field required for updating existing syslog server profiles.
 
@@ -125,7 +103,7 @@ The `SyslogServerProfileUpdateModel` extends the base model and adds the ID fiel
 | id | UUID | Yes | - | The UUID of the syslog server profile |
 | *All attributes from SyslogServerProfileBaseModel* |  |  |  |  |
 
-## SyslogServerProfileResponseModel
+### SyslogServerProfileResponseModel
 
 The `SyslogServerProfileResponseModel` extends the base model and includes the ID field returned in API responses.
 
@@ -252,21 +230,3 @@ updated = client.syslog_server_profile.update(existing)
 print(f"Updated profile: {updated.name}")
 ```
 
-## Best Practices
-
-### Server Configuration
-- Use TCP transport for critical logs to ensure reliable delivery
-- Configure appropriate facility values to distinguish log sources
-- Use IETF format for more detailed structured logging
-- Set descriptive server names for easier management
-
-### Format Configuration
-- Define custom log formats to include only the fields you need
-- Use consistent format templates across log types for easier parsing
-- Configure escaping for logs containing special characters
-- Follow RFC 3164 (BSD) or RFC 5424 (IETF) standards for your syslog messages
-
-### Container Management
-- Always specify exactly one container type (folder, snippet, or device)
-- Use consistent naming conventions for syslog server profiles
-- Organize profiles logically by function or application

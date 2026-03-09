@@ -1,6 +1,6 @@
 # Remote Networks Models
 
-## Overview {#Overview}
+## Overview
 
 The Remote Networks models provide a structured way to manage remote network connections in Palo Alto Networks' Strata Cloud Manager. These models are integral to the SD-WAN architecture, working in conjunction with Service Connections and BGP Routing configurations to establish secure and efficient connectivity between branch offices and cloud resources.
 
@@ -29,18 +29,18 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 | Attribute           | Type           | Required  | Default | Description                                                      |
 |---------------------|----------------|-----------|---------|------------------------------------------------------------------|
-| name                | str            | Yes       | None    | Name of the remote network. Pattern: ^[a-zA-Z0-9_ .-]+$          |
-| id                  | UUID           | Yes*      | None    | Unique identifier (*response only)                               |
-| region              | str            | Yes       | None    | AWS region for deployment (e.g., us-east-1)                      |
-| license_type        | str            | Yes       | None    | License type (defaults to FWAAS-AGGREGATE)                       |
-| spn_name            | str            | Yes**     | None    | Service Provider Name (**required for FWAAS)                     |
-| subnets             | List[str]      | No        | []      | List of network subnets                                          |
-| description         | str            | No        | None    | Description of the remote network                                |
-| ecmp_load_balancing | str            | Yes       | None    | ECMP mode (enable/disable)                                       |
-| ecmp_tunnels        | List[Tunnel]   | Yes***    | None    | ECMP tunnel configurations (***if ECMP enabled)                  |
-| ipsec_tunnel        | str            | Yes***    | None    | IPSec tunnel name (***if ECMP disabled)                          |
-| protocol            | Protocol       | No        | None    | BGP protocol configuration                                        |
-| folder              | str            | Yes       | None    | Folder where the remote network is defined                        |
+| `name` | `str` | Yes       | None    | Name of the remote network. Pattern: ^[a-zA-Z0-9_ .-]+$          |
+| `id` | `UUID` | Yes*      | None    | Unique identifier (*response only)                               |
+| `region` | `str` | Yes       | None    | AWS region for deployment (e.g., us-east-1)                      |
+| `license_type` | `str` | Yes       | None    | License type (defaults to FWAAS-AGGREGATE)                       |
+| `spn_name` | `str` | Yes**     | None    | Service Provider Name (**required for FWAAS)                     |
+| `subnets` | `List[str]` | No        | []      | List of network subnets                                          |
+| `description` | `str` | No        | None    | Description of the remote network                                |
+| `ecmp_load_balancing` | `str` | Yes       | None    | ECMP mode (enable/disable)                                       |
+| `ecmp_tunnels` | `List[Tunnel]` | Yes***    | None    | ECMP tunnel configurations (***if ECMP enabled)                  |
+| `ipsec_tunnel` | `str` | Yes***    | None    | IPSec tunnel name (***if ECMP disabled)                          |
+| `protocol` | `Protocol` | No        | None    | BGP protocol configuration                                        |
+| `folder` | `str` | Yes       | None    | Folder where the remote network is defined                        |
 
 \* Only required for response model
 \** Required when license_type is FWAAS-AGGREGATE
@@ -50,45 +50,45 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 | Attribute                    | Type            | Required | Default | Description                              |
 |------------------------------|-----------------|----------|---------|------------------------------------------|
-| name                         | str             | Yes      | None    | Tunnel name (max 63 chars)               |
-| ipsec_tunnel                 | str             | Yes      | None    | IPSec tunnel name (max 1023 chars)       |
-| local_ip_address             | str             | No       | None    | Local IP address                         |
-| peer_ip_address              | str             | No       | None    | Peer IP address                          |
-| peer_as                      | str             | No       | None    | Peer Autonomous System number            |
-| peering_type                 | PeeringTypeEnum | No       | None    | BGP peering type                         |
-| secret                       | str             | No       | None    | Authentication secret                    |
-| summarize_mobile_user_routes | bool            | No       | None    | Summarize mobile user routes             |
-| do_not_export_routes         | bool            | No       | None    | Do not export routes                     |
-| originate_default_route      | bool            | No       | None    | Originate default route                  |
+| `name` | `str` | Yes      | None    | Tunnel name (max 63 chars)               |
+| `ipsec_tunnel` | `str` | Yes      | None    | IPSec tunnel name (max 1023 chars)       |
+| `local_ip_address` | `str` | No       | None    | Local IP address                         |
+| `peer_ip_address` | `str` | No       | None    | Peer IP address                          |
+| `peer_as` | `str` | No       | None    | Peer Autonomous System number            |
+| `peering_type` | `PeeringTypeEnum` | No       | None    | BGP peering type                         |
+| `secret` | `str` | No       | None    | Authentication secret                    |
+| `summarize_mobile_user_routes` | `bool` | No       | None    | Summarize mobile user routes             |
+| `do_not_export_routes` | `bool` | No       | None    | Do not export routes                     |
+| `originate_default_route` | `bool` | No       | None    | Originate default route                  |
 
 ### ProtocolModel Attributes
 
 | Attribute | Type         | Required | Default | Description                |
 |-----------|--------------|----------|---------|----------------------------|
-| bgp       | BgpModel     | No       | None    | BGP protocol configuration |
-| bgp_peer  | BgpPeerModel | No       | None    | BGP peer configuration     |
+| `bgp` | `BgpModel` | No       | None    | BGP protocol configuration |
+| `bgp_peer` | `BgpPeerModel` | No       | None    | BGP peer configuration     |
 
 ### BgpModel Attributes
 
 | Attribute                    | Type            | Required | Default | Description                       |
 |------------------------------|-----------------|----------|---------|-----------------------------------|
-| enable                       | bool            | No       | None    | Enable BGP                        |
-| local_ip_address             | str             | No       | None    | Local IP address for BGP          |
-| peer_ip_address              | str             | No       | None    | Peer IP address for BGP           |
-| peer_as                      | str             | No       | None    | Peer AS number                    |
-| peering_type                 | PeeringTypeEnum | No       | None    | BGP peering type                  |
-| secret                       | str             | No       | None    | BGP authentication secret         |
-| do_not_export_routes         | bool            | No       | None    | Do not export routes              |
-| originate_default_route      | bool            | No       | None    | Originate default route           |
-| summarize_mobile_user_routes | bool            | No       | None    | Summarize mobile user routes      |
+| `enable` | `bool` | No       | None    | Enable BGP                        |
+| `local_ip_address` | `str` | No       | None    | Local IP address for BGP          |
+| `peer_ip_address` | `str` | No       | None    | Peer IP address for BGP           |
+| `peer_as` | `str` | No       | None    | Peer AS number                    |
+| `peering_type` | `PeeringTypeEnum` | No       | None    | BGP peering type                  |
+| `secret` | `str` | No       | None    | BGP authentication secret         |
+| `do_not_export_routes` | `bool` | No       | None    | Do not export routes              |
+| `originate_default_route` | `bool` | No       | None    | Originate default route           |
+| `summarize_mobile_user_routes` | `bool` | No       | None    | Summarize mobile user routes      |
 
 ### BgpPeerModel Attributes
 
 | Attribute        | Type | Required | Default | Description              |
 |------------------|------|----------|---------|--------------------------|
-| local_ip_address | str  | No       | None    | Local IP address         |
-| peer_ip_address  | str  | No       | None    | Peer IP address          |
-| secret           | str  | No       | None    | Authentication secret    |
+| `local_ip_address` | `str` | No       | None    | Local IP address         |
+| `peer_ip_address` | `str` | No       | None    | Peer IP address          |
+| `secret` | `str` | No       | None    | Authentication secret    |
 
 ### Enum Classes
 

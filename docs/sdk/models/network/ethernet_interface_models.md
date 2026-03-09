@@ -31,19 +31,19 @@ default_value="ethernet1/1"  # Physical interface assignment
 
 | Attribute       | Type            | Required | Default  | Description                                           |
 |-----------------|-----------------|----------|----------|-------------------------------------------------------|
-| `name`          | str             | Yes      | None     | Variable name (must start with $, max 63 chars)       |
-| `default_value` | str             | No       | None     | Physical interface (e.g., ethernet1/1)                |
-| `comment`       | str             | No       | None     | Description (max 1023 chars)                          |
-| `link_speed`    | str             | No       | "auto"   | Link speed (auto/10/100/1000/10000/40000/100000)      |
-| `link_duplex`   | str             | No       | "auto"   | Duplex (auto/half/full)                               |
-| `link_state`    | str             | No       | "auto"   | State (auto/up/down)                                  |
-| `poe`           | PoeConfig       | No       | None     | Power over Ethernet config                            |
-| `layer2`        | EthernetLayer2  | No*      | None     | Layer 2 mode configuration                            |
-| `layer3`        | EthernetLayer3  | No*      | None     | Layer 3 mode configuration                            |
-| `tap`           | EthernetTap     | No*      | None     | TAP mode configuration                                |
-| `folder`        | str             | No**     | None     | Folder container                                      |
-| `snippet`       | str             | No**     | None     | Snippet container                                     |
-| `device`        | str             | No**     | None     | Device container                                      |
+| `name`          | `str` | Yes      | None     | Variable name (must start with $, max 63 chars)       |
+| `default_value` | `str` | No       | None     | Physical interface (e.g., ethernet1/1)                |
+| `comment`       | `str` | No       | None     | Description (max 1023 chars)                          |
+| `link_speed`    | `str` | No       | "auto"   | Link speed (auto/10/100/1000/10000/40000/100000)      |
+| `link_duplex`   | `str` | No       | "auto"   | Duplex (auto/half/full)                               |
+| `link_state`    | `str` | No       | "auto"   | State (auto/up/down)                                  |
+| `poe`           | `PoeConfig` | No       | None     | Power over Ethernet config                            |
+| `layer2`        | `EthernetLayer2` | No*      | None     | Layer 2 mode configuration                            |
+| `layer3`        | `EthernetLayer3` | No*      | None     | Layer 3 mode configuration                            |
+| `tap`           | `EthernetTap` | No*      | None     | TAP mode configuration                                |
+| `folder`        | `str` | No**     | None     | Folder container                                      |
+| `snippet`       | `str` | No**     | None     | Snippet container                                     |
+| `device`        | `str` | No**     | None     | Device container                                      |
 
 \* Only one mode can be configured (oneOf validation)
 \** Exactly one container required for create operations
@@ -52,20 +52,20 @@ default_value="ethernet1/1"  # Physical interface assignment
 
 | Attribute  | Type       | Required | Default | Description        |
 |------------|------------|----------|---------|--------------------|
-| `vlan_tag` | str        | No       | None    | VLAN tag (1-4096)  |
-| `lldp`     | LldpConfig | No       | None    | LLDP configuration |
+| `vlan_tag` | `str` | No       | None    | VLAN tag (1-4096)  |
+| `lldp`     | `LldpConfig` | No       | None    | LLDP configuration |
 
 ### EthernetLayer3
 
 | Attribute                      | Type           | Required | Default | Description                    |
 |--------------------------------|----------------|----------|---------|--------------------------------|
-| `ip`                           | List[StaticIp] | No*      | None    | Static IP addresses            |
-| `dhcp_client`                  | DhcpClient     | No*      | None    | DHCP client configuration      |
-| `pppoe`                        | PppoeConfig    | No*      | None    | PPPoE configuration            |
-| `mtu`                          | int            | No       | 1500    | MTU (576-9216)                 |
-| `interface_management_profile` | str            | No       | None    | Management profile             |
-| `arp`                          | List[ArpEntry] | No       | None    | Static ARP entries             |
-| `ddns_config`                  | DdnsConfig     | No       | None    | Dynamic DNS config             |
+| `ip`                           | `List[StaticIp]` | No*      | None    | Static IP addresses            |
+| `dhcp_client`                  | `DhcpClient` | No*      | None    | DHCP client configuration      |
+| `pppoe`                        | `PppoeConfig` | No*      | None    | PPPoE configuration            |
+| `mtu`                          | `int` | No       | 1500    | MTU (576-9216)                 |
+| `interface_management_profile` | `str` | No       | None    | Management profile             |
+| `arp`                          | `List[ArpEntry]` | No       | None    | Static ARP entries             |
+| `ddns_config`                  | `DdnsConfig` | No       | None    | Dynamic DNS config             |
 
 \* Only one IP mode can be configured (oneOf validation)
 

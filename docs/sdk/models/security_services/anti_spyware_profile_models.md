@@ -1,20 +1,10 @@
 # Anti-Spyware Profile Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Enum Types](#enum-types)
-4. [Supporting Models](#supporting-models)
-5. [Exceptions](#exceptions)
-6. [Model Validators](#model-validators)
-7. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The Anti-Spyware Profile models provide a structured way to manage anti-spyware security profiles in Palo Alto Networks' Strata Cloud Manager. These models support configuring rules, threat exceptions, and MICA engine settings to detect and prevent spyware threats. Profiles can be defined in folders, snippets, or devices. The models handle validation of inputs and outputs when interacting with the SCM API.
 
-### Models
+## Models
 
 The module provides the following Pydantic models:
 
@@ -131,7 +121,7 @@ Defines the threat categories (partial list):
 
 See the source code for the complete list of category values.
 
-## Supporting Models
+## Component Models
 
 ### AntiSpywareRuleBaseModel
 

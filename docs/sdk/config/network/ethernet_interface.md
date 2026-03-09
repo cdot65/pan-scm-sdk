@@ -1,43 +1,22 @@
-# Ethernet Interface Configuration Object
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Core Methods](#core-methods)
-3. [Ethernet Interface Model Attributes](#ethernet-interface-model-attributes)
-4. [Interface Modes](#interface-modes)
-5. [Exceptions](#exceptions)
-6. [Basic Configuration](#basic-configuration)
-7. [Usage Examples](#usage-examples)
-    - [Creating Ethernet Interfaces](#creating-ethernet-interfaces)
-    - [Retrieving Ethernet Interfaces](#retrieving-ethernet-interfaces)
-    - [Updating Ethernet Interfaces](#updating-ethernet-interfaces)
-    - [Listing Ethernet Interfaces](#listing-ethernet-interfaces)
-    - [Filtering Responses](#filtering-responses)
-    - [Deleting Ethernet Interfaces](#deleting-ethernet-interfaces)
-8. [Managing Configuration Changes](#managing-configuration-changes)
-9. [Error Handling](#error-handling)
-10. [Best Practices](#best-practices)
-11. [Related Models](#related-models)
-
-## Overview
+# Ethernet Interface
 
 The `EthernetInterface` class manages ethernet interface objects in Palo Alto Networks' Strata Cloud Manager. Ethernet interfaces support three modes: Layer 2, Layer 3, and TAP. Layer 3 mode supports static IP, DHCP, or PPPoE addressing. The class provides methods for CRUD operations and enforces container requirements using `folder`, `snippet`, or `device` parameters.
 
-## Important: Naming Convention
-
-Ethernet interface names in SCM must start with `$` (dollar sign) as they are variable references. The `default_value` field specifies the physical interface assignment.
+## Class Overview
 
 ```python
-# Correct usage
-{
-    "name": "$wan-interface",        # Variable name (required $ prefix)
-    "default_value": "ethernet1/1",  # Physical interface assignment
-    "folder": "Interfaces"
-}
-```
+from scm.client import ScmClient
 
-## Core Methods
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Access ethernet interfaces via the client
+ethernet_interfaces = client.ethernet_interface
+```
 
 | Method     | Description                                                    | Parameters                                  | Return Type                         |
 |------------|----------------------------------------------------------------|---------------------------------------------|-------------------------------------|
@@ -48,7 +27,7 @@ Ethernet interface names in SCM must start with `$` (dollar sign) as they are va
 | `fetch()`  | Fetches a single ethernet interface by name within a container | `name: str`, `folder`, `snippet`, `device`  | `EthernetInterfaceResponseModel`    |
 | `delete()` | Deletes an ethernet interface by ID                            | `object_id: str`                            | `None`                              |
 
-## Ethernet Interface Model Attributes
+### Ethernet Interface Model Attributes
 
 | Attribute       | Type            | Required | Default  | Description                                         |
 |-----------------|-----------------|----------|----------|-----------------------------------------------------|
@@ -71,9 +50,9 @@ Ethernet interface names in SCM must start with `$` (dollar sign) as they are va
 \** Only one mode (layer2/layer3/tap) can be configured at a time
 \*** Exactly one container must be provided for create operations
 
-## Interface Modes
+### Interface Modes
 
-### Layer 2 Mode
+#### Layer 2 Mode
 
 Layer 2 mode operates at the data link layer with VLAN tagging and LLDP support.
 
@@ -88,7 +67,7 @@ interface_data = {
 }
 ```
 
-### Layer 3 Mode with Static IP
+#### Layer 3 Mode with Static IP
 
 Layer 3 mode with static IP addresses for routed interfaces.
 
@@ -105,7 +84,7 @@ interface_data = {
 }
 ```
 
-### Layer 3 Mode with DHCP
+#### Layer 3 Mode with DHCP
 
 Layer 3 mode using DHCP for dynamic IP assignment.
 
@@ -124,7 +103,7 @@ interface_data = {
 }
 ```
 
-### Layer 3 Mode with PPPoE
+#### Layer 3 Mode with PPPoE
 
 Layer 3 mode using PPPoE for ISP connections.
 
@@ -144,7 +123,7 @@ interface_data = {
 }
 ```
 
-### TAP Mode
+#### TAP Mode
 
 TAP mode for traffic monitoring without affecting traffic flow.
 
@@ -156,7 +135,20 @@ interface_data = {
 }
 ```
 
-## Exceptions
+### Naming Convention
+
+Ethernet interface names in SCM must start with `$` (dollar sign) as they are variable references. The `default_value` field specifies the physical interface assignment.
+
+```python
+# Correct usage
+{
+    "name": "$wan-interface",        # Variable name (required $ prefix)
+    "default_value": "ethernet1/1",  # Physical interface assignment
+    "folder": "Interfaces"
+}
+```
+
+### Exceptions
 
 | Exception                    | HTTP Code | Description                            |
 |------------------------------|-----------|----------------------------------------|
@@ -166,25 +158,67 @@ interface_data = {
 | `AuthenticationError`        | 401       | Authentication failed                  |
 | `ServerError`                | 500       | Internal server error                  |
 
-## Basic Configuration
+## Methods
+
+### List Ethernet Interfaces
 
 ```python
-from scm.client import ScmClient
+# List all interfaces in a folder
+interfaces = client.ethernet_interface.list(folder="Interfaces")
 
-# Initialize client
-client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
+for iface in interfaces:
+    print(f"Name: {iface.name}")
+    if iface.layer2:
+        print(f"  Mode: Layer 2, VLAN: {iface.layer2.vlan_tag}")
+    elif iface.layer3:
+        print(f"  Mode: Layer 3")
+    elif iface.tap:
+        print(f"  Mode: TAP")
+
+# Filter by mode
+layer3_interfaces = client.ethernet_interface.list(
+    folder="Interfaces",
+    mode="layer3"
 )
 
-# Access ethernet interfaces via the client
-ethernet_interfaces = client.ethernet_interface
+# Filter by link speed
+gigabit_interfaces = client.ethernet_interface.list(
+    folder="Interfaces",
+    link_speed="1000"
+)
 ```
 
-## Usage Examples
+#### Filtering Responses
 
-### Creating Ethernet Interfaces
+```python
+# Exact match only
+exact_interfaces = client.ethernet_interface.list(
+    folder="Interfaces",
+    exact_match=True
+)
+
+# Exclude specific folders
+filtered = client.ethernet_interface.list(
+    folder="Interfaces",
+    exclude_folders=["All"]
+)
+```
+
+### Fetch an Ethernet Interface
+
+```python
+# Fetch by name
+interface = client.ethernet_interface.fetch(
+    name="$wan-interface",
+    folder="Interfaces"
+)
+print(f"Found interface: {interface.name}")
+
+# Get by ID
+interface_by_id = client.ethernet_interface.get(interface.id)
+```
+
+### Create an Ethernet Interface
 
 ```python
 # Create Layer 3 interface with static IP
@@ -220,21 +254,7 @@ layer2_interface = {
 result = client.ethernet_interface.create(layer2_interface)
 ```
 
-### Retrieving Ethernet Interfaces
-
-```python
-# Fetch by name
-interface = client.ethernet_interface.fetch(
-    name="$wan-interface",
-    folder="Interfaces"
-)
-print(f"Found interface: {interface.name}")
-
-# Get by ID
-interface_by_id = client.ethernet_interface.get(interface.id)
-```
-
-### Updating Ethernet Interfaces
+### Update an Ethernet Interface
 
 ```python
 # Fetch existing interface
@@ -252,57 +272,15 @@ if existing.layer3:
 updated = client.ethernet_interface.update(existing)
 ```
 
-### Listing Ethernet Interfaces
-
-```python
-# List all interfaces in a folder
-interfaces = client.ethernet_interface.list(folder="Interfaces")
-
-for iface in interfaces:
-    print(f"Name: {iface.name}")
-    if iface.layer2:
-        print(f"  Mode: Layer 2, VLAN: {iface.layer2.vlan_tag}")
-    elif iface.layer3:
-        print(f"  Mode: Layer 3")
-    elif iface.tap:
-        print(f"  Mode: TAP")
-
-# Filter by mode
-layer3_interfaces = client.ethernet_interface.list(
-    folder="Interfaces",
-    mode="layer3"
-)
-
-# Filter by link speed
-gigabit_interfaces = client.ethernet_interface.list(
-    folder="Interfaces",
-    link_speed="1000"
-)
-```
-
-### Filtering Responses
-
-```python
-# Exact match only
-exact_interfaces = client.ethernet_interface.list(
-    folder="Interfaces",
-    exact_match=True
-)
-
-# Exclude specific folders
-filtered = client.ethernet_interface.list(
-    folder="Interfaces",
-    exclude_folders=["All"]
-)
-```
-
-### Deleting Ethernet Interfaces
+### Delete an Ethernet Interface
 
 ```python
 client.ethernet_interface.delete("123e4567-e89b-12d3-a456-426655440000")
 ```
 
-## Managing Configuration Changes
+## Use Cases
+
+#### Managing Configuration Changes
 
 ```python
 # Commit changes
@@ -346,17 +324,7 @@ except ValidationError as e:
     print("Name must start with $ (dollar sign)")
 ```
 
-## Best Practices
-
-1. **Naming Convention** - Always use `$` prefix for interface names (e.g., `$wan-interface`)
-2. **Physical Interface** - Use `default_value` to specify the physical interface (e.g., `ethernet1/1`)
-3. **Mode Selection** - Choose only one mode (layer2, layer3, or tap) per interface
-4. **IP Addressing** - In layer3 mode, use only one IP method (static, DHCP, or PPPoE)
-5. **Link Settings** - Set link_speed and link_duplex to "auto" unless specific values are required
-6. **Container Management** - Always specify exactly one container (folder/snippet/device)
-7. **Error Handling** - Implement comprehensive error handling for all operations
-
-## Related Models
+## Related Topics
 
 - [EthernetInterfaceCreateModel](../../models/network/ethernet_interface_models.md)
 - [EthernetInterfaceUpdateModel](../../models/network/ethernet_interface_models.md)

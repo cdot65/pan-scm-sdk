@@ -50,14 +50,14 @@ The SDK supports filtering results using the OData syntax:
 filtered = client.address.list(filter="name eq 'web-server'")
 
 # Filter by folder
-filtered = client.address.list(filter="folder eq 'Shared'")
+filtered = client.address.list(filter="folder eq 'Texas'")
 ```
 
 ### Compound Filters
 
 ```python
 # Multiple conditions (AND)
-filtered = client.address.list(filter="name eq 'web-server' and folder eq 'Shared'")
+filtered = client.address.list(filter="name eq 'web-server' and folder eq 'Texas'")
 
 # Multiple conditions (OR)
 filtered = client.address.list(filter="name eq 'web-server' or name eq 'db-server'")
@@ -94,9 +94,9 @@ For multiple operations, it's more efficient to use batch processing:
 ```python
 # Create multiple objects efficiently
 objects_to_create = [
-    {"name": "server1", "folder": "Shared", "ip_netmask": "192.168.1.100/32"},
-    {"name": "server2", "folder": "Shared", "ip_netmask": "192.168.1.101/32"},
-    {"name": "server3", "folder": "Shared", "ip_netmask": "192.168.1.102/32"}
+    {"name": "web-server-1", "folder": "Texas", "ip_netmask": "192.168.1.100/32"},
+    {"name": "web-server-2", "folder": "Texas", "ip_netmask": "192.168.1.101/32"},
+    {"name": "web-server-3", "folder": "Texas", "ip_netmask": "192.168.1.102/32"}
 ]
 
 for obj in objects_to_create:
@@ -104,7 +104,7 @@ for obj in objects_to_create:
 
 # Then commit once
 client.candidate_push({
-    "description": "Adding multiple server addresses",
+    "description": "Adding web server addresses",
     "admin_name": "admin"
 })
 ```
@@ -137,8 +137,8 @@ def retry_operation(operation_func, max_retries=3, retry_delay=2):
 # Usage example
 def create_address():
     return client.address.create({
-        "name": "example",
-        "folder": "Shared",
+        "name": "web-server",
+        "folder": "Texas",
         "ip_netmask": "192.168.1.100/32"
     })
 

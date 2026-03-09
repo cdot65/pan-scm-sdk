@@ -1,15 +1,6 @@
 # IPsec Tunnel Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Supporting Models](#supporting-models)
-4. [Exceptions](#exceptions)
-5. [Model Validators](#model-validators)
-6. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The IPsec Tunnel models provide a structured way to represent and validate IPsec tunnel configuration data for Palo Alto Networks' Strata Cloud Manager. These models ensure data integrity when creating and updating IPsec tunnels, enforcing proper auto key settings, proxy ID configurations, tunnel monitoring, container specifications, and field validations.
 
@@ -38,15 +29,15 @@ This is the base model containing fields common to all IPsec tunnel operations.
 
 | Attribute                 | Type          | Required | Default | Description                                                     |
 |---------------------------|---------------|----------|---------|-----------------------------------------------------------------|
-| name                      | str           | Yes      | None    | Name of the IPsec tunnel. Max 63 chars.                         |
-| auto_key                  | AutoKey       | Yes      | None    | Auto key configuration.                                        |
-| anti_replay               | bool          | No       | None    | Enable anti-replay protection.                                 |
-| copy_tos                  | bool          | No       | False   | Copy TOS header.                                               |
-| enable_gre_encapsulation  | bool          | No       | False   | Enable GRE encapsulation.                                      |
-| tunnel_monitor            | TunnelMonitor | No       | None    | Tunnel monitor configuration.                                  |
-| folder                    | str           | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
-| snippet                   | str           | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
-| device                    | str           | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `name` | `str` | Yes      | None    | Name of the IPsec tunnel. Max 63 chars.                         |
+| `auto_key` | `AutoKey` | Yes      | None    | Auto key configuration.                                        |
+| `anti_replay` | `bool` | No       | None    | Enable anti-replay protection.                                 |
+| `copy_tos` | `bool` | No       | False   | Copy TOS header.                                               |
+| `enable_gre_encapsulation` | `bool` | No       | False   | Enable GRE encapsulation.                                      |
+| `tunnel_monitor` | `TunnelMonitor` | No       | None    | Tunnel monitor configuration.                                  |
+| `folder` | `str` | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `snippet` | `str` | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
+| `device` | `str` | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
 
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
@@ -60,7 +51,7 @@ Extends `IPsecTunnelBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                              |
 |-----------|------|----------|---------|------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the IPsec tunnel |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the IPsec tunnel |
 
 ### IPsecTunnelResponseModel
 
@@ -68,9 +59,10 @@ Extends `IPsecTunnelBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                              |
 |-----------|------|----------|---------|------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the IPsec tunnel |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the IPsec tunnel |
 
-> **Note:** The `IPsecTunnelResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
+!!! note
+    The `IPsecTunnelResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
 
 ## Supporting Models
 
@@ -80,10 +72,10 @@ This model defines the auto key configuration for IPsec tunnels.
 
 | Attribute          | Type             | Required | Default | Description                    |
 |--------------------|------------------|----------|---------|--------------------------------|
-| ike_gateway        | List[IkeGatewayRef] | Yes   | None    | List of IKE gateway references.|
-| ipsec_crypto_profile | str            | Yes      | None    | IPsec crypto profile name.     |
-| proxy_id           | List[ProxyId]    | No       | None    | List of proxy IDs.             |
-| proxy_id_v6        | List[ProxyId]    | No       | None    | List of IPv6 proxy IDs.        |
+| `ike_gateway` | `List[IkeGatewayRef]` | Yes   | None    | List of IKE gateway references.|
+| `ipsec_crypto_profile` | `str` | Yes      | None    | IPsec crypto profile name.     |
+| `proxy_id` | `List[ProxyId]` | No       | None    | List of proxy IDs.             |
+| `proxy_id_v6` | `List[ProxyId]` | No       | None    | List of IPv6 proxy IDs.        |
 
 ### IkeGatewayRef
 
@@ -91,7 +83,7 @@ This model defines a reference to an IKE gateway.
 
 | Attribute | Type | Required | Default | Description               |
 |-----------|------|----------|---------|---------------------------|
-| name      | str  | Yes      | None    | The name of the IKE gateway.|
+| `name` | `str` | Yes      | None    | The name of the IKE gateway.|
 
 ### ProxyId
 
@@ -99,10 +91,10 @@ This model defines the proxy ID configuration for IPsec tunnels.
 
 | Attribute | Type            | Required | Default | Description              |
 |-----------|-----------------|----------|---------|--------------------------|
-| name      | str             | Yes      | None    | The name of the proxy ID.|
-| local     | str             | No       | None    | Local address or subnet. |
-| remote    | str             | No       | None    | Remote address or subnet.|
-| protocol  | ProxyIdProtocol | No       | None    | Protocol configuration.  |
+| `name` | `str` | Yes      | None    | The name of the proxy ID.|
+| `local` | `str` | No       | None    | Local address or subnet. |
+| `remote` | `str` | No       | None    | Remote address or subnet.|
+| `protocol` | `ProxyIdProtocol` | No       | None    | Protocol configuration.  |
 
 ### ProxyIdProtocol
 
@@ -110,9 +102,9 @@ This model defines the protocol configuration for proxy ID. At most one protocol
 
 | Attribute | Type     | Required | Default | Description                           |
 |-----------|----------|----------|---------|---------------------------------------|
-| number    | int      | No*      | None    | IP protocol number. Range: 1-254.     |
-| tcp       | PortPair | No*      | None    | TCP port pair.                        |
-| udp       | PortPair | No*      | None    | UDP port pair.                        |
+| `number` | `int` | No*      | None    | IP protocol number. Range: 1-254.     |
+| `tcp` | `PortPair` | No*      | None    | TCP port pair.                        |
+| `udp` | `PortPair` | No*      | None    | UDP port pair.                        |
 
 \* At most one of `number`, `tcp`, or `udp` may be set.
 
@@ -122,8 +114,8 @@ This model defines local and remote port pairs for proxy ID protocol configurati
 
 | Attribute   | Type | Required | Default | Description                        |
 |-------------|------|----------|---------|------------------------------------|
-| local_port  | int  | No       | 0       | Local port number. Range: 0-65535. |
-| remote_port | int  | No       | 0       | Remote port number. Range: 0-65535.|
+| `local_port` | `int` | No       | 0       | Local port number. Range: 0-65535. |
+| `remote_port` | `int` | No       | 0       | Remote port number. Range: 0-65535.|
 
 ### TunnelMonitor
 
@@ -131,9 +123,9 @@ This model defines tunnel monitor configuration for IPsec tunnels.
 
 | Attribute      | Type | Required | Default | Description                                     |
 |----------------|------|----------|---------|-------------------------------------------------|
-| enable         | bool | No       | True    | Enable tunnel monitoring.                       |
-| destination_ip | str  | Yes      | None    | Destination IP address for tunnel monitoring.   |
-| proxy_id       | str  | No       | None    | Proxy ID for tunnel monitoring.                 |
+| `enable` | `bool` | No       | True    | Enable tunnel monitoring.                       |
+| `destination_ip` | `str` | Yes      | None    | Destination IP address for tunnel monitoring.   |
+| `proxy_id` | `str` | No       | None    | Proxy ID for tunnel monitoring.                 |
 
 ## Exceptions
 

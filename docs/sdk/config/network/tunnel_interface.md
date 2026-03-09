@@ -1,23 +1,20 @@
-# Tunnel Interface Configuration Object
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Core Methods](#core-methods)
-3. [Tunnel Interface Model Attributes](#tunnel-interface-model-attributes)
-4. [Exceptions](#exceptions)
-5. [Basic Configuration](#basic-configuration)
-6. [Usage Examples](#usage-examples)
-7. [Managing Configuration Changes](#managing-configuration-changes)
-8. [Error Handling](#error-handling)
-9. [Best Practices](#best-practices)
-10. [Related Models](#related-models)
-
-## Overview
+# Tunnel Interface
 
 The `TunnelInterface` class manages tunnel interface objects in Palo Alto Networks' Strata Cloud Manager. Tunnel interfaces are used for VPN tunnels (IPsec, GRE, etc.) and provide a logical interface for encrypted traffic.
 
-## Core Methods
+## Class Overview
+
+```python
+from scm.client import ScmClient
+
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+tunnel_interfaces = client.tunnel_interface
+```
 
 | Method     | Description                                                  | Parameters                                  | Return Type                        |
 |------------|--------------------------------------------------------------|---------------------------------------------|------------------------------------|
@@ -28,7 +25,7 @@ The `TunnelInterface` class manages tunnel interface objects in Palo Alto Networ
 | `fetch()`  | Fetches a single tunnel interface by name within a container | `name: str`, `folder`, `snippet`, `device`  | `TunnelInterfaceResponseModel`     |
 | `delete()` | Deletes a tunnel interface by ID                             | `object_id: str`                            | `None`                             |
 
-## Tunnel Interface Model Attributes
+### Tunnel Interface Model Attributes
 
 | Attribute                      | Type         | Required | Default | Description                                      |
 |--------------------------------|--------------|----------|---------|--------------------------------------------------|
@@ -45,7 +42,7 @@ The `TunnelInterface` class manages tunnel interface objects in Palo Alto Networ
 \* Only required for update and response models
 \** Exactly one container must be provided for create operations
 
-## Exceptions
+### Exceptions
 
 | Exception                    | HTTP Code | Description                            |
 |------------------------------|-----------|----------------------------------------|
@@ -55,23 +52,38 @@ The `TunnelInterface` class manages tunnel interface objects in Palo Alto Networ
 | `AuthenticationError`        | 401       | Authentication failed                  |
 | `ServerError`                | 500       | Internal server error                  |
 
-## Basic Configuration
+## Methods
+
+### List Tunnel Interfaces
 
 ```python
-from scm.client import ScmClient
+# List all tunnels
+tunnels = client.tunnel_interface.list(folder="Interfaces")
 
-client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
+for tunnel in tunnels:
+    print(f"Name: {tunnel.name}, MTU: {tunnel.mtu}")
+    if tunnel.ip:
+        print(f"  IP: {', '.join(tunnel.ip)}")
 
-tunnel_interfaces = client.tunnel_interface
+# Filter by MTU
+low_mtu = client.tunnel_interface.list(folder="Interfaces", mtu=1400)
 ```
 
-## Usage Examples
+### Fetch a Tunnel Interface
 
-### Creating Tunnel Interfaces
+```python
+# Fetch by name
+tunnel = client.tunnel_interface.fetch(
+    name="tunnel.1",
+    folder="Interfaces"
+)
+print(f"Found: {tunnel.name}")
+
+# Get by ID
+tunnel_by_id = client.tunnel_interface.get(tunnel.id)
+```
+
+### Create a Tunnel Interface
 
 ```python
 # Create tunnel interface for IPsec VPN
@@ -97,21 +109,7 @@ unnumbered_tunnel = {
 result = client.tunnel_interface.create(unnumbered_tunnel)
 ```
 
-### Retrieving Tunnel Interfaces
-
-```python
-# Fetch by name
-tunnel = client.tunnel_interface.fetch(
-    name="tunnel.1",
-    folder="Interfaces"
-)
-print(f"Found: {tunnel.name}")
-
-# Get by ID
-tunnel_by_id = client.tunnel_interface.get(tunnel.id)
-```
-
-### Updating Tunnel Interfaces
+### Update a Tunnel Interface
 
 ```python
 existing = client.tunnel_interface.fetch(name="tunnel.1", folder="Interfaces")
@@ -122,28 +120,15 @@ existing.comment = "Updated VPN Tunnel"
 updated = client.tunnel_interface.update(existing)
 ```
 
-### Listing Tunnel Interfaces
-
-```python
-# List all tunnels
-tunnels = client.tunnel_interface.list(folder="Interfaces")
-
-for tunnel in tunnels:
-    print(f"Name: {tunnel.name}, MTU: {tunnel.mtu}")
-    if tunnel.ip:
-        print(f"  IP: {', '.join(tunnel.ip)}")
-
-# Filter by MTU
-low_mtu = client.tunnel_interface.list(folder="Interfaces", mtu=1400)
-```
-
-### Deleting Tunnel Interfaces
+### Delete a Tunnel Interface
 
 ```python
 client.tunnel_interface.delete("123e4567-e89b-12d3-a456-426655440000")
 ```
 
-## Managing Configuration Changes
+## Use Cases
+
+#### Managing Configuration Changes
 
 ```python
 result = client.commit(
@@ -168,14 +153,7 @@ except InvalidObjectError as e:
     print(f"Invalid configuration: {e.message}")
 ```
 
-## Best Practices
-
-1. **MTU Settings** - Account for encapsulation overhead (typically 1400-1480 for IPsec)
-2. **Naming** - Use descriptive names indicating the tunnel purpose
-3. **IP Addressing** - Use /30 or /31 subnets for point-to-point tunnels
-4. **Documentation** - Document the remote endpoint in comments
-
-## Related Models
+## Related Topics
 
 - [TunnelInterfaceCreateModel](../../models/network/tunnel_interface_models.md)
 - [TunnelInterfaceUpdateModel](../../models/network/tunnel_interface_models.md)

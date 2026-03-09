@@ -1,16 +1,6 @@
 # IKE Gateway Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Enum Types](#enum-types)
-4. [Supporting Models](#supporting-models)
-5. [Exceptions](#exceptions)
-6. [Model Validators](#model-validators)
-7. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The IKE Gateway models provide a structured way to manage Internet Key Exchange (IKE) gateway configurations in Palo Alto Networks' Strata Cloud Manager. These models support defining IKE configurations for establishing secure VPN connections with peer devices. The models handle validation of inputs and outputs when interacting with the SCM API.
 
@@ -45,17 +35,17 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 | Attribute          | Type           | Required | Default              | Description                                           |
 |--------------------|----------------|----------|----------------------|-------------------------------------------------------|
-| `name`             | str            | Yes      | None                 | Name of IKE gateway. Max 63 chars. Pattern: `^[0-9a-zA-Z._\-]+$` |
-| `id`               | UUID           | Yes*     | None                 | Unique identifier (*response/update only)             |
-| `authentication`   | Authentication | Yes      | None                 | Authentication configuration                          |
-| `peer_id`          | PeerId         | No       | None                 | Peer identification configuration                     |
-| `local_id`         | LocalId        | No       | None                 | Local identification configuration                    |
-| `protocol`         | Protocol       | Yes      | None                 | IKE protocol configuration                            |
-| `protocol_common`  | ProtocolCommon | No       | None                 | Common protocol settings                              |
-| `peer_address`     | PeerAddress    | Yes      | None                 | Peer address configuration                            |
-| `folder`           | str            | No**     | None                 | Folder location. Max 64 chars                         |
-| `snippet`          | str            | No**     | None                 | Snippet location. Max 64 chars                        |
-| `device`           | str            | No**     | None                 | Device location. Max 64 chars                         |
+| `name`             | `str` | Yes      | None                 | Name of IKE gateway. Max 63 chars. Pattern: `^[0-9a-zA-Z._\-]+$` |
+| `id`               | `UUID` | Yes*     | None                 | Unique identifier (*response/update only)             |
+| `authentication`   | `Authentication` | Yes      | None                 | Authentication configuration                          |
+| `peer_id`          | `PeerId` | No       | None                 | Peer identification configuration                     |
+| `local_id`         | `LocalId` | No       | None                 | Local identification configuration                    |
+| `protocol`         | `Protocol` | Yes      | None                 | IKE protocol configuration                            |
+| `protocol_common`  | `ProtocolCommon` | No       | None                 | Common protocol settings                              |
+| `peer_address`     | `PeerAddress` | Yes      | None                 | Peer address configuration                            |
+| `folder`           | `str` | No**     | None                 | Folder location. Max 64 chars                         |
+| `snippet`          | `str` | No**     | None                 | Snippet location. Max 64 chars                        |
+| `device`           | `str` | No**     | None                 | Device location. Max 64 chars                         |
 
 \* Only required for update and response models
 \** Exactly one container (folder/snippet/device) must be provided for create operations
@@ -100,8 +90,8 @@ Defines the IKE protocol versions supported:
 
 | Attribute       | Type           | Required | Default | Description                          |
 |-----------------|----------------|----------|---------|--------------------------------------|
-| `pre_shared_key`| PreSharedKey   | No*      | None    | Pre-shared key authentication        |
-| `certificate`   | CertificateAuth| No*      | None    | Certificate-based authentication     |
+| `pre_shared_key`| `PreSharedKey` | No*      | None    | Pre-shared key authentication        |
+| `certificate`   | `CertificateAuth` | No*      | None    | Certificate-based authentication     |
 
 \* Exactly one authentication type must be provided
 
@@ -109,87 +99,87 @@ Defines the IKE protocol versions supported:
 
 | Attribute | Type | Required | Default | Description              |
 |-----------|------|----------|---------|--------------------------|
-| `key`     | str  | Yes      | None    | Pre-shared key value     |
+| `key`     | `str` | Yes      | None    | Pre-shared key value     |
 
 ### CertificateAuth Model
 
 | Attribute                     | Type          | Required | Default | Description                          |
 |-------------------------------|---------------|----------|---------|--------------------------------------|
-| `allow_id_payload_mismatch`   | bool          | No       | None    | Allow ID payload mismatch            |
-| `certificate_profile`         | str           | No       | None    | Certificate profile name             |
-| `local_certificate`           | Dict[str,Any] | No       | None    | Local certificate configuration      |
-| `strict_validation_revocation`| bool          | No       | None    | Enable strict validation revocation  |
-| `use_management_as_source`    | bool          | No       | None    | Use management interface as source   |
+| `allow_id_payload_mismatch`   | `bool` | No       | None    | Allow ID payload mismatch            |
+| `certificate_profile`         | `str` | No       | None    | Certificate profile name             |
+| `local_certificate`           | `Dict[str,Any]` | No       | None    | Local certificate configuration      |
+| `strict_validation_revocation`| `bool` | No       | None    | Enable strict validation revocation  |
+| `use_management_as_source`    | `bool` | No       | None    | Use management interface as source   |
 
 ### PeerId Model
 
 | Attribute | Type       | Required | Default | Description                                      |
 |-----------|------------|----------|---------|--------------------------------------------------|
-| `type`    | PeerIdType | Yes      | None    | Type of peer ID                                  |
-| `id`      | str        | Yes      | None    | Peer ID string. Max 1024 chars                   |
+| `type`    | `PeerIdType` | Yes      | None    | Type of peer ID                                  |
+| `id`      | `str` | Yes      | None    | Peer ID string. Max 1024 chars                   |
 
 ### LocalId Model
 
 | Attribute | Type        | Required | Default | Description                                     |
 |-----------|-------------|----------|---------|--------------------------------------------------|
-| `type`    | LocalIdType | Yes      | None    | Type of local ID                                 |
-| `id`      | str         | Yes      | None    | Local ID string. Max 1024 chars                  |
+| `type`    | `LocalIdType` | Yes      | None    | Type of local ID                                 |
+| `id`      | `str` | Yes      | None    | Local ID string. Max 1024 chars                  |
 
 ### Protocol Model
 
 | Attribute | Type            | Required | Default          | Description                    |
 |-----------|-----------------|----------|------------------|--------------------------------|
-| `version` | ProtocolVersion | No       | ikev2-preferred  | IKE protocol version preference|
-| `ikev1`   | IKEv1           | No       | None             | IKEv1 configuration            |
-| `ikev2`   | IKEv2           | No       | None             | IKEv2 configuration            |
+| `version` | `ProtocolVersion` | No       | ikev2-preferred  | IKE protocol version preference|
+| `ikev1`   | `IKEv1` | No       | None             | IKEv1 configuration            |
+| `ikev2`   | `IKEv2` | No       | None             | IKEv2 configuration            |
 
 ### IKEv1 Model
 
 | Attribute           | Type              | Required | Default | Description                  |
 |---------------------|-------------------|----------|---------|------------------------------|
-| `ike_crypto_profile`| str               | No       | None    | IKE Crypto Profile name      |
-| `dpd`               | DeadPeerDetection | No       | None    | Dead Peer Detection config   |
+| `ike_crypto_profile`| `str` | No       | None    | IKE Crypto Profile name      |
+| `dpd`               | `DeadPeerDetection` | No       | None    | Dead Peer Detection config   |
 
 ### IKEv2 Model
 
 | Attribute           | Type              | Required | Default | Description                  |
 |---------------------|-------------------|----------|---------|------------------------------|
-| `ike_crypto_profile`| str               | No       | None    | IKE Crypto Profile name      |
-| `dpd`               | DeadPeerDetection | No       | None    | Dead Peer Detection config   |
+| `ike_crypto_profile`| `str` | No       | None    | IKE Crypto Profile name      |
+| `dpd`               | `DeadPeerDetection` | No       | None    | Dead Peer Detection config   |
 
 ### DeadPeerDetection Model
 
 | Attribute | Type | Required | Default | Description                  |
 |-----------|------|----------|---------|------------------------------|
-| `enable`  | bool | No       | None    | Enable Dead Peer Detection   |
+| `enable`  | `bool` | No       | None    | Enable Dead Peer Detection   |
 
 ### ProtocolCommon Model
 
 | Attribute      | Type          | Required | Default | Description                  |
 |----------------|---------------|----------|---------|------------------------------|
-| `nat_traversal`| NatTraversal  | No       | None    | NAT traversal configuration  |
-| `passive_mode` | bool          | No       | None    | Enable passive mode          |
-| `fragmentation`| Fragmentation | No       | None    | IKE fragmentation config     |
+| `nat_traversal`| `NatTraversal` | No       | None    | NAT traversal configuration  |
+| `passive_mode` | `bool` | No       | None    | Enable passive mode          |
+| `fragmentation`| `Fragmentation` | No       | None    | IKE fragmentation config     |
 
 ### NatTraversal Model
 
 | Attribute | Type | Required | Default | Description              |
 |-----------|------|----------|---------|--------------------------|
-| `enable`  | bool | No       | None    | Enable NAT traversal     |
+| `enable`  | `bool` | No       | None    | Enable NAT traversal     |
 
 ### Fragmentation Model
 
 | Attribute | Type | Required | Default | Description                  |
 |-----------|------|----------|---------|------------------------------|
-| `enable`  | bool | No       | False   | Enable IKE fragmentation     |
+| `enable`  | `bool` | No       | False   | Enable IKE fragmentation     |
 
 ### PeerAddress Model
 
 | Attribute | Type          | Required | Default | Description                        |
 |-----------|---------------|----------|---------|-------------------------------------|
-| `ip`      | str           | No*      | None    | Static IP address of peer gateway  |
-| `fqdn`    | str           | No*      | None    | FQDN of peer gateway. Max 255 chars|
-| `dynamic` | Dict[str,Any] | No*      | None    | Dynamic peer address configuration |
+| `ip`      | `str` | No*      | None    | Static IP address of peer gateway  |
+| `fqdn`    | `str` | No*      | None    | FQDN of peer gateway. Max 255 chars|
+| `dynamic` | `Dict[str,Any]` | No*      | None    | Dynamic peer address configuration |
 
 \* Exactly one peer address type (ip/fqdn/dynamic) must be provided
 

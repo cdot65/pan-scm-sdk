@@ -4,8 +4,6 @@ We're thrilled that you're interested in contributing to the `pan-scm-sdk` proje
 making this project better and more effective. Whether you're fixing a bug, adding a new feature, improving the
 documentation, or just giving suggestions, every contribution is valuable.
 
----
-
 ## Getting Started
 
 Before you begin, make sure you have a GitHub account and are familiar with Git and GitHub workflows. If you're new to
@@ -19,15 +17,15 @@ these tools, you might want to check out some tutorials on [GitHub's Help pages]
 2. **Clone Your Fork:** Clone your fork to your local machine:
 
    ```bash
-    $ git clone https://github.com/yourusername/pan-scm-sdk.git
-    $ cd pan-scm-sdk
-    ```
+   git clone https://github.com/yourusername/pan-scm-sdk.git
+   cd pan-scm-sdk
+   ```
 
 3. **Create a Branch:** Create a new branch for your feature, fix, or improvement:
 
    ```bash
-    $ git checkout -b feature/YourFeatureName
-    ```
+   git checkout -b feature/YourFeatureName
+   ```
 
 4. **Set Up the Development Environment:** Follow the [Getting Started](installation.md) guide to set up your local
    development environment.
@@ -43,25 +41,21 @@ these tools, you might want to check out some tutorials on [GitHub's Help pages]
 3. **Commit Your Changes:** Once you're happy with your changes, commit them:
 
    ```bash
-    $ git commit -am "Add some AmazingFeature"
-    ```
-
----
+   git commit -am "Add some AmazingFeature"
+   ```
 
 ## Submitting a Contribution
 
 1. **Push to Your Fork:** Push your branch to your GitHub fork:
 
    ```bash
-    $ git push origin feature/YourFeatureName
-    ```
+   git push origin feature/YourFeatureName
+   ```
 
 2. **Create a Pull Request:** Go to the original `pan-scm-sdk` repository on GitHub and create a new pull request.
    Provide a clear description of your changes and any relevant issue numbers.
 
 3. **Code Review:** Wait for a review from the project maintainers. Be open to feedback and make any requested changes.
-
----
 
 ## Contribution Guidelines
 
@@ -71,15 +65,9 @@ these tools, you might want to check out some tutorials on [GitHub's Help pages]
   existing functionality.
 - **Respect:** Treat other contributors with respect. We're all working towards the same goal!
 
----
-
 ## Questions or Need Help?
 
 If you have any questions or need help with your contribution, don't hesitate to reach out
 via [GitHub Issues](https://github.com/cdot65/pan-scm-sdk/issues) or our contact email.
 
----
-
 We're excited to see your contributions and to welcome you to our community!
-
-[Back to Top](#contributing-to-pan-scm-sdk)

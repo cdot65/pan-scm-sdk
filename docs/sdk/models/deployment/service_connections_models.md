@@ -1,6 +1,6 @@
 # Service Connection Models
 
-## Overview {#Overview}
+## Overview
 
 The Service Connection models are a key component in Palo Alto Networks' Strata Cloud Manager SDK, providing a structured way to manage and configure connections to cloud service providers. These models work in tandem with Remote Networks and BGP Routing configurations to establish secure, optimized connectivity between your on-premises infrastructure and cloud resources.
 
@@ -29,21 +29,21 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 | Attribute                | Type                | Required | Default            | Description                                                          |
 |--------------------------|---------------------|----------|---------------------|---------------------------------------------------------------------|
-| name                     | str                 | Yes      | None               | Name of the service connection. Max 63 chars, must match pattern: `^[0-9a-zA-Z._\- ]+$` |
-| id                       | UUID                | Yes***   | None               | UUID of the service connection (response & update only)              |
-| folder                   | str                 | Yes      | Service Connections | The folder containing the service connection                         |
-| ipsec_tunnel             | str                 | Yes      | None               | IPsec tunnel for the service connection                             |
-| onboarding_type          | OnboardingType      | Yes      | classic            | Onboarding type for the service connection                          |
-| region                   | str                 | Yes      | None               | Region for the service connection                                   |
-| backup_SC                | str                 | No       | None               | Backup service connection                                            |
-| bgp_peer                 | BgpPeerModel        | No       | None               | BGP peer configuration                                               |
-| nat_pool                 | str                 | No       | None               | NAT pool for the service connection                                 |
-| no_export_community      | NoExportCommunity   | No       | None               | No export community configuration                                   |
-| protocol                 | ProtocolModel       | No       | None               | Protocol configuration                                               |
-| qos                      | QosModel            | No       | None               | QoS configuration                                                    |
-| secondary_ipsec_tunnel   | str                 | No       | None               | Secondary IPsec tunnel                                               |
-| source_nat               | bool                | No       | None               | Enable source NAT                                                    |
-| subnets                  | List[str]           | No       | None               | Subnets for the service connection                                  |
+| `name` | `str` | Yes      | None               | Name of the service connection. Max 63 chars, must match pattern: `^[0-9a-zA-Z._\- ]+$` |
+| `id` | `UUID` | Yes***   | None               | UUID of the service connection (response & update only)              |
+| `folder` | `str` | Yes      | Service Connections | The folder containing the service connection                         |
+| `ipsec_tunnel` | `str` | Yes      | None               | IPsec tunnel for the service connection                             |
+| `onboarding_type` | `OnboardingType` | Yes      | classic            | Onboarding type for the service connection                          |
+| `region` | `str` | Yes      | None               | Region for the service connection                                   |
+| `backup_SC` | `str` | No       | None               | Backup service connection                                            |
+| `bgp_peer` | `BgpPeerModel` | No       | None               | BGP peer configuration                                               |
+| `nat_pool` | `str` | No       | None               | NAT pool for the service connection                                 |
+| `no_export_community` | `NoExportCommunity` | No       | None               | No export community configuration                                   |
+| `protocol` | `ProtocolModel` | No       | None               | Protocol configuration                                               |
+| `qos` | `QosModel` | No       | None               | QoS configuration                                                    |
+| `secondary_ipsec_tunnel` | `str` | No       | None               | Secondary IPsec tunnel                                               |
+| `source_nat` | `bool` | No       | None               | Enable source NAT                                                    |
+| `subnets` | `List[str]` | No       | None               | Subnets for the service connection                                  |
 
 \*** Only required for update and response models
 
@@ -51,38 +51,38 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 | Attribute          | Type | Required | Default | Description                        |
 |--------------------|------|----------|---------|-------------------------------------|
-| local_ip_address   | str  | No       | None    | Local IPv4 address for BGP peering  |
-| local_ipv6_address | str  | No       | None    | Local IPv6 address for BGP peering  |
-| peer_ip_address    | str  | No       | None    | Peer IPv4 address for BGP peering   |
-| peer_ipv6_address  | str  | No       | None    | Peer IPv6 address for BGP peering   |
-| secret             | str  | No       | None    | BGP authentication secret           |
+| `local_ip_address` | `str` | No       | None    | Local IPv4 address for BGP peering  |
+| `local_ipv6_address` | `str` | No       | None    | Local IPv6 address for BGP peering  |
+| `peer_ip_address` | `str` | No       | None    | Peer IPv4 address for BGP peering   |
+| `peer_ipv6_address` | `str` | No       | None    | Peer IPv6 address for BGP peering   |
+| `secret` | `str` | No       | None    | BGP authentication secret           |
 
 ### BgpProtocolModel Attributes
 
 | Attribute                    | Type | Required | Default | Description                    |
 |------------------------------|------|----------|---------|--------------------------------|
-| enable                       | bool | No       | None    | Enable BGP                     |
-| do_not_export_routes         | bool | No       | None    | Do not export routes option    |
-| fast_failover                | bool | No       | None    | Enable fast failover           |
-| local_ip_address             | str  | No       | None    | Local IPv4 address for BGP     |
-| originate_default_route      | bool | No       | None    | Originate default route        |
-| peer_as                      | str  | No       | None    | BGP peer AS number             |
-| peer_ip_address              | str  | No       | None    | Peer IPv4 address for BGP      |
-| secret                       | str  | No       | None    | BGP authentication secret      |
-| summarize_mobile_user_routes | bool | No       | None    | Summarize mobile user routes   |
+| `enable` | `bool` | No       | None    | Enable BGP                     |
+| `do_not_export_routes` | `bool` | No       | None    | Do not export routes option    |
+| `fast_failover` | `bool` | No       | None    | Enable fast failover           |
+| `local_ip_address` | `str` | No       | None    | Local IPv4 address for BGP     |
+| `originate_default_route` | `bool` | No       | None    | Originate default route        |
+| `peer_as` | `str` | No       | None    | BGP peer AS number             |
+| `peer_ip_address` | `str` | No       | None    | Peer IPv4 address for BGP      |
+| `secret` | `str` | No       | None    | BGP authentication secret      |
+| `summarize_mobile_user_routes` | `bool` | No       | None    | Summarize mobile user routes   |
 
 ### ProtocolModel Attributes
 
 | Attribute | Type             | Required | Default | Description                |
 |-----------|------------------|----------|---------|----------------------------|
-| bgp       | BgpProtocolModel | No       | None    | BGP protocol configuration |
+| `bgp` | `BgpProtocolModel` | No       | None    | BGP protocol configuration |
 
 ### QosModel Attributes
 
 | Attribute   | Type | Required | Default | Description       |
 |-------------|------|----------|---------|-------------------|
-| enable      | bool | No       | None    | Enable QoS        |
-| qos_profile | str  | No       | None    | QoS profile name  |
+| `enable` | `bool` | No       | None    | Enable QoS        |
+| `qos_profile` | `str` | No       | None    | QoS profile name  |
 
 ### Enum Classes
 

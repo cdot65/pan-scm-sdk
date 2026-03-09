@@ -1,67 +1,19 @@
-# Mobile Agent Configuration Objects
+# Mobile Agent Configuration
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Available Configuration Objects](#available-configuration-objects)
-3. [Common Features](#common-features)
-4. [Usage Examples](#usage-examples)
+Configuration objects for managing GlobalProtect mobile agent settings in Strata Cloud Manager.
 
 ## Overview
 
-This section covers the Mobile Agent configuration objects provided by the Palo Alto Networks Strata Cloud Manager SDK. These configuration objects correspond to resources related to GlobalProtect mobile VPN services in the Strata Cloud Manager.
+This section covers the Mobile Agent configuration objects provided by the Palo Alto Networks Strata Cloud Manager SDK. These objects correspond to resources related to GlobalProtect mobile VPN services.
 
-## Available Configuration Objects
+## Available Modules
 
-- [Authentication Settings](auth_settings.md) - Configuration for GlobalProtect authentication based on operating system
-- [Agent Versions](agent_versions.md) - Available GlobalProtect agent versions (read-only)
+| Module                                       | Description                                               |
+|----------------------------------------------|-----------------------------------------------------------|
+| [Authentication Settings](auth_settings.md)  | Manage GlobalProtect authentication settings by OS        |
+| [Agent Versions](agent_versions.md)          | List and retrieve available GlobalProtect agent versions  |
 
-## Common Features
+## Related Documentation
 
-All configuration objects provide standard operations where supported:
-
-- Read existing objects
-- List and filter objects with pagination support
-
-These objects enforce:
-
-- Data validation with detailed error messages
-- Consistent API patterns across object types
-
-## Usage Examples
-
-```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-# List all authentication settings
-auth_settings = client.auth_setting.list()
-for setting in auth_settings:
-    print(f"Auth Setting: {setting.name}, OS: {setting.os}")
-
-# Get available agent versions
-versions = client.agent_version.list()
-print(f"Available agent versions: {versions}")
-
-# Filter by version
-filtered_versions = client.agent_version.list(version="5.3")
-print(f"Filtered versions: {filtered_versions}")
-```
-
-Select an object from the list above to view detailed documentation, including methods, parameters, and examples.
-=======
-# Mobile Agent Module
-
-The Mobile Agent module contains configuration objects for managing mobile user and agent settings.
-
-## Authentication Settings
-
-Authentication settings allow you to configure authentication methods and preferences for GlobalProtect mobile users based on different operating systems.
-
-* [Authentication Settings](auth_settings.md) - Manage GlobalProtect authentication settings
+- [Mobile Agent Models](../../models/mobile_agent/index.md)
+- [API Client](../../client.md)

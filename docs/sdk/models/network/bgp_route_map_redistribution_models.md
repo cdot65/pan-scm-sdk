@@ -1,20 +1,6 @@
 # BGP Route Map Redistribution Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Architecture](#architecture)
-3. [Model Attributes](#model-attributes)
-4. [Source Protocol Models](#source-protocol-models)
-5. [Target Container Models](#target-container-models)
-6. [Route Map Entry Models](#route-map-entry-models)
-7. [Match Models](#match-models)
-8. [Set Models](#set-models)
-9. [Exceptions](#exceptions)
-10. [Model Validators](#model-validators)
-11. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The BGP Route Map Redistribution models provide a structured way to represent and validate BGP route map redistribution configuration data for Palo Alto Networks' Strata Cloud Manager. This is the most complex model in the routing profile family, implementing a **2-level oneOf discrimination pattern** that determines which match criteria and set actions are available based on the source and target protocol combination.
 
@@ -69,7 +55,7 @@ The module provides 31 Pydantic model classes organized into the following categ
 
 The BGP route map redistribution model uses a hierarchical oneOf pattern to determine valid configurations:
 
-```
+```text
 BgpRouteMapRedistributionBaseModel
 |
 +-- Level 1: Source Protocol (mutually exclusive)
@@ -122,13 +108,13 @@ This is the base model containing fields for the 2-level oneOf discrimination.
 
 | Attribute         | Type                                     | Required | Default | Description                                                     |
 |-------------------|------------------------------------------|----------|---------|-----------------------------------------------------------------|
-| name              | str                                      | Yes      | None    | Redistribution name.                                            |
-| bgp               | BgpRouteMapRedistBgpSource               | No*      | None    | BGP as source protocol.                                         |
-| ospf              | BgpRouteMapRedistOspfSource              | No*      | None    | OSPF as source protocol.                                        |
-| connected_static  | BgpRouteMapRedistConnectedStaticSource   | No*      | None    | Connected/Static as source protocol.                            |
-| folder            | str                                      | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
-| snippet           | str                                      | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
-| device            | str                                      | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `name` | `str` | Yes      | None    | Redistribution name.                                            |
+| `bgp` | `BgpRouteMapRedistBgpSource` | No*      | None    | BGP as source protocol.                                         |
+| `ospf` | `BgpRouteMapRedistOspfSource` | No*      | None    | OSPF as source protocol.                                        |
+| `connected_static` | `BgpRouteMapRedistConnectedStaticSource` | No*      | None    | Connected/Static as source protocol.                            |
+| `folder` | `str` | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `snippet` | `str` | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
+| `device` | `str` | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
 
 \* At most one source protocol (`bgp`, `ospf`, or `connected_static`) can be set.
 
@@ -144,7 +130,7 @@ Extends `BgpRouteMapRedistributionBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                                |
 |-----------|------|----------|---------|------------------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the route map redistribution      |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the route map redistribution      |
 
 ### BgpRouteMapRedistributionResponseModel
 
@@ -152,9 +138,10 @@ Extends `BgpRouteMapRedistributionBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                                |
 |-----------|------|----------|---------|------------------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the route map redistribution      |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the route map redistribution      |
 
-> **Note:** The `BgpRouteMapRedistributionResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
+!!! note
+    The `BgpRouteMapRedistributionResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
 
 ## Source Protocol Models
 
@@ -164,8 +151,8 @@ BGP source protocol. Target protocols (ospf, rib) are mutually exclusive.
 
 | Attribute | Type                        | Required | Default | Description                       |
 |-----------|-----------------------------|----------|---------|-----------------------------------|
-| ospf      | BgpRouteMapRedistBgpToOspf  | No*      | None    | Redistribute BGP routes to OSPF.  |
-| rib       | BgpRouteMapRedistBgpToRib   | No*      | None    | Redistribute BGP routes to RIB.   |
+| `ospf` | `BgpRouteMapRedistBgpToOspf` | No*      | None    | Redistribute BGP routes to OSPF.  |
+| `rib` | `BgpRouteMapRedistBgpToRib` | No*      | None    | Redistribute BGP routes to RIB.   |
 
 \* Only one of `ospf` or `rib` can be set.
 
@@ -175,8 +162,8 @@ OSPF source protocol. Target protocols (bgp, rib) are mutually exclusive.
 
 | Attribute | Type                         | Required | Default | Description                        |
 |-----------|------------------------------|----------|---------|------------------------------------|
-| bgp       | BgpRouteMapRedistOspfToBgp   | No*      | None    | Redistribute OSPF routes to BGP.   |
-| rib       | BgpRouteMapRedistOspfToRib   | No*      | None    | Redistribute OSPF routes to RIB.   |
+| `bgp` | `BgpRouteMapRedistOspfToBgp` | No*      | None    | Redistribute OSPF routes to BGP.   |
+| `rib` | `BgpRouteMapRedistOspfToRib` | No*      | None    | Redistribute OSPF routes to RIB.   |
 
 \* Only one of `bgp` or `rib` can be set.
 
@@ -186,9 +173,9 @@ Connected/Static source protocol. Target protocols (bgp, ospf, rib) are mutually
 
 | Attribute | Type                                  | Required | Default | Description                                       |
 |-----------|---------------------------------------|----------|---------|---------------------------------------------------|
-| bgp       | BgpRouteMapRedistConnStaticToBgp      | No*      | None    | Redistribute connected/static routes to BGP.      |
-| ospf      | BgpRouteMapRedistConnStaticToOspf     | No*      | None    | Redistribute connected/static routes to OSPF.     |
-| rib       | BgpRouteMapRedistConnStaticToRib      | No*      | None    | Redistribute connected/static routes to RIB.      |
+| `bgp` | `BgpRouteMapRedistConnStaticToBgp` | No*      | None    | Redistribute connected/static routes to BGP.      |
+| `ospf` | `BgpRouteMapRedistConnStaticToOspf` | No*      | None    | Redistribute connected/static routes to OSPF.     |
+| `rib` | `BgpRouteMapRedistConnStaticToRib` | No*      | None    | Redistribute connected/static routes to RIB.      |
 
 \* Only one of `bgp`, `ospf`, or `rib` can be set.
 
@@ -200,19 +187,19 @@ Each target container holds a list of route map entries specific to the source->
 
 | Attribute | Type                                                    | Required | Default | Description        |
 |-----------|---------------------------------------------------------|----------|---------|--------------------|
-| route_map | List[BgpRouteMapRedistBgpToOspfEntry] or List[BgpRouteMapRedistBgpToRibEntry] | No | None | Route map entries. |
+| `route_map` | `List[BgpRouteMapRedistBgpToOspfEntry] or List[BgpRouteMapRedistBgpToRibEntry]` | No | None | Route map entries. |
 
 ### BgpRouteMapRedistOspfToBgp / BgpRouteMapRedistOspfToRib
 
 | Attribute | Type                                                      | Required | Default | Description        |
 |-----------|-----------------------------------------------------------|----------|---------|--------------------|
-| route_map | List[BgpRouteMapRedistOspfToBgpEntry] or List[BgpRouteMapRedistOspfToRibEntry] | No | None | Route map entries. |
+| `route_map` | `List[BgpRouteMapRedistOspfToBgpEntry] or List[BgpRouteMapRedistOspfToRibEntry]` | No | None | Route map entries. |
 
 ### BgpRouteMapRedistConnStaticToBgp / BgpRouteMapRedistConnStaticToOspf / BgpRouteMapRedistConnStaticToRib
 
 | Attribute | Type                                  | Required | Default | Description        |
 |-----------|---------------------------------------|----------|---------|--------------------|
-| route_map | List[variant-specific Entry model]    | No       | None    | Route map entries. |
+| `route_map` | `List[variant-specific Entry model]` | No       | None    | Route map entries. |
 
 ## Route Map Entry Models
 
@@ -220,11 +207,11 @@ All 7 entry variants share the same base structure but use different match and s
 
 | Attribute   | Type                     | Required | Default | Description                                  |
 |-------------|--------------------------|----------|---------|----------------------------------------------|
-| name        | int                      | Yes      | None    | Sequence number (1-65535).                    |
-| description | str                      | No       | None    | Entry description.                            |
-| action      | str                      | No       | None    | Entry action. Pattern: `^(permit\|deny)$`     |
-| match       | (variant-specific Match) | No       | None    | Match criteria (depends on source protocol).  |
-| set         | (variant-specific Set)   | No       | None    | Set actions (depends on target protocol).     |
+| `name` | `int` | Yes      | None    | Sequence number (1-65535).                    |
+| `description` | `str` | No       | None    | Entry description.                            |
+| `action` | `str` | No       | None    | Entry action. Pattern: `^(permit\|deny)$`     |
+| `match` | `(variant-specific Match)` | No       | None    | Match criteria (depends on source protocol).  |
+| `set` | `(variant-specific Set)` | No       | None    | Set actions (depends on target protocol).     |
 
 ## Match Models
 
@@ -234,17 +221,17 @@ Full BGP match criteria, used when BGP is the source protocol. Provides richer m
 
 | Attribute           | Type                            | Required | Default | Description                                  |
 |---------------------|---------------------------------|----------|---------|----------------------------------------------|
-| as_path_access_list | str                             | No       | None    | AS path access list name.                    |
-| regular_community   | str                             | No       | None    | Regular community to match.                  |
-| large_community     | str                             | No       | None    | Large community to match.                    |
-| extended_community  | str                             | No       | None    | Extended community to match.                 |
-| interface           | str                             | No       | None    | Interface to match.                          |
-| tag                 | int                             | No       | None    | Tag value to match.                          |
-| local_preference    | int                             | No       | None    | Local preference to match.                   |
-| metric              | int                             | No       | None    | Metric to match.                             |
-| origin              | str                             | No       | None    | Origin to match.                             |
-| peer                | str                             | No       | None    | Peer type to match. Pattern: `^(local\|none)$` |
-| ipv4                | BgpRouteMapRedistBgpMatchIpv4   | No       | None    | IPv4 match criteria.                         |
+| `as_path_access_list` | `str` | No       | None    | AS path access list name.                    |
+| `regular_community` | `str` | No       | None    | Regular community to match.                  |
+| `large_community` | `str` | No       | None    | Large community to match.                    |
+| `extended_community` | `str` | No       | None    | Extended community to match.                 |
+| `interface` | `str` | No       | None    | Interface to match.                          |
+| `tag` | `int` | No       | None    | Tag value to match.                          |
+| `local_preference` | `int` | No       | None    | Local preference to match.                   |
+| `metric` | `int` | No       | None    | Metric to match.                             |
+| `origin` | `str` | No       | None    | Origin to match.                             |
+| `peer` | `str` | No       | None    | Peer type to match. Pattern: `^(local\|none)$` |
+| `ipv4` | `BgpRouteMapRedistBgpMatchIpv4` | No       | None    | IPv4 match criteria.                         |
 
 ### BgpRouteMapRedistBgpMatchIpv4
 
@@ -252,9 +239,9 @@ IPv4 match criteria for BGP source redistribution. Includes `route_source` which
 
 | Attribute    | Type | Required | Default | Description                        |
 |--------------|------|----------|---------|------------------------------------|
-| address      | str  | No       | None    | IPv4 address prefix list to match. |
-| next_hop     | str  | No       | None    | IPv4 next-hop prefix list to match.|
-| route_source | str  | No       | None    | IPv4 route source to match.        |
+| `address` | `str` | No       | None    | IPv4 address prefix list to match. |
+| `next_hop` | `str` | No       | None    | IPv4 next-hop prefix list to match.|
+| `route_source` | `str` | No       | None    | IPv4 route source to match.        |
 
 ### BgpRouteMapRedistSimpleMatch
 
@@ -262,10 +249,10 @@ Simplified match criteria, used when OSPF or connected/static is the source prot
 
 | Attribute | Type                                 | Required | Default | Description           |
 |-----------|--------------------------------------|----------|---------|-----------------------|
-| interface | str                                  | No       | None    | Interface to match.   |
-| metric    | int                                  | No       | None    | Metric to match.      |
-| tag       | int                                  | No       | None    | Tag to match.         |
-| ipv4      | BgpRouteMapRedistSimpleMatchIpv4     | No       | None    | IPv4 match criteria.  |
+| `interface` | `str` | No       | None    | Interface to match.   |
+| `metric` | `int` | No       | None    | Metric to match.      |
+| `tag` | `int` | No       | None    | Tag to match.         |
+| `ipv4` | `BgpRouteMapRedistSimpleMatchIpv4` | No       | None    | IPv4 match criteria.  |
 
 ### BgpRouteMapRedistSimpleMatchIpv4
 
@@ -273,8 +260,8 @@ IPv4 match criteria for OSPF/connected-static source. Does NOT include `route_so
 
 | Attribute | Type | Required | Default | Description                        |
 |-----------|------|----------|---------|------------------------------------|
-| address   | str  | No       | None    | IPv4 address prefix list to match. |
-| next_hop  | str  | No       | None    | IPv4 next-hop prefix list to match.|
+| `address` | `str` | No       | None    | IPv4 address prefix list to match. |
+| `next_hop` | `str` | No       | None    | IPv4 next-hop prefix list to match.|
 
 ## Set Models
 
@@ -284,23 +271,23 @@ Full BGP set actions, used when the target protocol is BGP. Provides the richest
 
 | Attribute                   | Type                            | Required | Default | Description                         |
 |-----------------------------|----------------------------------|----------|---------|-------------------------------------|
-| atomic_aggregate            | bool                             | No       | None    | Set atomic aggregate.               |
-| local_preference            | int                              | No       | None    | Local preference to set.            |
-| tag                         | int                              | No       | None    | Tag to set.                         |
-| metric                      | BgpRouteMapRedistSetMetric       | No       | None    | Metric action.                      |
-| weight                      | int                              | No       | None    | Weight to set.                      |
-| origin                      | str                              | No       | None    | Origin to set. Pattern: `^(none\|egp\|igp\|incomplete)$` |
-| remove_regular_community    | str                              | No       | None    | Community to remove.                |
-| remove_large_community      | str                              | No       | None    | Large community to remove.          |
-| originator_id               | str                              | No       | None    | Originator ID to set.               |
-| aggregator                  | BgpRouteMapRedistSetAggregator   | No       | None    | Aggregator config.                  |
-| ipv4                        | BgpRouteMapRedistSetIpv4         | No       | None    | IPv4 set config.                    |
-| aspath_exclude              | str                              | No       | None    | AS path to exclude.                 |
-| aspath_prepend              | str                              | No       | None    | AS path to prepend.                 |
-| regular_community           | List[str]                        | No       | None    | Communities to set.                 |
-| overwrite_regular_community | bool                             | No       | None    | Overwrite communities.              |
-| large_community             | List[str]                        | No       | None    | Large communities to set.           |
-| overwrite_large_community   | bool                             | No       | None    | Overwrite large communities.        |
+| `atomic_aggregate` | `bool` | No       | None    | Set atomic aggregate.               |
+| `local_preference` | `int` | No       | None    | Local preference to set.            |
+| `tag` | `int` | No       | None    | Tag to set.                         |
+| `metric` | `BgpRouteMapRedistSetMetric` | No       | None    | Metric action.                      |
+| `weight` | `int` | No       | None    | Weight to set.                      |
+| `origin` | `str` | No       | None    | Origin to set. Pattern: `^(none\|egp\|igp\|incomplete)$` |
+| `remove_regular_community` | `str` | No       | None    | Community to remove.                |
+| `remove_large_community` | `str` | No       | None    | Large community to remove.          |
+| `originator_id` | `str` | No       | None    | Originator ID to set.               |
+| `aggregator` | `BgpRouteMapRedistSetAggregator` | No       | None    | Aggregator config.                  |
+| `ipv4` | `BgpRouteMapRedistSetIpv4` | No       | None    | IPv4 set config.                    |
+| `aspath_exclude` | `str` | No       | None    | AS path to exclude.                 |
+| `aspath_prepend` | `str` | No       | None    | AS path to prepend.                 |
+| `regular_community` | `List[str]` | No       | None    | Communities to set.                 |
+| `overwrite_regular_community` | `bool` | No       | None    | Overwrite communities.              |
+| `large_community` | `List[str]` | No       | None    | Large communities to set.           |
+| `overwrite_large_community` | `bool` | No       | None    | Overwrite large communities.        |
 
 ### BgpRouteMapRedistSetToOspf
 
@@ -308,9 +295,9 @@ OSPF set actions, used when the target protocol is OSPF. Limited to metric, metr
 
 | Attribute   | Type                         | Required | Default | Description        |
 |-------------|------------------------------|----------|---------|--------------------|
-| metric      | BgpRouteMapRedistSetMetric   | No       | None    | Metric action.     |
-| metric_type | str                          | No       | None    | OSPF metric type.  |
-| tag         | int                          | No       | None    | Tag to set.        |
+| `metric` | `BgpRouteMapRedistSetMetric` | No       | None    | Metric action.     |
+| `metric_type` | `str` | No       | None    | OSPF metric type.  |
+| `tag` | `int` | No       | None    | Tag to set.        |
 
 ### BgpRouteMapRedistSetToRib
 
@@ -318,7 +305,7 @@ RIB set actions, used when the target is the routing table. Only source address 
 
 | Attribute | Type                       | Required | Default | Description             |
 |-----------|----------------------------|----------|---------|-------------------------|
-| ipv4      | BgpRouteMapRedistSetIpv4   | No       | None    | IPv4 set (source_address).|
+| `ipv4` | `BgpRouteMapRedistSetIpv4` | No       | None    | IPv4 set (source_address).|
 
 ### BgpRouteMapRedistSetMetric
 
@@ -326,10 +313,11 @@ Metric set action.
 
 | Attribute | Type | Required | Default | Description                                                                     |
 |-----------|------|----------|---------|---------------------------------------------------------------------------------|
-| action    | str  | No       | None    | Metric action type. Pattern: `^(set\|add\|substract)$` (note: API uses `substract`) |
-| value     | int  | No       | None    | Metric value.                                                                   |
+| `action` | `str` | No       | None    | Metric action type. Pattern: `^(set\|add\|substract)$` (note: API uses `substract`) |
+| `value` | `int` | No       | None    | Metric value.                                                                   |
 
-> **Important:** The `substract` spelling is intentional -- it matches the actual API spelling.
+!!! warning
+    The `substract` spelling is intentional -- it matches the actual API spelling.
 
 ### BgpRouteMapRedistSetAggregator
 
@@ -337,10 +325,11 @@ Aggregator set configuration.
 
 | Attribute | Type | Required | Default | Description                          |
 |-----------|------|----------|---------|--------------------------------------|
-| as\_      | int  | No       | None    | Aggregator AS number. (alias: `as`)  |
-| router_id | str  | No       | None    | Aggregator router ID.                |
+| `as\_` | `int` | No       | None    | Aggregator AS number. (alias: `as`)  |
+| `router_id` | `str` | No       | None    | Aggregator router ID.                |
 
-> **Important:** The Python attribute is `as_` (with trailing underscore) because `as` is a Python reserved keyword. The serialized alias is `as`.
+!!! warning
+    The Python attribute is `as_` (with trailing underscore) because `as` is a Python reserved keyword. The serialized alias is `as`.
 
 ### BgpRouteMapRedistSetIpv4
 
@@ -348,8 +337,8 @@ IPv4 set configuration.
 
 | Attribute      | Type | Required | Default | Description             |
 |----------------|------|----------|---------|-------------------------|
-| source_address | str  | No       | None    | Source address to set.   |
-| next_hop       | str  | No       | None    | Next-hop to set.         |
+| `source_address` | `str` | No       | None    | Source address to set.   |
+| `next_hop` | `str` | No       | None    | Next-hop to set.         |
 
 ## Exceptions
 

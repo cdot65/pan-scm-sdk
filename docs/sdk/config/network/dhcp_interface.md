@@ -1,33 +1,22 @@
-# DHCP Interface Configuration Object
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Core Methods](#core-methods)
-3. [DHCP Interface Model Attributes](#dhcp-interface-model-attributes)
-4. [Server and Relay Configuration](#server-and-relay-configuration)
-5. [Exceptions](#exceptions)
-6. [Basic Configuration](#basic-configuration)
-7. [Usage Examples](#usage-examples)
-    - [Creating DHCP Interfaces](#creating-dhcp-interfaces)
-    - [Retrieving DHCP Interfaces](#retrieving-dhcp-interfaces)
-    - [Updating DHCP Interfaces](#updating-dhcp-interfaces)
-    - [Listing DHCP Interfaces](#listing-dhcp-interfaces)
-    - [Filtering Responses](#filtering-responses)
-    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
-    - [Deleting DHCP Interfaces](#deleting-dhcp-interfaces)
-8. [Managing Configuration Changes](#managing-configuration-changes)
-    - [Performing Commits](#performing-commits)
-    - [Monitoring Jobs](#monitoring-jobs)
-9. [Error Handling](#error-handling)
-10. [Best Practices](#best-practices)
-11. [Related Models](#related-models)
-
-## Overview
+# DHCP Interface
 
 The `DhcpInterface` class manages DHCP server and relay configurations on firewall interfaces in Palo Alto Networks' Strata Cloud Manager. It extends from `BaseObject` and offers methods to create, retrieve, update, list, fetch, and delete DHCP interface configurations. Each DHCP interface can operate as either a DHCP server or a DHCP relay -- the two modes are mutually exclusive.
 
-## Core Methods
+## Class Overview
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
+# Access the DHCP Interface service directly through the client
+dhcp_interfaces = client.dhcp_interface
+```
 
 | Method     | Description                                                       | Parameters                                                                                                                       | Return Type                          |
 |------------|-------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|--------------------------------------|
@@ -38,7 +27,7 @@ The `DhcpInterface` class manages DHCP server and relay configurations on firewa
 | `fetch()`  | Fetches a single DHCP interface by name within a container        | `name: str`, `folder: Optional[str]`, `snippet: Optional[str]`, `device: Optional[str]`                                          | `DhcpInterfaceResponseModel`         |
 | `delete()` | Deletes a DHCP interface configuration by its ID                  | `object_id: str`                                                                                                                 | `None`                               |
 
-## DHCP Interface Model Attributes
+### DHCP Interface Model Attributes
 
 | Attribute  | Type       | Required      | Default | Description                                            |
 |------------|------------|---------------|---------|--------------------------------------------------------|
@@ -54,9 +43,9 @@ The `DhcpInterface` class manages DHCP server and relay configurations on firewa
 \** `server` and `relay` are mutually exclusive -- only one may be provided
 \*** Exactly one container (folder/snippet/device) must be provided for create operations
 
-## Server and Relay Configuration
+### Server and Relay Configuration
 
-### DHCP Server (DhcpServer)
+#### DHCP Server (DhcpServer)
 
 The server configuration provides full DHCP server capabilities on an interface.
 
@@ -84,7 +73,7 @@ The server configuration provides full DHCP server capabilities on an interface.
 | `smtp_server` | str             | SMTP server address                |
 | `dns_suffix`  | str             | DNS suffix                         |
 
-### DHCP Relay (DhcpRelay)
+#### DHCP Relay (DhcpRelay)
 
 The relay configuration forwards DHCP requests to external DHCP servers.
 
@@ -99,7 +88,7 @@ The relay configuration forwards DHCP requests to external DHCP servers.
 | `enabled` | bool       | Enable DHCP relay (default: `True`)      |
 | `server`  | List[str]  | List of DHCP relay server addresses      |
 
-## Exceptions
+### Exceptions
 
 | Exception                    | HTTP Code | Description                                                                   |
 |------------------------------|-----------|-------------------------------------------------------------------------------|
@@ -111,11 +100,76 @@ The relay configuration forwards DHCP requests to external DHCP servers.
 | `AuthenticationError`        | 401       | Authentication failed                                                         |
 | `ServerError`                | 500       | Internal server error                                                         |
 
-## Basic Configuration
+## Methods
 
-The DHCP Interface service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+### List DHCP Interfaces
 
-### Unified Client Interface (Recommended)
+```python
+# List all DHCP interfaces in a folder
+dhcp_interfaces = client.dhcp_interface.list(
+   folder="Texas"
+)
+
+# Process results
+for iface in dhcp_interfaces:
+   print(f"Interface: {iface.name}")
+   if iface.server:
+      print(f"  Type: DHCP Server (mode: {iface.server.mode})")
+      if iface.server.ip_pool:
+         print(f"  IP Pools: {', '.join(iface.server.ip_pool)}")
+   elif iface.relay:
+      print(f"  Type: DHCP Relay")
+      if iface.relay.ip:
+         print(f"  Relay Servers: {', '.join(iface.relay.ip.server)}")
+
+# List with mode filter (filter by DHCP server mode)
+auto_mode = client.dhcp_interface.list(
+   folder="Texas",
+   mode=["auto"]
+)
+```
+
+#### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
+you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control
+which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
+
+```python
+# Only return DHCP interfaces defined exactly in 'Texas'
+exact_dhcp = client.dhcp_interface.list(
+   folder='Texas',
+   exact_match=True
+)
+
+for iface in exact_dhcp:
+   print(f"Exact match: {iface.name} in {iface.folder}")
+
+# Exclude all DHCP interfaces from the 'All' folder
+no_all_dhcp = client.dhcp_interface.list(
+   folder='Texas',
+   exclude_folders=['All']
+)
+
+for iface in no_all_dhcp:
+   assert iface.folder != 'All'
+   print(f"Filtered out 'All': {iface.name}")
+```
+
+#### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
+
+**Example:**
 
 ```python
 from scm.client import ScmClient
@@ -127,33 +181,33 @@ client = ScmClient(
    tsg_id="your_tsg_id"
 )
 
-# Access the DHCP Interface service directly through the client
-dhcp_interfaces = client.dhcp_interface
+# Configure max_limit using the property setter
+client.dhcp_interface.max_limit = 4000
+
+# List all DHCP interfaces - auto-paginates through results
+all_dhcp = client.dhcp_interface.list(folder='Texas')
 ```
 
-### Traditional Service Instantiation (Legacy)
+### Fetch a DHCP Interface
 
 ```python
-from scm.client import Scm
-from scm.config.network import DhcpInterface
-
-# Initialize client
-client = Scm(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
+# Fetch by name and folder
+dhcp_iface = client.dhcp_interface.fetch(
+   name="ethernet1/1",
+   folder="Texas"
 )
+print(f"Found DHCP interface: {dhcp_iface.name}")
 
-# Initialize DhcpInterface object explicitly
-dhcp_interfaces = DhcpInterface(client)
+# Get by ID
+dhcp_by_id = client.dhcp_interface.get(dhcp_iface.id)
+print(f"Retrieved DHCP interface: {dhcp_by_id.name}")
+if dhcp_by_id.server:
+   print(f"  Mode: {dhcp_by_id.server.mode}")
+elif dhcp_by_id.relay:
+   print("  Type: DHCP Relay")
 ```
 
-!!! note
-    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
-
-## Usage Examples
-
-### Creating DHCP Interfaces
+### Create a DHCP Interface
 
 ```python
 from scm.client import ScmClient
@@ -217,26 +271,7 @@ new_relay = client.dhcp_interface.create(relay_data)
 print(f"Created DHCP relay on interface with ID: {new_relay.id}")
 ```
 
-### Retrieving DHCP Interfaces
-
-```python
-# Fetch by name and folder
-dhcp_iface = client.dhcp_interface.fetch(
-   name="ethernet1/1",
-   folder="Texas"
-)
-print(f"Found DHCP interface: {dhcp_iface.name}")
-
-# Get by ID
-dhcp_by_id = client.dhcp_interface.get(dhcp_iface.id)
-print(f"Retrieved DHCP interface: {dhcp_by_id.name}")
-if dhcp_by_id.server:
-   print(f"  Mode: {dhcp_by_id.server.mode}")
-elif dhcp_by_id.relay:
-   print("  Type: DHCP Relay")
-```
-
-### Updating DHCP Interfaces
+### Update a DHCP Interface
 
 ```python
 # Fetch existing DHCP interface
@@ -258,93 +293,7 @@ if existing_dhcp.server:
 updated_dhcp = client.dhcp_interface.update(existing_dhcp)
 ```
 
-### Listing DHCP Interfaces
-
-```python
-# List all DHCP interfaces in a folder
-dhcp_interfaces = client.dhcp_interface.list(
-   folder="Texas"
-)
-
-# Process results
-for iface in dhcp_interfaces:
-   print(f"Interface: {iface.name}")
-   if iface.server:
-      print(f"  Type: DHCP Server (mode: {iface.server.mode})")
-      if iface.server.ip_pool:
-         print(f"  IP Pools: {', '.join(iface.server.ip_pool)}")
-   elif iface.relay:
-      print(f"  Type: DHCP Relay")
-      if iface.relay.ip:
-         print(f"  Relay Servers: {', '.join(iface.relay.ip.server)}")
-
-# List with mode filter (filter by DHCP server mode)
-auto_mode = client.dhcp_interface.list(
-   folder="Texas",
-   mode=["auto"]
-)
-```
-
-### Filtering Responses
-
-The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
-you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control
-which objects are included or excluded after the initial API response is fetched.
-
-**Parameters:**
-
-- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
-- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
-- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
-- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
-
-**Examples:**
-
-```python
-# Only return DHCP interfaces defined exactly in 'Texas'
-exact_dhcp = client.dhcp_interface.list(
-   folder='Texas',
-   exact_match=True
-)
-
-for iface in exact_dhcp:
-   print(f"Exact match: {iface.name} in {iface.folder}")
-
-# Exclude all DHCP interfaces from the 'All' folder
-no_all_dhcp = client.dhcp_interface.list(
-   folder='Texas',
-   exclude_folders=['All']
-)
-
-for iface in no_all_dhcp:
-   assert iface.folder != 'All'
-   print(f"Filtered out 'All': {iface.name}")
-```
-
-### Controlling Pagination with max_limit
-
-The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
-
-**Example:**
-
-```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-# Configure max_limit using the property setter
-client.dhcp_interface.max_limit = 4000
-
-# List all DHCP interfaces - auto-paginates through results
-all_dhcp = client.dhcp_interface.list(folder='Texas')
-```
-
-### Deleting DHCP Interfaces
+### Delete a DHCP Interface
 
 ```python
 # Delete by ID
@@ -352,9 +301,9 @@ dhcp_id = "123e4567-e89b-12d3-a456-426655440000"
 client.dhcp_interface.delete(dhcp_id)
 ```
 
-## Managing Configuration Changes
+## Use Cases
 
-### Performing Commits
+#### Performing Commits
 
 ```python
 # Prepare commit parameters
@@ -371,7 +320,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-### Monitoring Jobs
+#### Monitoring Jobs
 
 ```python
 # Get status of specific job directly from the client
@@ -446,43 +395,7 @@ except MissingQueryParameterError as e:
    print(f"Missing parameter: {e.message}")
 ```
 
-## Best Practices
-
-1. **Client Usage**
-   - Use the unified client interface (`client.dhcp_interface`) for streamlined code
-   - Create a single client instance and reuse it across your application
-   - Perform commit operations directly on the client object (`client.commit()`)
-
-2. **DHCP Configuration**
-   - Choose either server or relay mode per interface -- they are mutually exclusive
-   - Use DHCP server mode when the firewall should directly serve IP addresses
-   - Use DHCP relay mode when forwarding requests to centralized DHCP servers
-   - Always configure a `gateway` and `subnet_mask` in server options
-   - Use IP reservations for critical infrastructure devices (servers, printers)
-
-3. **Server Mode Best Practices**
-   - Define appropriate IP pool ranges that do not overlap with static assignments
-   - Set reasonable lease timeouts (avoid unlimited leases in dynamic environments)
-   - Configure primary and secondary DNS servers for redundancy
-   - Enable `probe_ip` to verify IP availability before assignment
-
-4. **Container Management**
-   - Always specify exactly one container (folder, snippet, or device)
-   - Use consistent container names across operations
-   - Validate container existence before operations
-
-5. **Error Handling**
-   - Implement comprehensive error handling for all operations
-   - Check job status after commits
-   - Handle specific exceptions before generic ones
-   - Log error details for troubleshooting
-
-6. **Performance**
-   - Use appropriate pagination for list operations
-   - Cache frequently accessed DHCP interface configurations
-   - Implement proper retry mechanisms
-
-## Related Models
+## Related Topics
 
 - [DhcpInterfaceBaseModel](../../models/network/dhcp_interface_models.md#Overview)
 - [DhcpInterfaceCreateModel](../../models/network/dhcp_interface_models.md#Overview)

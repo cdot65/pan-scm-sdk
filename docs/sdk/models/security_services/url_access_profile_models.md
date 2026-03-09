@@ -1,22 +1,13 @@
 # URL Access Profile Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Supporting Models](#supporting-models)
-4. [Exceptions](#exceptions)
-5. [Model Validators](#model-validators)
-6. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The URL Access Profile models provide a structured way to manage URL access profiles in Palo Alto Networks' Strata Cloud Manager.
 These models support defining URL filtering policies with category-based actions (alert, allow, block, continue, redirect),
 credential enforcement settings, and logging options. Profiles can be defined in folders, snippets, or devices. The models
 handle validation of inputs and outputs when interacting with the SCM API.
 
-### Models
+## Models
 
 The module provides the following Pydantic models:
 
@@ -85,7 +76,7 @@ Extends `URLAccessProfileBaseModel` by adding:
 The response model uses `extra="ignore"` configuration instead of `extra="forbid"`, allowing it to accept additional
 fields returned by the API without raising validation errors.
 
-## Supporting Models
+## Component Models
 
 ### CredentialEnforcement
 

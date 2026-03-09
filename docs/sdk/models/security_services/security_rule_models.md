@@ -1,23 +1,13 @@
 # Security Rule Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Enum Types](#enum-types)
-4. [Supporting Models](#supporting-models)
-5. [Exceptions](#exceptions)
-6. [Model Validators](#model-validators)
-7. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The Security Rule models provide a structured way to manage security rules in Palo Alto Networks' Strata Cloud Manager.
 These models support defining security policies with source/destination zones, addresses, applications, and actions.
 Rules can be defined in folders, snippets, or devices and placed in either pre or post rulebases. The models handle
 validation of inputs and outputs when interacting with the SCM API.
 
-### Models
+## Models
 
 The module provides the following Pydantic models:
 
@@ -136,7 +126,7 @@ Defines the move destinations:
 | `before` | Move before a specific rule      |
 | `after`  | Move after a specific rule       |
 
-## Supporting Models
+## Component Models
 
 ### SecurityRuleProfileSetting
 

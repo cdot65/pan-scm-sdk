@@ -1,15 +1,6 @@
 # DNS Proxy Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Sub-Models](#sub-models)
-4. [Exceptions](#exceptions)
-5. [Model Validators](#model-validators)
-6. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The DNS Proxy models provide a structured way to represent and validate DNS proxy configuration data for Palo Alto Networks' Strata Cloud Manager. These models manage DNS proxy settings including default servers, domain-specific rules, static entries, caching behavior, and TCP/UDP query configurations.
 
@@ -63,18 +54,18 @@ This is the base model containing fields common to all DNS proxy operations.
 
 | Attribute        | Type                           | Required | Default | Description                                                       |
 |------------------|--------------------------------|----------|---------|-------------------------------------------------------------------|
-| name             | str                            | Yes      | None    | DNS proxy name. Max 31 chars.                                     |
-| enabled          | bool                           | No       | None    | Enable DNS proxy.                                                 |
-| default          | DnsProxyDefaultServer          | No       | None    | Default DNS server configuration.                                 |
-| interface        | List[str]                      | No       | None    | Interfaces on which to enable DNS proxy service.                  |
-| domain_servers   | List[DnsProxyDomainServer]     | No       | None    | DNS proxy rules (domain servers). Alias: `domain-servers`.        |
-| static_entries   | List[DnsProxyStaticEntry]      | No       | None    | Static domain name mappings. Alias: `static-entries`.             |
-| tcp_queries      | DnsProxyTcpQueries             | No       | None    | TCP queries configuration. Alias: `tcp-queries`.                  |
-| udp_queries      | DnsProxyUdpQueries             | No       | None    | UDP queries configuration. Alias: `udp-queries`.                  |
-| cache            | DnsProxyCache                  | No       | None    | DNS cache configuration.                                          |
-| folder           | str                            | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.    |
-| snippet          | str                            | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.   |
-| device           | str                            | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.    |
+| `name` | `str` | Yes      | None    | DNS proxy name. Max 31 chars.                                     |
+| `enabled` | `bool` | No       | None    | Enable DNS proxy.                                                 |
+| `default` | `DnsProxyDefaultServer` | No       | None    | Default DNS server configuration.                                 |
+| `interface` | `List[str]` | No       | None    | Interfaces on which to enable DNS proxy service.                  |
+| `domain_servers` | `List[DnsProxyDomainServer]` | No       | None    | DNS proxy rules (domain servers). Alias: `domain-servers`.        |
+| `static_entries` | `List[DnsProxyStaticEntry]` | No       | None    | Static domain name mappings. Alias: `static-entries`.             |
+| `tcp_queries` | `DnsProxyTcpQueries` | No       | None    | TCP queries configuration. Alias: `tcp-queries`.                  |
+| `udp_queries` | `DnsProxyUdpQueries` | No       | None    | UDP queries configuration. Alias: `udp-queries`.                  |
+| `cache` | `DnsProxyCache` | No       | None    | DNS cache configuration.                                          |
+| `folder` | `str` | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.    |
+| `snippet` | `str` | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.   |
+| `device` | `str` | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.    |
 
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
@@ -88,7 +79,7 @@ Extends `DnsProxyBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                        |
 |-----------|------|----------|---------|----------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the DNS proxy             |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the DNS proxy             |
 
 ### DnsProxyResponseModel
 
@@ -96,9 +87,10 @@ Extends `DnsProxyBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                        |
 |-----------|------|----------|---------|----------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the DNS proxy             |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the DNS proxy             |
 
-> **Note:** The `DnsProxyResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
+!!! note
+    The `DnsProxyResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
 
 ## Sub-Models
 
@@ -108,9 +100,9 @@ Default DNS server configuration.
 
 | Attribute   | Type              | Required | Default | Description                                           |
 |-------------|-------------------|----------|---------|-------------------------------------------------------|
-| inheritance | Dict[str, Any]    | No       | None    | Inheritance settings with 'source' (dynamic interface)|
-| primary     | str               | Yes      | None    | Primary DNS name server IP address.                   |
-| secondary   | str               | No       | None    | Secondary DNS name server IP address.                 |
+| `inheritance` | `Dict[str, Any]` | No       | None    | Inheritance settings with 'source' (dynamic interface)|
+| `primary` | `str` | Yes      | None    | Primary DNS name server IP address.                   |
+| `secondary` | `str` | No       | None    | Secondary DNS name server IP address.                 |
 
 ### DnsProxyDomainServer
 
@@ -118,11 +110,11 @@ DNS proxy rule (domain server) entry for domain-specific DNS resolution.
 
 | Attribute   | Type        | Required | Default | Description                                           |
 |-------------|-------------|----------|---------|-------------------------------------------------------|
-| name        | str         | Yes      | None    | Proxy rule name.                                      |
-| cacheable   | bool        | No       | None    | Enable caching for this DNS proxy rule.               |
-| domain_name | List[str]   | No       | None    | Domain names that will be matched. Alias: `domain-name`.|
-| primary     | str         | Yes      | None    | Primary DNS server IP address.                        |
-| secondary   | str         | No       | None    | Secondary DNS server IP address.                      |
+| `name` | `str` | Yes      | None    | Proxy rule name.                                      |
+| `cacheable` | `bool` | No       | None    | Enable caching for this DNS proxy rule.               |
+| `domain_name` | `List[str]` | No       | None    | Domain names that will be matched. Alias: `domain-name`.|
+| `primary` | `str` | Yes      | None    | Primary DNS server IP address.                        |
+| `secondary` | `str` | No       | None    | Secondary DNS server IP address.                      |
 
 ### DnsProxyStaticEntry
 
@@ -130,9 +122,9 @@ Static domain name mapping entry for direct name-to-address resolution.
 
 | Attribute | Type        | Required | Default | Description                                           |
 |-----------|-------------|----------|---------|-------------------------------------------------------|
-| name      | str         | Yes      | None    | Static entry name. Max 31 chars.                      |
-| domain    | str         | Yes      | None    | Fully qualified domain name. Max 255 chars.           |
-| address   | List[str]   | Yes      | None    | Resolved IP addresses.                                |
+| `name` | `str` | Yes      | None    | Static entry name. Max 31 chars.                      |
+| `domain` | `str` | Yes      | None    | Fully qualified domain name. Max 255 chars.           |
+| `address` | `List[str]` | Yes      | None    | Resolved IP addresses.                                |
 
 ### DnsProxyTcpQueries
 
@@ -140,8 +132,8 @@ TCP queries configuration.
 
 | Attribute            | Type | Required | Default | Description                                                |
 |----------------------|------|----------|---------|------------------------------------------------------------|
-| enabled              | bool | Yes      | None    | Turn on forwarding of TCP DNS queries.                     |
-| max_pending_requests | int  | No       | None    | Upper limit on concurrent TCP DNS requests (64-256). Alias: `max-pending-requests`.|
+| `enabled` | `bool` | Yes      | None    | Turn on forwarding of TCP DNS queries.                     |
+| `max_pending_requests` | `int` | No       | None    | Upper limit on concurrent TCP DNS requests (64-256). Alias: `max-pending-requests`.|
 
 ### DnsProxyUdpQueries
 
@@ -149,7 +141,7 @@ UDP queries configuration.
 
 | Attribute | Type              | Required | Default | Description                              |
 |-----------|-------------------|----------|---------|------------------------------------------|
-| retries   | DnsProxyUdpRetries| No       | None    | Retry configuration for UDP queries.     |
+| `retries` | `DnsProxyUdpRetries` | No       | None    | Retry configuration for UDP queries.     |
 
 ### DnsProxyUdpRetries
 
@@ -157,8 +149,8 @@ UDP query retry configuration.
 
 | Attribute | Type | Required | Default | Description                                                |
 |-----------|------|----------|---------|------------------------------------------------------------|
-| interval  | int  | No       | None    | Time in seconds for another request to be sent (1-30).     |
-| attempts  | int  | No       | None    | Maximum number of retries before trying next server (1-30).|
+| `interval` | `int` | No       | None    | Time in seconds for another request to be sent (1-30).     |
+| `attempts` | `int` | No       | None    | Maximum number of retries before trying next server (1-30).|
 
 ### DnsProxyCacheMaxTtl
 
@@ -166,8 +158,8 @@ Cache max TTL configuration.
 
 | Attribute    | Type | Required | Default | Description                                                        |
 |--------------|------|----------|---------|--------------------------------------------------------------------|
-| enabled      | bool | Yes      | None    | Enable max TTL for this DNS object.                                |
-| time_to_live | int  | No       | None    | Time in seconds after which entry is cleared (60-86400). Alias: `time-to-live`.|
+| `enabled` | `bool` | Yes      | None    | Enable max TTL for this DNS object.                                |
+| `time_to_live` | `int` | No       | None    | Time in seconds after which entry is cleared (60-86400). Alias: `time-to-live`.|
 
 ### DnsProxyCache
 
@@ -175,9 +167,9 @@ DNS cache configuration.
 
 | Attribute  | Type                | Required | Default | Description                                           |
 |------------|---------------------|----------|---------|-------------------------------------------------------|
-| enabled    | bool                | Yes      | None    | Turn on caching for this DNS object.                  |
-| cache_edns | bool                | No       | None    | Cache EDNS UDP response. Alias: `cache-edns`.         |
-| max_ttl    | DnsProxyCacheMaxTtl | No       | None    | Maximum TTL configuration. Alias: `max-ttl`.          |
+| `enabled` | `bool` | Yes      | None    | Turn on caching for this DNS object.                  |
+| `cache_edns` | `bool` | No       | None    | Cache EDNS UDP response. Alias: `cache-edns`.         |
+| `max_ttl` | `DnsProxyCacheMaxTtl` | No       | None    | Maximum TTL configuration. Alias: `max-ttl`.          |
 
 ## Exceptions
 

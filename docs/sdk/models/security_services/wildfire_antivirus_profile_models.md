@@ -1,23 +1,13 @@
 # WildFire Antivirus Profile Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Enum Types](#enum-types)
-4. [Supporting Models](#supporting-models)
-5. [Exceptions](#exceptions)
-6. [Model Validators](#model-validators)
-7. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The WildFire Antivirus Profile models provide a structured way to manage WildFire antivirus profiles in Palo Alto
 Networks' Strata Cloud Manager. These profiles define rules for malware analysis using either public or private cloud
 infrastructure, with support for packet capture, MLAV exceptions, and threat exceptions. The models handle validation of
 inputs and outputs when interacting with the SCM API.
 
-### Models
+## Models
 
 The module provides the following Pydantic models:
 
@@ -93,7 +83,7 @@ Defines the traffic direction options:
 | `upload`   | Analyze uploaded files               |
 | `both`     | Analyze both uploaded and downloaded |
 
-## Supporting Models
+## Component Models
 
 ### WildfireAvRuleBase
 

@@ -12,7 +12,7 @@ with Palo Alto Networks Strata Cloud Manager.
 Install the package via pip:
 
 ```bash
-$ pip install pan-scm-sdk
+pip install pan-scm-sdk
 ```
 
 ## Authentication
@@ -68,7 +68,7 @@ new_address = client.address.create(address_data)
 print(f"Created address with ID: {new_address.id}")
 
 # List addresses
-addresses = client.address.list(folder='Prisma Access')
+addresses = client.address.list(folder="Texas")
 for addr in addresses:
     print(f"Address Name: {addr.name}, IP: {addr.ip_netmask or addr.fqdn}")
 

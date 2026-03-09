@@ -1,21 +1,12 @@
 # URL Categories Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Enum Types](#enum-types)
-4. [Exceptions](#exceptions)
-5. [Model Validators](#model-validators)
-6. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The URL Categories models provide a structured way to manage URL categories in Palo Alto Networks' Strata Cloud Manager.
 These models support both URL List and Category Match types, which can be defined in folders, snippets, or devices. The
 models handle validation of inputs and outputs when interacting with the SCM API.
 
-### Models
+## Models
 
 The module provides the following Pydantic models:
 
@@ -189,20 +180,3 @@ existing.list.extend(["newsite.com", "anothersite.com"])
 updated = client.url_categories.update(existing)
 print(f"Updated category: {updated.name}")
 ```
-
-## Best Practices
-
-### URL List Configuration
-- For URL List type, include fully qualified domain names (without http:// or https:// prefixes)
-- Use wildcards (*) to match subdomains (e.g., *.example.com)
-- Keep lists organized and maintainable by limiting the number of entries
-
-### Category Match Configuration
-- Use predefined PAN-DB categories for Category Match type
-- Combine related categories to simplify policy management
-- Verify that category names exactly match PAN-DB category names
-
-### Container Management
-- Always specify exactly one container type (folder, snippet, or device)
-- Use consistent naming conventions for URL categories
-- Organize categories logically by function or security policy

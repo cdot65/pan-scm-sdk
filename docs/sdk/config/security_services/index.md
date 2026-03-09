@@ -1,207 +1,87 @@
-# Security Services Configuration Objects
+# Security Services Configuration
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Security Rules and Policy Management](#security-rules-and-policy-management)
-3. [Security Profiles](#security-profiles)
-4. [Common Features](#common-features)
-5. [Usage Pattern](#usage-pattern)
-6. [Related Documentation](#related-documentation)
+Security services configuration objects for managing security policies, profiles, and rules in Strata Cloud Manager.
 
 ## Overview
 
-This section covers the configuration security services provided by the Palo Alto Networks Strata Cloud Manager SDK. Each configuration object corresponds to a resource in the Strata Cloud Manager and provides methods for managing security policies and profiles.
+This section covers security services provided by the Palo Alto Networks Strata Cloud Manager SDK. Each configuration object corresponds to a resource in Strata Cloud Manager and provides methods for managing security policies and profiles.
 
 ## Security Rules and Policy Management
 
 ### [Security Rule](security_rule.md)
 
-Manage Security Rules, which define the core security policies for your network traffic. These rules determine:
-
-- Source and destination zones/addresses
-- Applications and services allowed/denied
-- Security profiles to be applied
-- Logging and monitoring settings
-
-## Security Profiles
-
-### [Anti Spyware Profile](anti_spyware_profile.md)
-
-Configure Anti-Spyware profiles to protect against:
-
-- Spyware downloads and installations
-- Command-and-control (C2) traffic
-- Data exfiltration attempts
-- Known malicious sites and patterns
-
-### [Decryption Profile](decryption_profile.md)
-
-Manage SSL/TLS Decryption profiles to:
-
-- Control encrypted traffic inspection
-- Define certificate validation settings
-- Configure SSL/TLS protocol settings
-- Manage trusted certificates
-
-### [DNS Security Profile](dns_security_profile.md)
-
-Configure DNS Security profiles to protect against:
-
-- DNS tunneling
-- Domain generation algorithms (DGA)
-- Fast-flux DNS attacks
-- Known malicious domains
-
-### [URL Categories](url_categories.md)
-
-Manage URL Categories to:
-
-- Create custom URL categories
-- Define custom URL lists
-- Override default category settings
-- Apply granular policy control
-
-### [Vulnerability Protection Profile](vulnerability_protection_profile.md)
-
-Manage Vulnerability Protection profiles to:
-
-- Protect against known CVEs
-- Block exploit attempts
-- Prevent buffer overflows
-- Protect against code execution attempts
-
-### [Wildfire Antivirus Profile](wildfire_antivirus.md)
-
-Configure WildFire and Antivirus profiles for:
-
-- Real-time malware analysis
-- Zero-day threat protection
-- Known malware blocking
-- File type controls
-
-### [File Blocking Profile](file_blocking_profile.md)
-
-Manage File Blocking profiles to:
-
-- Control file transfers based on file type
-- Block dangerous file downloads and uploads
-- Alert on suspicious file transfers
-- Configure direction-based file policies
-
-### [URL Access Profile](url_access_profile.md)
-
-Configure URL Access profiles to:
-
-- Control access to websites by URL category
-- Define alert, allow, block, continue, and redirect actions
-- Configure credential enforcement to prevent credential theft
-- Enable inline categorization and safe search enforcement
+Manage security rules that define core security policies for network traffic, including source/destination zones, applications, services, and security profiles.
 
 ### [App Override Rule](app_override_rule.md)
 
-Manage App Override Rules to:
-
-- Force application identification for specific traffic
-- Override App-ID for custom applications
-- Define rules based on port, protocol, and zone
-- Position rules within pre or post rulebases
-
-### [Decryption Rule](decryption_rule.md)
-
-Manage Decryption Rules to:
-
-- Control SSL/TLS traffic decryption policies
-- Define decrypt and no-decrypt rules
-- Configure SSL forward proxy and inbound inspection
-- Manage rule positioning within rulebases
+Manage app override rules to force application identification for specific traffic based on zone, address, port, and protocol.
 
 ### [Authentication Rule](authentication_rule.md)
 
-Manage Authentication Rules to:
+Manage authentication rules to define identity-based policies for network traffic.
 
-- Define authentication policies for network traffic
-- Control authentication requirements by zone and address
-- Configure authentication enforcement settings
-- Manage rule positioning within rulebases
+### [Decryption Rule](decryption_rule.md)
+
+Manage decryption rules to control SSL/TLS traffic inspection policies.
+
+## Security Profiles
+
+### [Anti-Spyware Profile](anti_spyware_profile.md)
+
+Configure anti-spyware profiles to protect against spyware, command-and-control traffic, and data exfiltration.
+
+### [Decryption Profile](decryption_profile.md)
+
+Manage SSL/TLS decryption profiles to control encrypted traffic inspection and certificate validation.
+
+### [DNS Security Profile](dns_security_profile.md)
+
+Configure DNS security profiles to protect against DNS tunneling, DGA, and malicious domains.
+
+### [File Blocking Profile](file_blocking_profile.md)
+
+Manage file blocking profiles to control file transfers based on file type and direction.
+
+### [URL Access Profile](url_access_profile.md)
+
+Configure URL access profiles to control website access by category with credential enforcement.
+
+### [URL Categories](url_categories.md)
+
+Manage custom URL categories for granular policy control.
+
+### [Vulnerability Protection Profile](vulnerability_protection_profile.md)
+
+Manage vulnerability protection profiles to protect against known CVEs and exploit attempts.
+
+### [Wildfire Antivirus Profile](wildfire_antivirus.md)
+
+Configure WildFire and antivirus profiles for real-time malware analysis and zero-day protection.
 
 ## Common Features
 
-All configuration objects provide standard CRUD operations:
+All security services configuration objects provide:
 
-- **Create**: Add new security profiles or rules
-- **Read**: Retrieve existing configurations
-- **Update**: Modify existing profiles or rules
-- **Delete**: Remove unwanted configurations
-- **List**: Enumerate and filter configurations
-
-Additional features include:
-
+- Standard CRUD operations (create, read, update, delete)
 - Pagination support for large collections
 - Filtering capabilities
-- Container-aware operations (folder/device/snippet)
+- Container-aware operations (`folder`, `snippet`, or `device`)
 - Validation of configuration parameters
 
 ## Usage Pattern
 
-All configuration objects follow a consistent pattern:
-
 ```python
 from scm.client import ScmClient
 
-# Initialize the client using unified interface
 client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# Define your intended object as a Python dictionary
-sec_rule_dictionary = {
-   "name": "test-rule",
-   "folder": "Texas",
-   "source": ["any"],
-   "destination": ["any"],
-   "application": ["web-browsing"],
-   "service": ["application-default"],
-   "action": "allow"
-}
-
-# Perform operations using the unified client
-result = client.security_rule.create(sec_rule_dictionary)
-print(f"Created security rule with ID: {result.id}")
-```
-
-You can also use the traditional approach:
-
-```python
-from scm.client import Scm
-from scm.config.security import SecurityRule  # Or other config object
-
-# Initialize the client
-api_client = Scm(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-# Create configuration object instance
-security_rule = SecurityRule(api_client)
-
-# Define your intended object as a Python dictionary
-sec_rule_dictionary = {
-   "name": "test-rule",
-   "folder": "Texas",
-   "source": ["any"],
-   "destination": ["any"],
-   "application": ["web-browsing"],
-   "service": ["application-default"],
-   "action": "allow"
-}
-
-# Perform operations
-result = security_rule.create(sec_rule_dictionary)
-print(f"Created security rule with ID: {result.id}")
+# Access any security service through the client
+rules = client.security_rule.list(folder="Texas", rulebase="pre")
+profiles = client.anti_spyware_profile.list(folder="Texas")
 ```
 
 ## Related Documentation
@@ -209,5 +89,3 @@ print(f"Created security rule with ID: {result.id}")
 - [Security Models](../../models/security_services/index.md)
 - [API Client](../../client.md)
 - [Operations](../../models/operations/jobs.md)
-
-Select a configuration object above to view detailed documentation, including methods, parameters, and examples.

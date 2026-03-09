@@ -1,137 +1,144 @@
-# HIP Object Configuration Object
+# HIP Object
 
-## Table of Contents
+The `HIPObject` service manages Host Information Profile (HIP) objects in Strata Cloud Manager, defining security posture requirements for endpoints such as host info, disk encryption, and patch management criteria.
 
-1. [Overview](#overview)
-2. [Core Methods](#core-methods)
-3. [HIP Object Model Attributes](#hip-object-model-attributes)
-4. [Exceptions](#exceptions)
-5. [Basic Configuration](#basic-configuration)
-6. [Usage Examples](#usage-examples)
-    - [Creating HIP Objects](#creating-hip-objects)
-    - [Retrieving HIP Objects](#retrieving-hip-objects)
-    - [Updating HIP Objects](#updating-hip-objects)
-    - [Listing HIP Objects](#listing-hip-objects)
-    - [Filtering Responses](#filtering-responses)
-    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
-    - [Deleting HIP Objects](#deleting-hip-objects)
-7. [Managing Configuration Changes](#managing-configuration-changes)
-    - [Performing Commits](#performing-commits)
-    - [Monitoring Jobs](#monitoring-jobs)
-8. [Error Handling](#error-handling)
-9. [Best Practices](#best-practices)
-10. [Full Script Examples](#full-script-examples)
-11. [Related Models](#related-models)
+## Class Overview
 
-## Overview
-
-The `HIPObject` class provides functionality to manage Host Information Profile (HIP) objects in Palo Alto Networks' Strata
-Cloud Manager. This class inherits from `BaseObject` and provides methods for creating, retrieving, updating, and deleting
-HIP objects that define security posture requirements for endpoints.
-
-## Core Methods
-
-| Method     | Description                      | Parameters                                                                    | Return Type                    |
-|------------|----------------------------------|-------------------------------------------------------------------------------|--------------------------------|
-| `create()` | Creates a new HIP object         | `data: Dict[str, Any]`                                                        | `HIPObjectResponseModel`       |
-| `get()`    | Retrieves a HIP object by ID     | `object_id: str`                                                              | `HIPObjectResponseModel`       |
-| `update()` | Updates an existing HIP object   | `hip_object: HIPObjectUpdateModel`                                            | `HIPObjectResponseModel`       |
-| `delete()` | Deletes a HIP object             | `object_id: str`                                                              | `None`                         |
-| `list()`   | Lists HIP objects with filtering | `folder: str`, `snippet: str`, `device: str`, `exact_match: bool`, `**filters` | `List[HIPObjectResponseModel]` |
-| `fetch()`  | Gets HIP object by name          | `name: str`, `folder: str`, `snippet: str`, `device: str`                     | `HIPObjectResponseModel`       |
-
-## HIP Object Model Attributes
-
-| Attribute          | Type                 | Required | Default | Description                                 |
-|--------------------|----------------------|----------|---------|---------------------------------------------|
-| `name`             | str                  | Yes      | None    | Name of HIP object (max 31 chars)           |
-| `id`               | UUID                 | Yes*     | None    | Unique identifier (*response only)          |
-| `description`      | str                  | No       | None    | Object description (max 255 chars)          |
-| `host_info`        | HostInfoModel        | No       | None    | Host information criteria                   |
-| `network_info`     | NetworkInfoModel     | No       | None    | Network information criteria                |
-| `patch_management` | PatchManagementModel | No       | None    | Patch management criteria                   |
-| `disk_encryption`  | DiskEncryptionModel  | No       | None    | Disk encryption criteria                    |
-| `mobile_device`    | MobileDeviceModel    | No       | None    | Mobile device criteria                      |
-| `certificate`      | CertificateModel     | No       | None    | Certificate criteria                        |
-| `custom_checks`    | CustomChecksModel    | No       | None    | Custom checks (registry, process, plist)    |
-| `folder`           | str                  | Yes**    | None    | Folder location (**one container required)  |
-| `snippet`          | str                  | Yes**    | None    | Snippet location (**one container required) |
-| `device`           | str                  | Yes**    | None    | Device location (**one container required)  |
-
-## Exceptions
-
-| Exception                    | HTTP Code | Description                        |
-|------------------------------|-----------|------------------------------------|
-| `InvalidObjectError`         | 400       | Invalid HIP object data or format  |
-| `MissingQueryParameterError` | 400       | Missing required parameters        |
-| `NameNotUniqueError`         | 409       | HIP object name already exists     |
-| `ObjectNotPresentError`      | 404       | HIP object not found               |
-| `ReferenceNotZeroError`      | 409       | HIP object still referenced        |
-| `AuthenticationError`        | 401       | Authentication failed              |
-| `ServerError`                | 500       | Internal server error              |
-
-## Basic Configuration
+The `HIPObject` class provides CRUD operations for HIP objects. It is accessed through the `client.hip_object` attribute on an initialized `ScmClient` instance.
 
 ```python
 from scm.client import ScmClient
 
-# Initialize client using the unified client approach
 client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
 )
 
-# Access the hip_object module directly through the client
-# client.hip_object is automatically initialized for you
+# Access the HIPObject service
+hip_objects = client.hip_object
 ```
 
-You can also use the traditional approach if preferred:
+### Key Attributes
+
+| Attribute          | Type                   | Required | Description                                |
+|--------------------|------------------------|----------|--------------------------------------------|
+| `name`             | `str`                  | Yes      | Name of HIP object (max 31 chars)          |
+| `id`               | `UUID`                 | Yes*     | Unique identifier (*response only)         |
+| `description`      | `str`                  | No       | Object description (max 255 chars)         |
+| `host_info`        | `HostInfoModel`        | No       | Host information criteria                  |
+| `network_info`     | `NetworkInfoModel`     | No       | Network information criteria               |
+| `patch_management` | `PatchManagementModel` | No       | Patch management criteria                  |
+| `disk_encryption`  | `DiskEncryptionModel`  | No       | Disk encryption criteria                   |
+| `mobile_device`    | `MobileDeviceModel`    | No       | Mobile device criteria                     |
+| `certificate`      | `CertificateModel`     | No       | Certificate criteria                       |
+| `custom_checks`    | `CustomChecksModel`    | No       | Custom checks (registry, process, plist)   |
+| `folder`           | `str`                  | Yes**    | Folder location (**one container required) |
+| `snippet`          | `str`                  | Yes**    | Snippet location (**one container required)|
+| `device`           | `str`                  | Yes**    | Device location (**one container required) |
+
+\* Exactly one of `folder`, `snippet`, or `device` is required.
+
+## Methods
+
+### List HIP Objects
+
+Retrieves a list of HIP objects with optional filtering.
 
 ```python
-from scm.client import Scm
-from scm.config.objects import HIPObject
+hips = client.hip_object.list(
+    folder="Texas",
+    criteria_types=["host_info", "disk_encryption"]
+)
 
-# Initialize client
-client = Scm(
+for hip in hips:
+    print(f"Name: {hip.name}")
+```
+
+### Fetch a HIP Object
+
+Retrieves a single HIP object by name and container.
+
+```python
+hip = client.hip_object.fetch(
+    name="windows-workstation",
+    folder="Texas"
+)
+print(f"Found HIP object: {hip.name}")
+```
+
+### Create a HIP Object
+
+Creates a new HIP object.
+
+```python
+new_hip = client.hip_object.create({
+    "name": "windows-workstation",
+    "folder": "Texas",
+    "description": "Windows workstation requirements",
+    "host_info": {
+        "criteria": {
+            "os": {"contains": {"Microsoft": "All"}},
+            "managed": True
+        }
+    }
+})
+```
+
+### Update a HIP Object
+
+Updates an existing HIP object.
+
+```python
+existing = client.hip_object.fetch(
+    name="windows-workstation",
+    folder="Texas"
+)
+existing.description = "Updated Windows workstation requirements"
+
+updated = client.hip_object.update(existing)
+```
+
+### Delete a HIP Object
+
+Deletes a HIP object by ID.
+
+```python
+client.hip_object.delete("123e4567-e89b-12d3-a456-426655440000")
+```
+
+## Use Cases
+
+### Defining Endpoint Security Requirements
+
+Create HIP objects for different security posture checks.
+
+```python
+from scm.client import ScmClient
+
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
 )
 
-# Initialize HIPObject object
-hip_objects = HIPObject(client)
-```
-
-## Usage Examples
-
-### Creating HIP Objects
-
-```python
 # Host info based HIP object
-host_info_config = {
+client.hip_object.create({
     "name": "windows-workstation",
-    "folder": "Shared",
+    "folder": "Texas",
     "description": "Windows workstation requirements",
     "host_info": {
         "criteria": {
-            "os": {
-                "contains": {
-                    "Microsoft": "All"
-                }
-            },
+            "os": {"contains": {"Microsoft": "All"}},
             "managed": True
         }
     }
-}
-
-# Create host info HIP object
-host_info_hip = client.hip_object.create(host_info_config)
+})
 
 # Disk encryption based HIP object
-disk_encryption_config = {
+client.hip_object.create({
     "name": "encrypted-endpoints",
-    "folder": "Shared",
+    "folder": "Texas",
     "description": "Disk encryption requirements",
     "disk_encryption": {
         "criteria": {
@@ -144,201 +151,25 @@ disk_encryption_config = {
             ]
         }
     }
-}
-
-# Create disk encryption HIP object
-disk_encryption_hip = client.hip_object.create(disk_encryption_config)
+})
 ```
 
-### Retrieving HIP Objects
+### Filtering HIP Objects
+
+Use advanced filtering to find specific HIP objects.
 
 ```python
-# Fetch by name and folder
-hip_object = client.hip_object.fetch(name="windows-workstation", folder="Shared")
-print(f"Found HIP object: {hip_object.name}")
-
-# Get by ID
-hip_by_id = client.hip_object.get(hip_object.id)
-print(f"Retrieved HIP object: {hip_by_id.name}")
-```
-
-### Updating HIP Objects
-
-```python
-# Fetch existing HIP object
-existing_hip = client.hip_object.fetch(name="encrypted-endpoints", folder="Shared")
-
-# Add additional encryption location
-if existing_hip.disk_encryption and existing_hip.disk_encryption.criteria:
-    existing_hip.disk_encryption.criteria.encrypted_locations.append({
-        "name": "D:",
-        "encryption_state": {"is": "encrypted"}
-    })
-
-# Update description
-existing_hip.description = "Updated disk encryption requirements"
-
-# Perform update
-updated_hip = client.hip_object.update(existing_hip)
-```
-
-### Listing HIP Objects
-
-```python
-# List with direct filter parameters
-filtered_hips = client.hip_object.list(
-    folder='Shared',
-    criteria_types=['host_info', 'disk_encryption']
-)
-
-# Process results
-for hip in filtered_hips:
-    print(f"Name: {hip.name}")
-    if hip.host_info:
-        print("Type: Host Info")
-    elif hip.disk_encryption:
-        print("Type: Disk Encryption")
-
-# Define filter parameters as dictionary
-list_params = {
-    "folder": "Shared",
-    "criteria_types": ["mobile_device"]
-}
-
-# List with filters as kwargs
-filtered_hips = client.hip_object.list(**list_params)
-```
-
-### Filtering Responses
-
-The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
-(like `criteria_types`), you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and
-`exclude_devices` parameters to control which objects are included or excluded after the initial API response is fetched.
-
-**Parameters:**
-
-- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
-- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
-- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
-- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
-
-**Examples:**
-
-```python
-# Only return HIP objects defined exactly in 'Shared'
-exact_hips = client.hip_object.list(
-    folder='Shared',
-    exact_match=True
-)
-
-for hip in exact_hips:
-    print(f"Exact match: {hip.name} in {hip.folder}")
-
-# Exclude all HIP objects from the 'All' folder
-no_all_hips = client.hip_object.list(
-    folder='Shared',
-    exclude_folders=['All']
-)
-
-for hip in no_all_hips:
-    assert hip.folder != 'All'
-    print(f"Filtered out 'All': {hip.name}")
-
-# Exclude HIP objects that come from 'default' snippet
-no_default_snippet = client.hip_object.list(
-    folder='Shared',
-    exclude_snippets=['default']
-)
-
-for hip in no_default_snippet:
-    assert hip.snippet != 'default'
-    print(f"Filtered out 'default' snippet: {hip.name}")
-
-# Exclude HIP objects associated with 'DeviceA'
-no_deviceA = client.hip_object.list(
-    folder='Shared',
-    exclude_devices=['DeviceA']
-)
-
-for hip in no_deviceA:
-    assert hip.device != 'DeviceA'
-    print(f"Filtered out 'DeviceA': {hip.name}")
-
-# Combine exact_match with multiple exclusions
-combined_filters = client.hip_object.list(
-    folder='Shared',
+# Exact match with exclusions
+filtered = client.hip_object.list(
+    folder="Texas",
     exact_match=True,
-    exclude_folders=['All'],
-    exclude_snippets=['default'],
-    exclude_devices=['DeviceA']
+    exclude_folders=["All"],
+    exclude_snippets=["default"],
+    exclude_devices=["DeviceA"]
 )
 
-for hip in combined_filters:
-    print(f"Combined filters result: {hip.name} in {hip.folder}")
-```
-
-### Controlling Pagination with max_limit
-
-The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
-
-```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
-
-# Configure max_limit on the hip_object service
-client.hip_object.max_limit = 4321
-
-# List all HIP objects - auto-paginates through results
-all_hips = client.hip_object.list(folder='Shared')
-
-# The list() method will retrieve up to 4321 objects per API call (max 5000)
-# and auto-paginate through all available objects.
-```
-
-### Deleting HIP Objects
-
-```python
-# Delete by ID
-hip_id = "123e4567-e89b-12d3-a456-426655440000"
-client.hip_object.delete(hip_id)
-```
-
-## Managing Configuration Changes
-
-### Performing Commits
-
-```python
-# Prepare commit parameters
-commit_params = {
-    "folders": ["Shared"],
-    "description": "Updated HIP objects",
-    "sync": True,
-    "timeout": 300  # 5 minute timeout
-}
-
-# Commit the changes
-result = client.commit(**commit_params)
-
-print(f"Commit job ID: {result.job_id}")
-```
-
-### Monitoring Jobs
-
-```python
-# Get status of specific job
-job_status = client.get_job_status(result.job_id)
-print(f"Job status: {job_status.data[0].status_str}")
-
-# List recent jobs
-recent_jobs = client.list_jobs(limit=10)
-for job in recent_jobs.data:
-    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
+for hip in filtered:
+    print(f"HIP Object: {hip.name} in {hip.folder}")
 ```
 
 ## Error Handling
@@ -353,7 +184,6 @@ from scm.exceptions import (
     ReferenceNotZeroError
 )
 
-# Initialize client
 client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
@@ -361,31 +191,14 @@ client = ScmClient(
 )
 
 try:
-    # Create HIP object configuration
-    hip_config = {
+    new_hip = client.hip_object.create({
         "name": "test-hip",
-        "folder": "Shared",
+        "folder": "Texas",
         "description": "Test HIP object",
         "host_info": {
-            "criteria": {
-                "managed": True
-            }
+            "criteria": {"managed": True}
         }
-    }
-
-    # Create the HIP object using the unified client
-    new_hip = client.hip_object.create(hip_config)
-
-    # Commit changes directly on the client
-    result = client.commit(
-        folders=["Shared"],
-        description="Added test HIP object",
-        sync=True
-    )
-
-    # Check job status on the client
-    status = client.get_job_status(result.job_id)
-
+    })
 except InvalidObjectError as e:
     print(f"Invalid HIP object data: {e.message}")
 except NameNotUniqueError as e:
@@ -398,57 +211,7 @@ except MissingQueryParameterError as e:
     print(f"Missing parameter: {e.message}")
 ```
 
-## Best Practices
+## Related Topics
 
-1. **Client Usage**
-    - Use the unified `ScmClient` approach for simpler code
-    - Access HIP object operations via `client.hip_object` property
-    - Perform commit operations directly on the client
-    - Monitor jobs directly on the client
-    - Set appropriate max_limit parameters for large datasets using `hip_object_max_limit`
-
-2. **HIP Object Design**
-    - Use descriptive names for clarity
-    - Define specific criteria for each type
-    - Combine criteria types logically
-    - Document requirements clearly
-    - Keep criteria focused and minimal
-
-3. **Container Management**
-    - Always specify exactly one container
-    - Use consistent container names
-    - Validate container existence
-    - Group related HIP objects
-    - Consider inheritance patterns
-
-4. **Performance**
-    - Set appropriate max_limit values
-    - Use pagination for large lists
-    - Cache frequently accessed objects
-    - Implement proper retry logic
-    - Monitor API response times
-
-5. **Security**
-    - Follow least privilege principle
-    - Validate input data
-    - Use secure connection settings
-    - Implement proper authentication
-    - Monitor security posture changes
-
-6. **Error Handling**
-    - Implement comprehensive error handling
-    - Check job status after commits
-    - Log error details
-    - Handle specific exceptions
-    - Validate criteria before creation
-
-## Full Script Examples
-
-Refer to
-the [hip_object.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/objects/hip_object.py).
-
-## Related Models
-
-- [HIPObjectCreateModel](../../models/objects/hip_object_models.md#Overview)
-- [HIPObjectUpdateModel](../../models/objects/hip_object_models.md#Overview)
-- [HIPObjectResponseModel](../../models/objects/hip_object_models.md#Overview)
+- [HIP Object Models](../../models/objects/hip_object_models.md#Overview)
+- [HIP Profile](hip_profile.md)

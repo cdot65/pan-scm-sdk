@@ -1,13 +1,13 @@
 # Application Models
 
-## Overview {#Overview}
+## Overview
 
 The Application models provide a structured way to manage custom applications in Palo Alto Networks' Strata Cloud
 Manager. These models support defining application characteristics like category, risk level, and behavioral attributes.
 Applications can be defined in folders or snippets. The models handle validation of inputs and outputs when interacting
 with the SCM API.
 
-### Models
+## Models
 
 | Model                      | Purpose                                          |
 |----------------------------|--------------------------------------------------|

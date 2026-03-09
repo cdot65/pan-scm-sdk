@@ -1,36 +1,25 @@
-# BGP Route Map Configuration Object
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Core Methods](#core-methods)
-3. [BGP Route Map Model Attributes](#bgp-route-map-model-attributes)
-4. [Route Map Entry Configuration](#route-map-entry-configuration)
-5. [Exceptions](#exceptions)
-6. [Basic Configuration](#basic-configuration)
-7. [Usage Examples](#usage-examples)
-    - [Creating BGP Route Maps](#creating-bgp-route-maps)
-    - [Retrieving BGP Route Maps](#retrieving-bgp-route-maps)
-    - [Updating BGP Route Maps](#updating-bgp-route-maps)
-    - [Listing BGP Route Maps](#listing-bgp-route-maps)
-    - [Filtering Responses](#filtering-responses)
-    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
-    - [Deleting BGP Route Maps](#deleting-bgp-route-maps)
-8. [Managing Configuration Changes](#managing-configuration-changes)
-    - [Performing Commits](#performing-commits)
-    - [Monitoring Jobs](#monitoring-jobs)
-9. [Error Handling](#error-handling)
-10. [Best Practices](#best-practices)
-11. [Related Models](#related-models)
-
-## Overview
+# BGP Route Map
 
 The `BgpRouteMap` class manages BGP route map objects in Palo Alto Networks' Strata Cloud Manager. It extends from `BaseObject` and offers methods to create, retrieve, update, list, fetch, and delete BGP route maps. Route maps provide import/export policy control for BGP, defining ordered entries with match criteria and set actions. Each entry has a sequence number, a permit/deny action, optional match conditions, and optional set modifications.
 
 !!! note
     The API uses the spelling `substract` (not `subtract`) for the metric action type. This typo is preserved in the SDK to match the API exactly.
 
-## Core Methods
+## Class Overview
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
+# Access the BGP Route Map service directly through the client
+bgp_route_maps = client.bgp_route_map
+```
 
 | Method     | Description                                                  | Parameters                                                                                                                       | Return Type                        |
 |------------|--------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|------------------------------------|
@@ -41,7 +30,7 @@ The `BgpRouteMap` class manages BGP route map objects in Palo Alto Networks' Str
 | `fetch()`  | Fetches a single BGP route map by name within a container    | `name: str`, `folder: Optional[str]`, `snippet: Optional[str]`, `device: Optional[str]`                                          | `BgpRouteMapResponseModel`         |
 | `delete()` | Deletes a BGP route map by its ID                            | `object_id: str`                                                                                                                 | `None`                             |
 
-## BGP Route Map Model Attributes
+### BGP Route Map Model Attributes
 
 | Attribute   | Type                     | Required | Default | Description                                         |
 |-------------|--------------------------|----------|---------|-----------------------------------------------------|
@@ -55,11 +44,11 @@ The `BgpRouteMap` class manages BGP route map objects in Palo Alto Networks' Str
 \* Only required for update and response models
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
-## Route Map Entry Configuration
+### Route Map Entry Configuration
 
 The `route_map` attribute holds a list of entries, each with a sequence number, action, match criteria, and set actions.
 
-### BgpRouteMapEntry
+#### BgpRouteMapEntry
 
 | Attribute     | Type             | Required | Description                              |
 |---------------|------------------|----------|------------------------------------------|
@@ -69,7 +58,7 @@ The `route_map` attribute holds a list of entries, each with a sequence number, 
 | `match`       | BgpRouteMapMatch | No       | Match criteria                           |
 | `set`         | BgpRouteMapSet   | No       | Set actions                              |
 
-### BgpRouteMapMatch
+#### BgpRouteMapMatch
 
 | Attribute             | Type                  | Required | Description                        |
 |-----------------------|-----------------------|----------|------------------------------------|
@@ -85,7 +74,7 @@ The `route_map` attribute holds a list of entries, each with a sequence number, 
 | `peer`                | str                   | No       | Peer type: "local" or "none"       |
 | `ipv4`                | BgpRouteMapMatchIpv4  | No       | IPv4 match criteria                |
 
-### BgpRouteMapMatchIpv4
+#### BgpRouteMapMatchIpv4
 
 | Attribute      | Type | Required | Description                        |
 |----------------|------|----------|------------------------------------|
@@ -93,7 +82,7 @@ The `route_map` attribute holds a list of entries, each with a sequence number, 
 | `next_hop`     | str  | No       | IPv4 next-hop prefix list to match |
 | `route_source` | str  | No       | IPv4 route source to match         |
 
-### BgpRouteMapSet
+#### BgpRouteMapSet
 
 | Attribute                    | Type                      | Required | Description                           |
 |------------------------------|---------------------------|----------|---------------------------------------|
@@ -115,28 +104,28 @@ The `route_map` attribute holds a list of entries, each with a sequence number, 
 | `large_community`            | List[str]                 | No       | Large communities to set              |
 | `overwrite_large_community`  | bool                      | No       | Overwrite existing large communities  |
 
-### BgpRouteMapSetMetric
+#### BgpRouteMapSetMetric
 
 | Attribute | Type | Required | Description                                              |
 |-----------|------|----------|----------------------------------------------------------|
 | `action`  | str  | No       | Metric action: "set", "add", or "substract" (API spelling) |
 | `value`   | int  | No       | Metric value                                             |
 
-### BgpRouteMapSetAggregator
+#### BgpRouteMapSetAggregator
 
 | Attribute   | Type | Required | Description              |
 |-------------|------|----------|--------------------------|
 | `as`        | int  | No       | Aggregator AS number     |
 | `router_id` | str | No       | Aggregator router ID     |
 
-### BgpRouteMapSetIpv4
+#### BgpRouteMapSetIpv4
 
 | Attribute        | Type | Required | Description              |
 |------------------|------|----------|--------------------------|
 | `source_address` | str  | No       | Source address to set     |
 | `next_hop`       | str  | No       | Next-hop address to set   |
 
-## Exceptions
+### Exceptions
 
 | Exception                    | HTTP Code | Description                                                                   |
 |------------------------------|-----------|-------------------------------------------------------------------------------|
@@ -148,11 +137,63 @@ The `route_map` attribute holds a list of entries, each with a sequence number, 
 | `AuthenticationError`        | 401       | Authentication failed                                                         |
 | `ServerError`                | 500       | Internal server error                                                         |
 
-## Basic Configuration
+## Methods
 
-The BGP Route Map service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+### List BGP Route Maps
 
-### Unified Client Interface (Recommended)
+```python
+# List all route maps in a folder
+route_maps = client.bgp_route_map.list(
+   folder="Texas"
+)
+
+# Process results
+for rm in route_maps:
+   entry_count = len(rm.route_map) if rm.route_map else 0
+   print(f"Name: {rm.name} ({entry_count} entries)")
+```
+
+#### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
+you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control
+which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
+
+```python
+# Only return route maps defined exactly in 'Texas'
+exact_maps = client.bgp_route_map.list(
+   folder='Texas',
+   exact_match=True
+)
+
+for rm in exact_maps:
+   print(f"Exact match: {rm.name} in {rm.folder}")
+
+# Exclude all route maps from the 'All' folder
+no_all_maps = client.bgp_route_map.list(
+   folder='Texas',
+   exclude_folders=['All']
+)
+
+for rm in no_all_maps:
+   assert rm.folder != 'All'
+   print(f"Filtered out 'All': {rm.name}")
+```
+
+#### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
+
+**Example:**
 
 ```python
 from scm.client import ScmClient
@@ -164,33 +205,34 @@ client = ScmClient(
    tsg_id="your_tsg_id"
 )
 
-# Access the BGP Route Map service directly through the client
-bgp_route_maps = client.bgp_route_map
+# Configure max_limit using the property setter
+client.bgp_route_map.max_limit = 4000
+
+# List all route maps - auto-paginates through results
+all_maps = client.bgp_route_map.list(folder='Texas')
 ```
 
-### Traditional Service Instantiation (Legacy)
+### Fetch a BGP Route Map
 
 ```python
-from scm.client import Scm
-from scm.config.network import BgpRouteMap
-
-# Initialize client
-client = Scm(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
+# Fetch by name and folder
+route_map = client.bgp_route_map.fetch(
+   name="inbound-policy",
+   folder="Texas"
 )
+print(f"Found route map: {route_map.name}")
+if route_map.route_map:
+   for entry in route_map.route_map:
+      print(f"  Seq {entry.name}: {entry.action}")
+      if entry.description:
+         print(f"    Description: {entry.description}")
 
-# Initialize BgpRouteMap object explicitly
-bgp_route_maps = BgpRouteMap(client)
+# Get by ID
+route_map_by_id = client.bgp_route_map.get(route_map.id)
+print(f"Retrieved route map: {route_map_by_id.name}")
 ```
 
-!!! note
-    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
-
-## Usage Examples
-
-### Creating BGP Route Maps
+### Create a BGP Route Map
 
 ```python
 from scm.client import ScmClient
@@ -290,27 +332,7 @@ prepend_map = client.bgp_route_map.create(prepend_map_data)
 print(f"Created AS-prepend route map with ID: {prepend_map.id}")
 ```
 
-### Retrieving BGP Route Maps
-
-```python
-# Fetch by name and folder
-route_map = client.bgp_route_map.fetch(
-   name="inbound-policy",
-   folder="Texas"
-)
-print(f"Found route map: {route_map.name}")
-if route_map.route_map:
-   for entry in route_map.route_map:
-      print(f"  Seq {entry.name}: {entry.action}")
-      if entry.description:
-         print(f"    Description: {entry.description}")
-
-# Get by ID
-route_map_by_id = client.bgp_route_map.get(route_map.id)
-print(f"Retrieved route map: {route_map_by_id.name}")
-```
-
-### Updating BGP Route Maps
+### Update a BGP Route Map
 
 ```python
 # Fetch existing route map
@@ -335,80 +357,7 @@ existing_map.route_map.insert(0, {
 updated_map = client.bgp_route_map.update(existing_map)
 ```
 
-### Listing BGP Route Maps
-
-```python
-# List all route maps in a folder
-route_maps = client.bgp_route_map.list(
-   folder="Texas"
-)
-
-# Process results
-for rm in route_maps:
-   entry_count = len(rm.route_map) if rm.route_map else 0
-   print(f"Name: {rm.name} ({entry_count} entries)")
-```
-
-### Filtering Responses
-
-The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
-you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control
-which objects are included or excluded after the initial API response is fetched.
-
-**Parameters:**
-
-- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
-- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
-- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
-- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
-
-**Examples:**
-
-```python
-# Only return route maps defined exactly in 'Texas'
-exact_maps = client.bgp_route_map.list(
-   folder='Texas',
-   exact_match=True
-)
-
-for rm in exact_maps:
-   print(f"Exact match: {rm.name} in {rm.folder}")
-
-# Exclude all route maps from the 'All' folder
-no_all_maps = client.bgp_route_map.list(
-   folder='Texas',
-   exclude_folders=['All']
-)
-
-for rm in no_all_maps:
-   assert rm.folder != 'All'
-   print(f"Filtered out 'All': {rm.name}")
-```
-
-### Controlling Pagination with max_limit
-
-The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
-
-**Example:**
-
-```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-# Configure max_limit using the property setter
-client.bgp_route_map.max_limit = 4000
-
-# List all route maps - auto-paginates through results
-all_maps = client.bgp_route_map.list(folder='Texas')
-```
-
-### Deleting BGP Route Maps
+### Delete a BGP Route Map
 
 ```python
 # Delete by ID
@@ -416,9 +365,9 @@ route_map_id = "123e4567-e89b-12d3-a456-426655440000"
 client.bgp_route_map.delete(route_map_id)
 ```
 
-## Managing Configuration Changes
+## Use Cases
 
-### Performing Commits
+#### Performing Commits
 
 ```python
 # Prepare commit parameters
@@ -435,7 +384,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-### Monitoring Jobs
+#### Monitoring Jobs
 
 ```python
 # Get status of specific job directly from the client
@@ -507,46 +456,7 @@ except MissingQueryParameterError as e:
    print(f"Missing parameter: {e.message}")
 ```
 
-## Best Practices
-
-1. **Client Usage**
-   - Use the unified client interface (`client.bgp_route_map`) for streamlined code
-   - Create a single client instance and reuse it across your application
-   - Perform commit operations directly on the client object (`client.commit()`)
-
-2. **Route Map Design**
-   - Use sequence numbers with gaps (10, 20, 30) to allow future insertions
-   - Always include a final permit-all or deny-all entry for explicit behavior
-   - Place more specific matches before general ones in the sequence
-   - Use descriptions on entries to document the policy intent
-
-3. **Match and Set Actions**
-   - Combine multiple match criteria to create precise filters
-   - Use AS path prepending carefully as it affects convergence time
-   - Set local preference for inbound policy to prefer specific paths
-   - Use communities to tag routes for downstream policy decisions
-
-4. **API Quirks**
-   - The metric action uses `substract` (not `subtract`) to match the API spelling
-   - The `as` field in aggregator uses `as_` in Python (aliased to `as` for serialization)
-
-5. **Container Management**
-   - Always specify exactly one container (folder, snippet, or device)
-   - Use consistent container names across operations
-   - Validate container existence before operations
-
-6. **Error Handling**
-   - Implement comprehensive error handling for all operations
-   - Check job status after commits
-   - Handle specific exceptions before generic ones
-   - Log error details for troubleshooting
-
-7. **Performance**
-   - Use appropriate pagination for list operations
-   - Cache frequently accessed route map configurations
-   - Implement proper retry mechanisms
-
-## Related Models
+## Related Topics
 
 - [BgpRouteMapBaseModel](../../models/network/bgp_route_map_models.md#Overview)
 - [BgpRouteMapCreateModel](../../models/network/bgp_route_map_models.md#Overview)

@@ -1,15 +1,6 @@
 # Zone Protection Profile Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Supporting Models](#supporting-models)
-4. [Exceptions](#exceptions)
-5. [Model Validators](#model-validators)
-6. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The Zone Protection Profile models provide a structured way to represent and validate zone protection profile configuration data for Palo Alto Networks' Strata Cloud Manager. These models ensure data integrity when creating and updating zone protection profiles, enforcing proper flood protection, scan protection, protocol filtering, and field validations.
 
@@ -49,43 +40,43 @@ This is the base model containing fields common to all zone protection profile o
 
 | Attribute                                    | Type                    | Required | Default | Description                                                    |
 |----------------------------------------------|-------------------------|----------|---------|----------------------------------------------------------------|
-| name                                         | str                     | Yes      | None    | Name of the profile. Max 31 chars.                             |
-| description                                  | str                     | No       | None    | Description of the profile. Max 255 chars.                     |
-| flood                                        | FloodProtection         | No       | None    | Flood protection configuration.                                |
-| scan                                         | List[ScanEntry]         | No       | None    | Scan protection entries.                                       |
-| scan_white_list                              | List[ScanWhiteListEntry]| No       | None    | Scan whitelist entries.                                        |
-| spoofed_ip_discard                           | bool                    | No       | None    | Discard spoofed IP packets.                                    |
-| strict_ip_check                              | bool                    | No       | None    | Enable strict IP address checking.                             |
-| fragmented_traffic_discard                   | bool                    | No       | None    | Discard fragmented traffic.                                    |
-| strict_source_routing_discard                | bool                    | No       | None    | Discard strict source routing packets.                         |
-| loose_source_routing_discard                 | bool                    | No       | None    | Discard loose source routing packets.                          |
-| timestamp_discard                            | bool                    | No       | None    | Discard timestamp option packets.                              |
-| record_route_discard                         | bool                    | No       | None    | Discard record route option packets.                           |
-| security_discard                             | bool                    | No       | None    | Discard security option packets.                               |
-| stream_id_discard                            | bool                    | No       | None    | Discard stream ID option packets.                              |
-| unknown_option_discard                       | bool                    | No       | None    | Discard unknown option packets.                                |
-| malformed_option_discard                     | bool                    | No       | None    | Discard malformed option packets.                              |
-| mismatched_overlapping_tcp_segment_discard   | bool                    | No       | None    | Discard mismatched overlapping TCP segments.                   |
-| tcp_handshake_discard                        | bool                    | No       | None    | Discard incomplete TCP handshake packets.                      |
-| tcp_syn_with_data_discard                    | bool                    | No       | None    | Discard TCP SYN packets with data.                             |
-| tcp_synack_with_data_discard                 | bool                    | No       | None    | Discard TCP SYN-ACK packets with data.                         |
-| reject_non_syn_tcp                           | str                     | No       | None    | Reject non-SYN TCP. Pattern: `^(global\|yes\|no)$`.           |
-| asymmetric_path                              | str                     | No       | None    | Asymmetric path handling. Pattern: `^(global\|drop\|bypass)$`. |
-| mptcp_option_strip                           | str                     | No       | None    | MPTCP option strip. Pattern: `^(no\|yes\|global)$`.           |
-| tcp_timestamp_strip                          | bool                    | No       | None    | Strip TCP timestamp option.                                    |
-| tcp_fast_open_and_data_strip                 | bool                    | No       | None    | Strip TCP Fast Open and data.                                  |
-| icmp_ping_zero_id_discard                    | bool                    | No       | None    | Discard ICMP ping with zero ID.                                |
-| icmp_frag_discard                            | bool                    | No       | None    | Discard fragmented ICMP packets.                               |
-| icmp_large_packet_discard                    | bool                    | No       | None    | Discard large ICMP packets.                                    |
-| discard_icmp_embedded_error                  | bool                    | No       | None    | Discard ICMP embedded error messages.                          |
-| suppress_icmp_timeexceeded                   | bool                    | No       | None    | Suppress ICMP time exceeded messages.                          |
-| suppress_icmp_needfrag                       | bool                    | No       | None    | Suppress ICMP need fragmentation messages.                     |
-| ipv6                                         | Dict[str, Any]          | No       | None    | IPv6 protection configuration.                                 |
-| non_ip_protocol                              | NonIpProtocol           | No       | None    | Non-IP protocol configuration.                                 |
-| l2_sec_group_tag_protection                  | L2SecGroupTagProtection | No       | None    | Layer 2 Security Group Tag protection.                         |
-| folder                                       | str                     | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
-| snippet                                      | str                     | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.|
-| device                                       | str                     | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
+| `name` | `str` | Yes      | None    | Name of the profile. Max 31 chars.                             |
+| `description` | `str` | No       | None    | Description of the profile. Max 255 chars.                     |
+| `flood` | `FloodProtection` | No       | None    | Flood protection configuration.                                |
+| `scan` | `List[ScanEntry]` | No       | None    | Scan protection entries.                                       |
+| `scan_white_list` | `List[ScanWhiteListEntry]` | No       | None    | Scan whitelist entries.                                        |
+| `spoofed_ip_discard` | `bool` | No       | None    | Discard spoofed IP packets.                                    |
+| `strict_ip_check` | `bool` | No       | None    | Enable strict IP address checking.                             |
+| `fragmented_traffic_discard` | `bool` | No       | None    | Discard fragmented traffic.                                    |
+| `strict_source_routing_discard` | `bool` | No       | None    | Discard strict source routing packets.                         |
+| `loose_source_routing_discard` | `bool` | No       | None    | Discard loose source routing packets.                          |
+| `timestamp_discard` | `bool` | No       | None    | Discard timestamp option packets.                              |
+| `record_route_discard` | `bool` | No       | None    | Discard record route option packets.                           |
+| `security_discard` | `bool` | No       | None    | Discard security option packets.                               |
+| `stream_id_discard` | `bool` | No       | None    | Discard stream ID option packets.                              |
+| `unknown_option_discard` | `bool` | No       | None    | Discard unknown option packets.                                |
+| `malformed_option_discard` | `bool` | No       | None    | Discard malformed option packets.                              |
+| `mismatched_overlapping_tcp_segment_discard` | `bool` | No       | None    | Discard mismatched overlapping TCP segments.                   |
+| `tcp_handshake_discard` | `bool` | No       | None    | Discard incomplete TCP handshake packets.                      |
+| `tcp_syn_with_data_discard` | `bool` | No       | None    | Discard TCP SYN packets with data.                             |
+| `tcp_synack_with_data_discard` | `bool` | No       | None    | Discard TCP SYN-ACK packets with data.                         |
+| `reject_non_syn_tcp` | `str` | No       | None    | Reject non-SYN TCP. Pattern: `^(global\|yes\|no)$`.           |
+| `asymmetric_path` | `str` | No       | None    | Asymmetric path handling. Pattern: `^(global\|drop\|bypass)$`. |
+| `mptcp_option_strip` | `str` | No       | None    | MPTCP option strip. Pattern: `^(no\|yes\|global)$`.           |
+| `tcp_timestamp_strip` | `bool` | No       | None    | Strip TCP timestamp option.                                    |
+| `tcp_fast_open_and_data_strip` | `bool` | No       | None    | Strip TCP Fast Open and data.                                  |
+| `icmp_ping_zero_id_discard` | `bool` | No       | None    | Discard ICMP ping with zero ID.                                |
+| `icmp_frag_discard` | `bool` | No       | None    | Discard fragmented ICMP packets.                               |
+| `icmp_large_packet_discard` | `bool` | No       | None    | Discard large ICMP packets.                                    |
+| `discard_icmp_embedded_error` | `bool` | No       | None    | Discard ICMP embedded error messages.                          |
+| `suppress_icmp_timeexceeded` | `bool` | No       | None    | Suppress ICMP time exceeded messages.                          |
+| `suppress_icmp_needfrag` | `bool` | No       | None    | Suppress ICMP need fragmentation messages.                     |
+| `ipv6` | `Dict[str, Any]` | No       | None    | IPv6 protection configuration.                                 |
+| `non_ip_protocol` | `NonIpProtocol` | No       | None    | Non-IP protocol configuration.                                 |
+| `l2_sec_group_tag_protection` | `L2SecGroupTagProtection` | No       | None    | Layer 2 Security Group Tag protection.                         |
+| `folder` | `str` | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
+| `snippet` | `str` | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.|
+| `device` | `str` | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
 
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
@@ -99,7 +90,7 @@ Extends `ZoneProtectionProfileBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                         |
 |-----------|------|----------|---------|-----------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the zone protection profile |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the zone protection profile |
 
 ### ZoneProtectionProfileResponseModel
 
@@ -107,9 +98,10 @@ Extends `ZoneProtectionProfileBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                         |
 |-----------|------|----------|---------|-----------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the zone protection profile |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the zone protection profile |
 
-> **Note:** The `ZoneProtectionProfileResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
+!!! note
+    The `ZoneProtectionProfileResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
 
 ## Supporting Models
 
@@ -119,12 +111,12 @@ This model defines the top-level flood protection configuration.
 
 | Attribute | Type          | Required | Default | Description                    |
 |-----------|---------------|----------|---------|--------------------------------|
-| tcp_syn   | TcpSynFlood   | No       | None    | TCP SYN flood protection.      |
-| udp       | UdpFlood      | No       | None    | UDP flood protection.          |
-| sctp_init | SctpInitFlood | No       | None    | SCTP INIT flood protection.    |
-| icmp      | IcmpFlood     | No       | None    | ICMP flood protection.         |
-| icmpv6    | Icmpv6Flood   | No       | None    | ICMPv6 flood protection.       |
-| other_ip  | OtherIpFlood  | No       | None    | Other IP flood protection.     |
+| `tcp_syn` | `TcpSynFlood` | No       | None    | TCP SYN flood protection.      |
+| `udp` | `UdpFlood` | No       | None    | UDP flood protection.          |
+| `sctp_init` | `SctpInitFlood` | No       | None    | SCTP INIT flood protection.    |
+| `icmp` | `IcmpFlood` | No       | None    | ICMP flood protection.         |
+| `icmpv6` | `Icmpv6Flood` | No       | None    | ICMPv6 flood protection.       |
+| `other_ip` | `OtherIpFlood` | No       | None    | Other IP flood protection.     |
 
 ### FloodRed
 
@@ -132,11 +124,12 @@ Random Early Detection (RED) configuration shared by multiple flood protection t
 
 | Attribute     | Type | Required | Default | Description                        |
 |---------------|------|----------|---------|------------------------------------|
-| alarm_rate    | int  | No       | None    | Alarm rate threshold. Range: 0-2000000.    |
-| activate_rate | int  | No       | None    | Activate rate threshold. Range: 0-2000000. |
-| maximal_rate  | int  | No       | None    | Maximal rate threshold. Range: 0-2000000.  |
+| `alarm_rate` | `int` | No       | None    | Alarm rate threshold. Range: 0-2000000.    |
+| `activate_rate` | `int` | No       | None    | Activate rate threshold. Range: 0-2000000. |
+| `maximal_rate` | `int` | No       | None    | Maximal rate threshold. Range: 0-2000000.  |
 
-> **Rate ordering:** When all three rate fields are set, they must satisfy `alarm_rate <= activate_rate <= maximal_rate`.
+!!! info "Rate Ordering"
+    When all three rate fields are set, they must satisfy `alarm_rate <= activate_rate <= maximal_rate`.
 
 ### FloodSynCookies
 
@@ -144,11 +137,12 @@ SYN Cookies configuration for TCP SYN flood protection.
 
 | Attribute     | Type | Required | Default | Description                        |
 |---------------|------|----------|---------|------------------------------------|
-| alarm_rate    | int  | No       | None    | Alarm rate threshold. Range: 0-2000000.    |
-| activate_rate | int  | No       | None    | Activate rate threshold. Range: 0-2000000. |
-| maximal_rate  | int  | No       | None    | Maximal rate threshold. Range: 0-2000000.  |
+| `alarm_rate` | `int` | No       | None    | Alarm rate threshold. Range: 0-2000000.    |
+| `activate_rate` | `int` | No       | None    | Activate rate threshold. Range: 0-2000000. |
+| `maximal_rate` | `int` | No       | None    | Maximal rate threshold. Range: 0-2000000.  |
 
-> **Rate ordering:** When all three rate fields are set, they must satisfy `alarm_rate <= activate_rate <= maximal_rate`.
+!!! info "Rate Ordering"
+    When all three rate fields are set, they must satisfy `alarm_rate <= activate_rate <= maximal_rate`.
 
 ### TcpSynFlood
 
@@ -156,9 +150,9 @@ TCP SYN flood protection configuration. Supports either RED or SYN Cookies mode,
 
 | Attribute   | Type            | Required | Default | Description                              |
 |-------------|-----------------|----------|---------|------------------------------------------|
-| enable      | bool            | No       | None    | Enable TCP SYN flood protection.         |
-| red         | FloodRed        | No*      | None    | Random Early Detection configuration.    |
-| syn_cookies | FloodSynCookies | No*      | None    | SYN Cookies configuration.               |
+| `enable` | `bool` | No       | None    | Enable TCP SYN flood protection.         |
+| `red` | `FloodRed` | No*      | None    | Random Early Detection configuration.    |
+| `syn_cookies` | `FloodSynCookies` | No*      | None    | SYN Cookies configuration.               |
 
 \* `red` and `syn_cookies` are mutually exclusive. Only one may be set at a time.
 
@@ -168,8 +162,8 @@ UDP flood protection configuration.
 
 | Attribute | Type     | Required | Default | Description                          |
 |-----------|----------|----------|---------|--------------------------------------|
-| enable    | bool     | No       | None    | Enable UDP flood protection.         |
-| red       | FloodRed | No       | None    | Random Early Detection configuration.|
+| `enable` | `bool` | No       | None    | Enable UDP flood protection.         |
+| `red` | `FloodRed` | No       | None    | Random Early Detection configuration.|
 
 ### SctpInitFlood
 
@@ -177,8 +171,8 @@ SCTP INIT flood protection configuration.
 
 | Attribute | Type     | Required | Default | Description                          |
 |-----------|----------|----------|---------|--------------------------------------|
-| enable    | bool     | No       | None    | Enable SCTP INIT flood protection.   |
-| red       | FloodRed | No       | None    | Random Early Detection configuration.|
+| `enable` | `bool` | No       | None    | Enable SCTP INIT flood protection.   |
+| `red` | `FloodRed` | No       | None    | Random Early Detection configuration.|
 
 ### IcmpFlood
 
@@ -186,8 +180,8 @@ ICMP flood protection configuration.
 
 | Attribute | Type     | Required | Default | Description                          |
 |-----------|----------|----------|---------|--------------------------------------|
-| enable    | bool     | No       | None    | Enable ICMP flood protection.        |
-| red       | FloodRed | No       | None    | Random Early Detection configuration.|
+| `enable` | `bool` | No       | None    | Enable ICMP flood protection.        |
+| `red` | `FloodRed` | No       | None    | Random Early Detection configuration.|
 
 ### Icmpv6Flood
 
@@ -195,8 +189,8 @@ ICMPv6 flood protection configuration.
 
 | Attribute | Type     | Required | Default | Description                          |
 |-----------|----------|----------|---------|--------------------------------------|
-| enable    | bool     | No       | None    | Enable ICMPv6 flood protection.      |
-| red       | FloodRed | No       | None    | Random Early Detection configuration.|
+| `enable` | `bool` | No       | None    | Enable ICMPv6 flood protection.      |
+| `red` | `FloodRed` | No       | None    | Random Early Detection configuration.|
 
 ### OtherIpFlood
 
@@ -204,8 +198,8 @@ Other IP flood protection configuration.
 
 | Attribute | Type     | Required | Default | Description                          |
 |-----------|----------|----------|---------|--------------------------------------|
-| enable    | bool     | No       | None    | Enable other IP flood protection.    |
-| red       | FloodRed | No       | None    | Random Early Detection configuration.|
+| `enable` | `bool` | No       | None    | Enable other IP flood protection.    |
+| `red` | `FloodRed` | No       | None    | Random Early Detection configuration.|
 
 ### ScanEntry
 
@@ -213,10 +207,10 @@ Scan protection entry configuration.
 
 | Attribute | Type       | Required | Default | Description                                        |
 |-----------|------------|----------|---------|----------------------------------------------------|
-| name      | str        | Yes      | None    | Scan entry name. Pattern: `^(8001\|8002\|8003\|8006)$`. |
-| action    | ScanAction | No       | None    | Scan action configuration.                         |
-| interval  | int        | No       | None    | Scan interval. Range: 2-65535.                     |
-| threshold | int        | No       | None    | Scan threshold. Range: 2-65535.                    |
+| `name` | `str` | Yes      | None    | Scan entry name. Pattern: `^(8001\|8002\|8003\|8006)$`. |
+| `action` | `ScanAction` | No       | None    | Scan action configuration.                         |
+| `interval` | `int` | No       | None    | Scan interval. Range: 2-65535.                     |
+| `threshold` | `int` | No       | None    | Scan threshold. Range: 2-65535.                    |
 
 ### ScanAction
 
@@ -224,10 +218,10 @@ Scan action configuration. Exactly one action must be specified.
 
 | Attribute | Type              | Required | Default | Description     |
 |-----------|-------------------|----------|---------|-----------------|
-| allow     | Dict[str, Any]    | No*      | None    | Allow action.   |
-| alert     | Dict[str, Any]    | No*      | None    | Alert action.   |
-| block     | Dict[str, Any]    | No*      | None    | Block action.   |
-| block_ip  | ScanActionBlockIp | No*      | None    | Block IP action.|
+| `allow` | `Dict[str, Any]` | No*      | None    | Allow action.   |
+| `alert` | `Dict[str, Any]` | No*      | None    | Alert action.   |
+| `block` | `Dict[str, Any]` | No*      | None    | Block action.   |
+| `block_ip` | `ScanActionBlockIp` | No*      | None    | Block IP action.|
 
 \* Exactly one of `allow`, `alert`, `block`, or `block_ip` must be set.
 
@@ -237,8 +231,8 @@ Block IP action configuration for scan protection.
 
 | Attribute | Type | Required | Default | Description                                                    |
 |-----------|------|----------|---------|----------------------------------------------------------------|
-| track_by  | str  | Yes      | None    | Track by method. Pattern: `^(source\|source-and-destination)$`. |
-| duration  | int  | Yes      | None    | Block duration in seconds. Range: 1-3600.                      |
+| `track_by` | `str` | Yes      | None    | Track by method. Pattern: `^(source\|source-and-destination)$`. |
+| `duration` | `int` | Yes      | None    | Block duration in seconds. Range: 1-3600.                      |
 
 ### ScanWhiteListEntry
 
@@ -246,9 +240,9 @@ Scan whitelist entry configuration.
 
 | Attribute | Type | Required | Default | Description          |
 |-----------|------|----------|---------|----------------------|
-| name      | str  | Yes      | None    | Whitelist entry name.|
-| ipv4      | str  | No       | None    | IPv4 address.        |
-| ipv6      | str  | No       | None    | IPv6 address.        |
+| `name` | `str` | Yes      | None    | Whitelist entry name.|
+| `ipv4` | `str` | No       | None    | IPv4 address.        |
+| `ipv6` | `str` | No       | None    | IPv6 address.        |
 
 ### NonIpProtocol
 
@@ -256,8 +250,8 @@ Non-IP protocol configuration.
 
 | Attribute | Type                    | Required | Default | Description                                        |
 |-----------|-------------------------|----------|---------|----------------------------------------------------|
-| list_type | str                     | No       | None    | List type. Pattern: `^(exclude\|include)$`.         |
-| protocol  | List[NonIpProtocolEntry]| No       | None    | Protocol entries.                                  |
+| `list_type` | `str` | No       | None    | List type. Pattern: `^(exclude\|include)$`.         |
+| `protocol` | `List[NonIpProtocolEntry]` | No       | None    | Protocol entries.                                  |
 
 ### NonIpProtocolEntry
 
@@ -265,9 +259,9 @@ Non-IP protocol entry configuration.
 
 | Attribute  | Type | Required | Default | Description                    |
 |------------|------|----------|---------|--------------------------------|
-| name       | str  | Yes      | None    | Protocol entry name.           |
-| ether_type | str  | Yes      | None    | Ethernet type.                 |
-| enable     | bool | No       | None    | Enable this protocol entry.    |
+| `name` | `str` | Yes      | None    | Protocol entry name.           |
+| `ether_type` | `str` | Yes      | None    | Ethernet type.                 |
+| `enable` | `bool` | No       | None    | Enable this protocol entry.    |
 
 ### L2SecGroupTagProtection
 
@@ -275,7 +269,7 @@ Layer 2 Security Group Tag protection configuration.
 
 | Attribute | Type           | Required | Default | Description                  |
 |-----------|----------------|----------|---------|------------------------------|
-| tags      | List[SgtEntry] | No       | None    | Security Group Tag entries.  |
+| `tags` | `List[SgtEntry]` | No       | None    | Security Group Tag entries.  |
 
 ### SgtEntry
 
@@ -283,9 +277,9 @@ Security Group Tag entry configuration.
 
 | Attribute | Type | Required | Default | Description                |
 |-----------|------|----------|---------|----------------------------|
-| name      | str  | Yes      | None    | SGT entry name.            |
-| tag       | str  | Yes      | None    | Security group tag value.  |
-| enable    | bool | No       | None    | Enable this SGT entry.     |
+| `name` | `str` | Yes      | None    | SGT entry name.            |
+| `tag` | `str` | Yes      | None    | Security group tag value.  |
+| `enable` | `bool` | No       | None    | Enable this SGT entry.     |
 
 ## Exceptions
 

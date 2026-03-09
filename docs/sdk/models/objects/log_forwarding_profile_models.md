@@ -1,10 +1,10 @@
 # Log Forwarding Profile Models
 
-## Overview {#Overview}
+## Overview
 
 Log Forwarding Profiles allow you to configure how logs are handled and forwarded to external systems in Palo Alto Networks' Strata Cloud Manager. These models define the structure for creating, updating, and retrieving log forwarding profile configurations.
 
-### Models
+## Models
 
 The module provides the following Pydantic models:
 
@@ -16,7 +16,9 @@ The module provides the following Pydantic models:
 
 All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
 
-## MatchListItem
+## Component Models
+
+### MatchListItem
 
 The `MatchListItem` represents a match profile configuration within a log forwarding profile. It defines the criteria for matching specific log types and where to send the matching logs.
 
@@ -31,7 +33,9 @@ The `MatchListItem` represents a match profile configuration within a log forwar
 | send_to_panorama | Optional[bool] | No | None | Flag to send logs to Panorama |
 | quarantine | Optional[bool] | No | False | Flag to quarantine matching logs |
 
-## LogForwardingProfileBaseModel
+## Base Models
+
+### LogForwardingProfileBaseModel
 
 The `LogForwardingProfileBaseModel` contains fields common to all log forwarding profile CRUD operations.
 
@@ -45,7 +49,7 @@ The `LogForwardingProfileBaseModel` contains fields common to all log forwarding
 | snippet | Optional[str] | No | None | The snippet in which the resource is defined (max length: 64) |
 | device | Optional[str] | No | None | The device in which the resource is defined (max length: 64) |
 
-## LogForwardingProfileCreateModel
+### LogForwardingProfileCreateModel
 
 The `LogForwardingProfileCreateModel` extends the base model and includes validation to ensure that exactly one container type is provided.
 
@@ -53,35 +57,9 @@ The `LogForwardingProfileCreateModel` extends the base model and includes valida
 |-----------|------|----------|---------|-------------|
 | *All attributes from LogForwardingProfileBaseModel* |  |  |  |  |
 
-### Container Type Validation
+When creating a log forwarding profile, exactly one container type (`folder`, `snippet`, or `device`) must be provided.
 
-When creating a log forwarding profile, exactly one of the following container types must be provided:
-- `folder`: The folder in which the resource is defined
-- `snippet`: The snippet in which the resource is defined
-- `device`: The device in which the resource is defined
-
-This validation is enforced by the `validate_container_type` model validator.
-
-```python
-@model_validator(mode="after")
-def validate_container_type(self) -> "LogForwardingProfileCreateModel":
-    """Validates that exactly one container type is provided."""
-    container_fields = [
-        "folder",
-        "snippet",
-        "device",
-    ]
-    provided = [
-        field for field in container_fields if getattr(self, field) is not None
-    ]
-    if len(provided) != 1:
-        raise ValueError(
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-        )
-    return self
-```
-
-## LogForwardingProfileUpdateModel
+#### LogForwardingProfileUpdateModel
 
 The `LogForwardingProfileUpdateModel` extends the base model and adds the ID field required for updating existing log forwarding profiles.
 
@@ -90,7 +68,7 @@ The `LogForwardingProfileUpdateModel` extends the base model and adds the ID fie
 | id | UUID | Yes | - | The UUID of the log forwarding profile |
 | *All attributes from LogForwardingProfileBaseModel* |  |  |  |  |
 
-## LogForwardingProfileResponseModel
+### LogForwardingProfileResponseModel
 
 The `LogForwardingProfileResponseModel` extends the base model and includes the ID field returned in API responses.
 
@@ -99,24 +77,8 @@ The `LogForwardingProfileResponseModel` extends the base model and includes the 
 | id | Optional[UUID] | No | None | The UUID of the log forwarding profile (not required for predefined snippets) |
 | *All attributes from LogForwardingProfileBaseModel* |  |  |  |  |
 
-### ID Validation for Non-Predefined Profiles
-
-The response model includes a validator to ensure that non-predefined profiles have an ID:
-
-```python
-@model_validator(mode="after")
-def validate_id_for_non_predefined(self) -> "LogForwardingProfileResponseModel":
-    """Validates that non-predefined profiles have an ID."""
-    # Skip validation if snippet is "predefined-snippet"
-    if self.snippet == "predefined-snippet":
-        return self
-
-    # For normal profiles in folders, ensure ID is present
-    if not self.id and self.snippet != "predefined-snippet" and self.folder is not None:
-        raise ValueError("ID is required for non-predefined profiles")
-
-    return self
-```
+!!! note
+    The response model includes a validator to ensure that non-predefined profiles have an ID. Profiles with snippet `"predefined-snippet"` may not have an ID.
 
 ## Usage Examples
 
@@ -208,17 +170,3 @@ existing.match_list.append({
 updated = client.log_forwarding_profile.update(existing)
 ```
 
-## Best Practices
-
-### Match List Configuration
-- Use specific filters to target only the logs you need
-- Configure appropriate log destinations (HTTP servers or syslog servers)
-- Consider using both HTTP and syslog servers for critical logs
-- Set descriptive names and action descriptions for better management
-- Enable quarantine for suspicious events that require investigation
-- Use send_to_panorama for logs that should be centrally stored
-
-### Container Management
-- Always specify exactly one container type (folder, snippet, or device)
-- Use consistent naming conventions for log forwarding profiles
-- Organize profiles logically by function or application

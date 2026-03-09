@@ -1,37 +1,22 @@
-# Logical Router Configuration Object
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Core Methods](#core-methods)
-3. [Logical Router Model Attributes](#logical-router-model-attributes)
-4. [VRF Configuration](#vrf-configuration)
-5. [Static Routes](#static-routes)
-6. [BGP Configuration](#bgp-configuration)
-7. [OSPF Configuration](#ospf-configuration)
-8. [ECMP Configuration](#ecmp-configuration)
-9. [Exceptions](#exceptions)
-10. [Basic Configuration](#basic-configuration)
-11. [Usage Examples](#usage-examples)
-    - [Creating Logical Routers](#creating-logical-routers)
-    - [Retrieving Logical Routers](#retrieving-logical-routers)
-    - [Updating Logical Routers](#updating-logical-routers)
-    - [Listing Logical Routers](#listing-logical-routers)
-    - [Filtering Responses](#filtering-responses)
-    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
-    - [Deleting Logical Routers](#deleting-logical-routers)
-12. [Managing Configuration Changes](#managing-configuration-changes)
-    - [Performing Commits](#performing-commits)
-    - [Monitoring Jobs](#monitoring-jobs)
-13. [Error Handling](#error-handling)
-14. [Best Practices](#best-practices)
-15. [Related Models](#related-models)
-
-## Overview
+# Logical Router
 
 The `LogicalRouter` class manages logical router objects in Palo Alto Networks' Strata Cloud Manager. It extends from `BaseObject` and offers methods to create, retrieve, update, list, fetch, and delete logical routers. Logical routers serve as the routing backbone for SCM-managed devices, replacing the legacy Virtual Router for ARE-enabled devices. All routing configuration -- static routes, BGP, OSPF, ECMP, and RIP -- is organized within VRF (Virtual Routing and Forwarding) objects attached to the router. The underlying Pydantic model hierarchy comprises 93 model classes to represent the full depth of the routing configuration.
 
-## Core Methods
+## Class Overview
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
+# Access the Logical Router service directly through the client
+logical_routers = client.logical_router
+```
 
 | Method     | Description                                                     | Parameters                                                                                                                       | Return Type                          |
 |------------|-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|--------------------------------------|
@@ -42,7 +27,7 @@ The `LogicalRouter` class manages logical router objects in Palo Alto Networks' 
 | `fetch()`  | Fetches a single logical router by name within a container      | `name: str`, `folder: Optional[str]`, `snippet: Optional[str]`, `device: Optional[str]`                                          | `LogicalRouterResponseModel`         |
 | `delete()` | Deletes a logical router by its ID                              | `object_id: str`                                                                                                                 | `None`                               |
 
-## Logical Router Model Attributes
+### Logical Router Model Attributes
 
 | Attribute       | Type                   | Required | Default | Description                                                 |
 |-----------------|------------------------|----------|---------|-------------------------------------------------------------|
@@ -57,11 +42,11 @@ The `LogicalRouter` class manages logical router objects in Palo Alto Networks' 
 \* Only required for update and response models
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
-## VRF Configuration
+### VRF Configuration
 
 The `vrf` attribute contains a list of VRF objects. Each VRF is the central organizing unit for all routing configuration within a logical router.
 
-### VrfConfig
+#### VrfConfig
 
 | Attribute        | Type               | Required | Description                                    |
 |------------------|--------------------|----------|------------------------------------------------|
@@ -81,7 +66,7 @@ The `vrf` attribute contains a list of VRF objects. Each VRF is the central orga
 | `rip`            | RipConfig          | No       | RIP routing protocol configuration             |
 | `bgp`            | BgpConfig          | No       | BGP routing protocol configuration             |
 
-### AdminDists
+#### AdminDists
 
 | Attribute      | Type | Required | Description                          |
 |----------------|------|----------|--------------------------------------|
@@ -98,11 +83,11 @@ The `vrf` attribute contains a list of VRF objects. Each VRF is the central orga
 | `bgp_local`    | int  | No       | BGP local admin distance             |
 | `rip`          | int  | No       | RIP admin distance                   |
 
-## Static Routes
+### Static Routes
 
 Static routes live inside a VRF's `routing_table` attribute, which contains separate `ip` (IPv4) and `ipv6` sections, each holding a list of static route objects.
 
-### IPv4StaticRoute
+#### IPv4StaticRoute
 
 | Attribute      | Type           | Required | Description                                       |
 |----------------|----------------|----------|---------------------------------------------------|
@@ -116,7 +101,7 @@ Static routes live inside a VRF's `routing_table` attribute, which contains sepa
 | `bfd`          | BfdProfile     | No       | BFD profile reference                             |
 | `path_monitor` | PathMonitor    | No       | Path monitor configuration                        |
 
-### IPv6StaticRoute
+#### IPv6StaticRoute
 
 | Attribute      | Type           | Required | Description                                       |
 |----------------|----------------|----------|---------------------------------------------------|
@@ -130,11 +115,11 @@ Static routes live inside a VRF's `routing_table` attribute, which contains sepa
 | `bfd`          | BfdProfile     | No       | BFD profile reference                             |
 | `path_monitor` | PathMonitor    | No       | Path monitor configuration                        |
 
-## BGP Configuration
+### BGP Configuration
 
 The `bgp` attribute within a VRF provides full BGP routing protocol support including peer groups, redistribution, and policy configuration.
 
-### BgpConfig
+#### BgpConfig
 
 | Attribute                          | Type                  | Required | Description                               |
 |------------------------------------|-----------------------|----------|-------------------------------------------|
@@ -159,7 +144,7 @@ The `bgp` attribute within a VRF provides full BGP routing protocol support incl
 | `policy`                           | BgpPolicy             | No       | BGP policy configuration                  |
 | `redist_rules`                     | List[BgpRedistRule]   | No       | Redistribution rules                      |
 
-### BgpPeerGroup
+#### BgpPeerGroup
 
 | Attribute                      | Type                           | Required | Description                              |
 |--------------------------------|--------------------------------|----------|------------------------------------------|
@@ -171,11 +156,11 @@ The `bgp` attribute within a VRF provides full BGP routing protocol support incl
 | `connection_options`           | BgpPeerGroupConnectionOptions  | No       | Connection options                       |
 | `peer`                         | List[BgpPeer]                  | No       | Peers in this group                      |
 
-## OSPF Configuration
+### OSPF Configuration
 
 The `ospf` attribute within a VRF provides OSPF routing protocol support with areas, interfaces, authentication, and graceful restart.
 
-### OspfConfig
+#### OspfConfig
 
 | Attribute                      | Type                   | Required | Description                               |
 |--------------------------------|------------------------|----------|-------------------------------------------|
@@ -195,7 +180,7 @@ The `ospf` attribute within a VRF provides OSPF routing protocol support with ar
 | `export_rules`                 | List[OspfExportRule]   | No       | Export rules                              |
 | `graceful_restart`             | OspfGracefulRestart    | No       | Graceful restart configuration            |
 
-### OspfArea
+#### OspfArea
 
 | Attribute        | Type                   | Required | Description                                          |
 |------------------|------------------------|----------|------------------------------------------------------|
@@ -207,11 +192,11 @@ The `ospf` attribute within a VRF provides OSPF routing protocol support with ar
 | `interface`      | List[OspfInterface]    | No       | OSPF interfaces in this area                         |
 | `virtual_link`   | List[OspfVirtualLink]  | No       | OSPF virtual links                                   |
 
-## ECMP Configuration
+### ECMP Configuration
 
 The `ecmp` attribute within a VRF configures Equal-Cost Multi-Path routing with algorithm selection and path limits.
 
-### EcmpConfig
+#### EcmpConfig
 
 | Attribute            | Type          | Required | Description                              |
 |----------------------|---------------|----------|------------------------------------------|
@@ -221,7 +206,7 @@ The `ecmp` attribute within a VRF configures Equal-Cost Multi-Path routing with 
 | `symmetric_return`   | bool          | No       | Enable symmetric return                  |
 | `strict_source_path` | bool          | No       | Enable strict source path                |
 
-### EcmpAlgorithm
+#### EcmpAlgorithm
 
 Only one algorithm can be selected at a time (oneOf):
 
@@ -232,7 +217,7 @@ Only one algorithm can be selected at a time (oneOf):
 | `weighted_round_robin`   | EcmpWeightedRoundRobin | Weighted round-robin with interface weights |
 | `balanced_round_robin`   | Dict[str, Any]         | Balanced round-robin algorithm (empty object) |
 
-## Exceptions
+### Exceptions
 
 | Exception                    | HTTP Code | Description                                                                   |
 |------------------------------|-----------|-------------------------------------------------------------------------------|
@@ -244,11 +229,82 @@ Only one algorithm can be selected at a time (oneOf):
 | `AuthenticationError`        | 401       | Authentication failed                                                         |
 | `ServerError`                | 500       | Internal server error                                                         |
 
-## Basic Configuration
+## Methods
 
-The Logical Router service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+### List Logical Routers
 
-### Unified Client Interface (Recommended)
+```python
+# List all logical routers in a folder
+routers = client.logical_router.list(
+   folder="Texas"
+)
+
+# Process results
+for router in routers:
+   print(f"Name: {router.name}")
+   if router.routing_stack:
+      print(f"  Routing Stack: {router.routing_stack.value}")
+   if router.vrf:
+      for vrf in router.vrf:
+         print(f"  VRF: {vrf.name}")
+         if vrf.bgp and vrf.bgp.enable:
+            print(f"    BGP: AS {vrf.bgp.local_as}")
+         if vrf.ospf and vrf.ospf.enable:
+            print(f"    OSPF: Router ID {vrf.ospf.router_id}")
+         if vrf.ecmp and vrf.ecmp.enable:
+            print(f"    ECMP: max_path={vrf.ecmp.max_path}")
+
+# List with routing_stack filter
+advanced_routers = client.logical_router.list(
+   folder="Texas",
+   routing_stack=["advanced"]
+)
+
+for router in advanced_routers:
+   print(f"Advanced router: {router.name}")
+```
+
+#### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
+you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control
+which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
+
+```python
+# Only return routers defined exactly in 'Texas'
+exact_routers = client.logical_router.list(
+   folder='Texas',
+   exact_match=True
+)
+
+for router in exact_routers:
+   print(f"Exact match: {router.name} in {router.folder}")
+
+# Exclude all routers from the 'All' folder
+no_all_routers = client.logical_router.list(
+   folder='Texas',
+   exclude_folders=['All']
+)
+
+for router in no_all_routers:
+   assert router.folder != 'All'
+   print(f"Filtered out 'All': {router.name}")
+```
+
+#### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
+
+**Example:**
 
 ```python
 from scm.client import ScmClient
@@ -260,33 +316,35 @@ client = ScmClient(
    tsg_id="your_tsg_id"
 )
 
-# Access the Logical Router service directly through the client
-logical_routers = client.logical_router
+# Configure max_limit using the property setter
+client.logical_router.max_limit = 4000
+
+# List all routers - auto-paginates through results
+all_routers = client.logical_router.list(folder='Texas')
 ```
 
-### Traditional Service Instantiation (Legacy)
+### Fetch a Logical Router
 
 ```python
-from scm.client import Scm
-from scm.config.network import LogicalRouter
-
-# Initialize client
-client = Scm(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
+# Fetch by name and folder
+router = client.logical_router.fetch(
+   name="branch-router-01",
+   folder="Texas"
 )
+print(f"Found router: {router.name}")
+print(f"  Routing stack: {router.routing_stack}")
+if router.vrf:
+   for vrf in router.vrf:
+      print(f"  VRF: {vrf.name}")
+      if vrf.interface:
+         print(f"    Interfaces: {', '.join(vrf.interface)}")
 
-# Initialize LogicalRouter object explicitly
-logical_routers = LogicalRouter(client)
+# Get by ID
+router_by_id = client.logical_router.get(router.id)
+print(f"Retrieved router: {router_by_id.name}")
 ```
 
-!!! note
-    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
-
-## Usage Examples
-
-### Creating Logical Routers
+### Create a Logical Router
 
 ```python
 from scm.client import ScmClient
@@ -428,28 +486,7 @@ ospf_router = client.logical_router.create(ospf_router_data)
 print(f"Created OSPF router with ID: {ospf_router.id}")
 ```
 
-### Retrieving Logical Routers
-
-```python
-# Fetch by name and folder
-router = client.logical_router.fetch(
-   name="branch-router-01",
-   folder="Texas"
-)
-print(f"Found router: {router.name}")
-print(f"  Routing stack: {router.routing_stack}")
-if router.vrf:
-   for vrf in router.vrf:
-      print(f"  VRF: {vrf.name}")
-      if vrf.interface:
-         print(f"    Interfaces: {', '.join(vrf.interface)}")
-
-# Get by ID
-router_by_id = client.logical_router.get(router.id)
-print(f"Retrieved router: {router_by_id.name}")
-```
-
-### Updating Logical Routers
+### Update a Logical Router
 
 ```python
 # Fetch existing router
@@ -533,99 +570,7 @@ updated_ospf_router = client.logical_router.update(router_with_ospf)
 print(f"Updated OSPF router with stub area")
 ```
 
-### Listing Logical Routers
-
-```python
-# List all logical routers in a folder
-routers = client.logical_router.list(
-   folder="Texas"
-)
-
-# Process results
-for router in routers:
-   print(f"Name: {router.name}")
-   if router.routing_stack:
-      print(f"  Routing Stack: {router.routing_stack.value}")
-   if router.vrf:
-      for vrf in router.vrf:
-         print(f"  VRF: {vrf.name}")
-         if vrf.bgp and vrf.bgp.enable:
-            print(f"    BGP: AS {vrf.bgp.local_as}")
-         if vrf.ospf and vrf.ospf.enable:
-            print(f"    OSPF: Router ID {vrf.ospf.router_id}")
-         if vrf.ecmp and vrf.ecmp.enable:
-            print(f"    ECMP: max_path={vrf.ecmp.max_path}")
-
-# List with routing_stack filter
-advanced_routers = client.logical_router.list(
-   folder="Texas",
-   routing_stack=["advanced"]
-)
-
-for router in advanced_routers:
-   print(f"Advanced router: {router.name}")
-```
-
-### Filtering Responses
-
-The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
-you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control
-which objects are included or excluded after the initial API response is fetched.
-
-**Parameters:**
-
-- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
-- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
-- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
-- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
-
-**Examples:**
-
-```python
-# Only return routers defined exactly in 'Texas'
-exact_routers = client.logical_router.list(
-   folder='Texas',
-   exact_match=True
-)
-
-for router in exact_routers:
-   print(f"Exact match: {router.name} in {router.folder}")
-
-# Exclude all routers from the 'All' folder
-no_all_routers = client.logical_router.list(
-   folder='Texas',
-   exclude_folders=['All']
-)
-
-for router in no_all_routers:
-   assert router.folder != 'All'
-   print(f"Filtered out 'All': {router.name}")
-```
-
-### Controlling Pagination with max_limit
-
-The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
-
-**Example:**
-
-```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-# Configure max_limit using the property setter
-client.logical_router.max_limit = 4000
-
-# List all routers - auto-paginates through results
-all_routers = client.logical_router.list(folder='Texas')
-```
-
-### Deleting Logical Routers
+### Delete a Logical Router
 
 ```python
 # Delete by ID
@@ -633,9 +578,9 @@ router_id = "123e4567-e89b-12d3-a456-426655440000"
 client.logical_router.delete(router_id)
 ```
 
-## Managing Configuration Changes
+## Use Cases
 
-### Performing Commits
+#### Performing Commits
 
 ```python
 # Prepare commit parameters
@@ -652,7 +597,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-### Monitoring Jobs
+#### Monitoring Jobs
 
 ```python
 # Get status of specific job directly from the client
@@ -737,50 +682,7 @@ except MissingQueryParameterError as e:
    print(f"Missing parameter: {e.message}")
 ```
 
-## Best Practices
-
-1. **Client Usage**
-   - Use the unified client interface (`client.logical_router`) for streamlined code
-   - Create a single client instance and reuse it across your application
-   - Perform commit operations directly on the client object (`client.commit()`)
-
-2. **VRF Design**
-   - Use separate VRFs to segment routing domains (e.g., production, management, guest)
-   - Assign interfaces to VRFs before configuring routing protocols
-   - Use descriptive VRF names that indicate their purpose
-   - Configure administrative distances to control route preference between protocols
-
-3. **Routing Protocol Configuration**
-   - Enable only the routing protocols you need within each VRF
-   - For BGP, always set `router_id` and `local_as` explicitly
-   - For OSPF, assign the backbone area (`0.0.0.0`) first, then add stub or NSSA areas
-   - Use ECMP to distribute traffic across multiple paths for high availability
-   - Configure graceful restart for both BGP and OSPF to minimize disruption during failovers
-
-4. **Static Routes**
-   - Use static routes for simple default routing and well-known destinations
-   - Set appropriate administrative distances when mixing static routes with dynamic protocols
-   - Configure path monitoring on critical static routes to detect next-hop failures
-   - Use BFD profiles for fast failure detection on static route next-hops
-
-5. **Container Management**
-   - Always specify exactly one container (folder, snippet, or device)
-   - Use consistent container names across operations
-   - Validate container existence before operations
-
-6. **Error Handling**
-   - Implement comprehensive error handling for all operations
-   - Check job status after commits
-   - Handle specific exceptions before generic ones
-   - Log error details for troubleshooting
-
-7. **Performance**
-   - Use appropriate pagination for list operations
-   - Cache frequently accessed router configurations
-   - Implement proper retry mechanisms
-   - Use the `routing_stack` filter on `list()` to narrow results
-
-## Related Models
+## Related Topics
 
 - [LogicalRouterBaseModel](../../models/network/logical_router_models.md#Overview)
 - [LogicalRouterCreateModel](../../models/network/logical_router_models.md#Overview)

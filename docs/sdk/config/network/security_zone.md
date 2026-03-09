@@ -1,34 +1,24 @@
-# Security Zone Configuration Object
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Core Methods](#core-methods)
-3. [Security Zone Model Attributes](#security-zone-model-attributes)
-4. [Network Interface Types](#network-interface-types)
-5. [Exceptions](#exceptions)
-6. [Basic Configuration](#basic-configuration)
-7. [Usage Examples](#usage-examples)
-    - [Creating Security Zones](#creating-security-zones)
-    - [Retrieving Security Zones](#retrieving-security-zones)
-    - [Updating Security Zones](#updating-security-zones)
-    - [Listing Security Zones](#listing-security-zones)
-    - [Filtering Responses](#filtering-responses)
-    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
-    - [Deleting Security Zones](#deleting-security-zones)
-8. [Managing Configuration Changes](#managing-configuration-changes)
-    - [Performing Commits](#performing-commits)
-    - [Monitoring Jobs](#monitoring-jobs)
-9. [Error Handling](#error-handling)
-10. [Best Practices](#best-practices)
-11. [Full Script Examples](#full-script-examples)
-12. [Related Models](#related-models)
-
-## Overview
+# Security Zone
 
 The `SecurityZone` class manages security zone objects in Palo Alto Networks' Strata Cloud Manager. It extends from `BaseObject` and offers methods to create, retrieve, update, list, fetch, and delete security zones. Additionally, it provides client-side filtering for listing operations and enforces container requirements using the `folder`, `snippet`, or `device` parameters.
 
-## Core Methods
+## Class Overview
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
+# Access the Security Zone service directly through the client
+# No need to create a separate SecurityZone instance
+# The ScmClient automatically handles authentication and token refresh
+zones = client.security_zone
+```
 
 | Method     | Description                                                   | Parameters                                                                                                                       | Return Type                       |
 |------------|---------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|-----------------------------------|
@@ -39,7 +29,7 @@ The `SecurityZone` class manages security zone objects in Palo Alto Networks' St
 | `fetch()`  | Fetches a single security zone by its name within a container | `name: str`, `folder: Optional[str]`, `snippet: Optional[str]`, `device: Optional[str]`                                          | `SecurityZoneResponseModel`       |
 | `delete()` | Deletes a security zone object by its ID                      | `object_id: str`                                                                                                                 | `None`                            |
 
-## Security Zone Model Attributes
+### Security Zone Model Attributes
 
 | Attribute                      | Type          | Required      | Default | Description                                             |
 |--------------------------------|---------------|---------------|---------|--------------------------------------------------------|
@@ -59,11 +49,11 @@ The `SecurityZone` class manages security zone objects in Palo Alto Networks' St
 \* Only required for update and response models
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
-## Network Interface Types
+### Network Interface Types
 
 Security zones can use different network interface types, following a mutual exclusion pattern where exactly one type must be provided:
 
-### 1. Layer 3 Interfaces
+#### 1. Layer 3 Interfaces
 
 Layer 3 interfaces are the most common type and define routed interfaces.
 
@@ -79,7 +69,7 @@ security_zone_data = {
 }
 ```
 
-### 2. Layer 2 Interfaces
+#### 2. Layer 2 Interfaces
 
 Layer 2 interfaces operate at the data link layer.
 
@@ -94,7 +84,7 @@ security_zone_data = {
 }
 ```
 
-### 3. Virtual Wire Interfaces
+#### 3. Virtual Wire Interfaces
 
 Virtual wire interfaces connect two interfaces together.
 
@@ -108,7 +98,7 @@ security_zone_data = {
 }
 ```
 
-### 4. Tunnel Interfaces
+#### 4. Tunnel Interfaces
 
 Tunnel interfaces are used for VPN and other tunneling technologies.
 
@@ -122,7 +112,7 @@ security_zone_data = {
 }
 ```
 
-### 5. TAP Interfaces
+#### 5. TAP Interfaces
 
 TAP interfaces are used for traffic monitoring without affecting the traffic flow.
 
@@ -136,7 +126,7 @@ security_zone_data = {
 }
 ```
 
-### 6. External Interfaces
+#### 6. External Interfaces
 
 External interfaces are used for connecting to external networks.
 
@@ -150,7 +140,7 @@ security_zone_data = {
 }
 ```
 
-## Exceptions
+### Exceptions
 
 | Exception                    | HTTP Code | Description                                                                   |
 |------------------------------|-----------|-------------------------------------------------------------------------------|
@@ -162,139 +152,9 @@ security_zone_data = {
 | `AuthenticationError`        | 401       | Authentication failed                                                         |
 | `ServerError`                | 500       | Internal server error                                                         |
 
-## Basic Configuration
+## Methods
 
-The Security Zone service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
-
-### Unified Client Interface (Recommended)
-
-```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-# Access the Security Zone service directly through the client
-# No need to create a separate SecurityZone instance
-# The ScmClient automatically handles authentication and token refresh
-zones = client.security_zone
-```
-
-### Traditional Service Instantiation (Legacy)
-
-```python
-from scm.client import Scm
-from scm.config.network import SecurityZone
-
-# Initialize client
-client = Scm(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-# Initialize SecurityZone object explicitly
-zones = SecurityZone(client)
-```
-
-!!! note
-    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
-
-## Usage Examples
-
-### Creating Security Zones
-
-```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-# Define security zone configuration with Layer 3 interfaces
-security_zone_data = {
-   "name": "trust-zone",
-   "enable_user_identification": True,
-   "enable_device_identification": False,
-   "network": {
-      "layer3": ["ethernet1/1", "ethernet1/2"],
-      "zone_protection_profile": "default",
-      "enable_packet_buffer_protection": True
-   },
-   "user_acl": {
-      "include_list": ["user1", "user2"],
-      "exclude_list": []
-   },
-   "folder": "Security Zones"
-}
-
-# Create a new security zone
-new_security_zone = client.security_zone.create(security_zone_data)
-print(f"Created security zone with ID: {new_security_zone.id}")
-
-# Create a security zone with Layer 2 interfaces
-layer2_zone_data = {
-   "name": "layer2-zone",
-   "enable_user_identification": False,
-   "network": {
-      "layer2": ["ethernet1/3", "ethernet1/4"],
-      "log_setting": "default-log-setting"
-   },
-   "folder": "Security Zones"
-}
-
-layer2_zone = client.security_zone.create(layer2_zone_data)
-print(f"Created Layer 2 security zone with ID: {layer2_zone.id}")
-```
-
-### Retrieving Security Zones
-
-```python
-# Fetch by name and folder
-zone = client.security_zone.fetch(
-   name="trust-zone",
-   folder="Security Zones"
-)
-print(f"Found security zone: {zone.name}")
-
-# Get by ID
-zone_by_id = client.security_zone.get(zone.id)
-print(f"Retrieved security zone: {zone_by_id.name}")
-```
-
-### Updating Security Zones
-
-```python
-# Fetch existing security zone
-existing_zone = client.security_zone.fetch(
-   name="trust-zone",
-   folder="Security Zones"
-)
-
-# Update specific attributes
-if existing_zone.network and existing_zone.network.layer3:
-    # Add a new interface to the existing list
-    existing_zone.network.layer3.append("ethernet1/3")
-
-# Update protection profile
-if existing_zone.network:
-    existing_zone.network.zone_protection_profile = "enhanced-security"
-
-# Update user identification setting
-existing_zone.enable_device_identification = True
-
-# Perform update
-updated_zone = client.security_zone.update(existing_zone)
-```
-
-### Listing Security Zones
+### List Security Zones
 
 ```python
 # Pass filters directly into the list method
@@ -329,7 +189,7 @@ list_params = {
 filtered_zones = client.security_zone.list(**list_params)
 ```
 
-### Filtering Responses
+#### Filtering Responses
 
 The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
 you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control
@@ -397,7 +257,7 @@ for zone in combined_filters:
    print(f"Combined filters result: {zone.name} in {zone.folder}")
 ```
 
-### Controlling Pagination with max_limit
+#### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
@@ -422,7 +282,95 @@ all_zones = client.security_zone.list(folder='Security Zones')
 # The security zones are fetched in chunks according to the max_limit setting.
 ```
 
-### Deleting Security Zones
+### Fetch a Security Zone
+
+```python
+# Fetch by name and folder
+zone = client.security_zone.fetch(
+   name="trust-zone",
+   folder="Security Zones"
+)
+print(f"Found security zone: {zone.name}")
+
+# Get by ID
+zone_by_id = client.security_zone.get(zone.id)
+print(f"Retrieved security zone: {zone_by_id.name}")
+```
+
+### Create a Security Zone
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
+# Define security zone configuration with Layer 3 interfaces
+security_zone_data = {
+   "name": "trust-zone",
+   "enable_user_identification": True,
+   "enable_device_identification": False,
+   "network": {
+      "layer3": ["ethernet1/1", "ethernet1/2"],
+      "zone_protection_profile": "default",
+      "enable_packet_buffer_protection": True
+   },
+   "user_acl": {
+      "include_list": ["user1", "user2"],
+      "exclude_list": []
+   },
+   "folder": "Security Zones"
+}
+
+# Create a new security zone
+new_security_zone = client.security_zone.create(security_zone_data)
+print(f"Created security zone with ID: {new_security_zone.id}")
+
+# Create a security zone with Layer 2 interfaces
+layer2_zone_data = {
+   "name": "layer2-zone",
+   "enable_user_identification": False,
+   "network": {
+      "layer2": ["ethernet1/3", "ethernet1/4"],
+      "log_setting": "default-log-setting"
+   },
+   "folder": "Security Zones"
+}
+
+layer2_zone = client.security_zone.create(layer2_zone_data)
+print(f"Created Layer 2 security zone with ID: {layer2_zone.id}")
+```
+
+### Update a Security Zone
+
+```python
+# Fetch existing security zone
+existing_zone = client.security_zone.fetch(
+   name="trust-zone",
+   folder="Security Zones"
+)
+
+# Update specific attributes
+if existing_zone.network and existing_zone.network.layer3:
+    # Add a new interface to the existing list
+    existing_zone.network.layer3.append("ethernet1/3")
+
+# Update protection profile
+if existing_zone.network:
+    existing_zone.network.zone_protection_profile = "enhanced-security"
+
+# Update user identification setting
+existing_zone.enable_device_identification = True
+
+# Perform update
+updated_zone = client.security_zone.update(existing_zone)
+```
+
+### Delete a Security Zone
 
 ```python
 # Delete by ID
@@ -430,9 +378,9 @@ zone_id = "123e4567-e89b-12d3-a456-426655440000"
 client.security_zone.delete(zone_id)
 ```
 
-## Managing Configuration Changes
+## Use Cases
 
-### Performing Commits
+#### Performing Commits
 
 ```python
 # Prepare commit parameters
@@ -449,7 +397,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-### Monitoring Jobs
+#### Monitoring Jobs
 
 ```python
 # Get status of specific job directly from the client
@@ -519,51 +467,7 @@ except MissingQueryParameterError as e:
    print(f"Missing parameter: {e.message}")
 ```
 
-## Best Practices
-
-1. **Client Usage**
-   - Use the unified client interface (`client.security_zone`) for streamlined code
-   - Create a single client instance and reuse it across your application
-   - Perform commit operations directly on the client object (`client.commit()`)
-   - For custom max_limit settings, create a dedicated service instance if needed
-
-2. **Security Zone Configuration**
-   - Choose appropriate network interface types for your deployment scenario
-   - Use clear and descriptive names for security zones
-   - Configure only one network interface type per zone
-   - Enable user and device identification only when necessary for policy enforcement
-   - Use proper zone protection profiles to secure network segments
-
-3. **Container Management**
-   - Always specify exactly one container (folder, snippet, or device)
-   - Use consistent container names across operations
-   - Validate container existence before operations
-   - Group related zones logically
-
-4. **Error Handling**
-   - Implement comprehensive error handling for all operations
-   - Check job status after commits
-   - Handle specific exceptions before generic ones
-   - Log error details for troubleshooting
-
-5. **Performance**
-   - Use appropriate pagination for list operations
-   - Cache frequently accessed security zones
-   - Implement proper retry mechanisms
-   - Monitor timeout settings
-
-6. **Security**
-   - Follow the least privilege principle for zone configurations
-   - Validate input data before operations
-   - Document security implications
-   - Monitor zone usage in security policies
-
-## Full Script Examples
-
-Refer to
-the [security_zone.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/network/security_zone.py).
-
-## Related Models
+## Related Topics
 
 - [SecurityZoneBaseModel](../../models/network/security_zone_models.md#Overview)
 - [SecurityZoneCreateModel](../../models/network/security_zone_models.md#Overview)
@@ -573,3 +477,6 @@ the [security_zone.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/e
 - [UserAcl](../../models/network/security_zone_models.md#Overview)
 - [DeviceAcl](../../models/network/security_zone_models.md#Overview)
 - [NetworkInterfaceType](../../models/network/security_zone_models.md#Overview)
+
+Refer to
+the [security_zone.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/network/security_zone.py).

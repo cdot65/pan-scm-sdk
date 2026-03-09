@@ -1,14 +1,6 @@
 # QoS Profile Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Exceptions](#exceptions)
-4. [Model Validators](#model-validators)
-5. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The QoS Profile models provide a structured way to represent and validate QoS profile configuration data for Palo Alto Networks' Strata Cloud Manager. These models manage bandwidth allocation settings including aggregate bandwidth limits and per-class bandwidth type configurations used for traffic prioritization.
 
@@ -31,12 +23,12 @@ This is the base model containing fields common to all QoS profile operations.
 
 | Attribute              | Type              | Required | Default | Description                                                                |
 |------------------------|-------------------|----------|---------|----------------------------------------------------------------------------|
-| name                   | str               | Yes      | None    | Profile name. Max 31 chars. Pattern: `[0-9a-zA-Z._-]`                     |
-| aggregate_bandwidth    | Dict[str, Any]    | No       | None    | Aggregate bandwidth settings (egress_max, egress_guaranteed).              |
-| class_bandwidth_type   | Dict[str, Any]    | No       | None    | Class bandwidth type configuration (mbps or percentage).                   |
-| folder                 | str               | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.             |
-| snippet                | str               | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.            |
-| device                 | str               | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.             |
+| `name` | `str` | Yes      | None    | Profile name. Max 31 chars. Pattern: `[0-9a-zA-Z._-]`                     |
+| `aggregate_bandwidth` | `Dict[str, Any]` | No       | None    | Aggregate bandwidth settings (egress_max, egress_guaranteed).              |
+| `class_bandwidth_type` | `Dict[str, Any]` | No       | None    | Class bandwidth type configuration (mbps or percentage).                   |
+| `folder` | `str` | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.             |
+| `snippet` | `str` | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.            |
+| `device` | `str` | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.             |
 
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
@@ -50,7 +42,7 @@ Extends `QosProfileBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                        |
 |-----------|------|----------|---------|----------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the QoS profile           |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the QoS profile           |
 
 ### QosProfileResponseModel
 
@@ -58,9 +50,10 @@ Extends `QosProfileBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                        |
 |-----------|------|----------|---------|----------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the QoS profile           |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the QoS profile           |
 
-> **Note:** The `QosProfileResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
+!!! note
+    The `QosProfileResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
 
 ## Exceptions
 

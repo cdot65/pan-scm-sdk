@@ -1,16 +1,6 @@
 # Security Zone Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Enum Types](#enum-types)
-4. [Supporting Models](#supporting-models)
-5. [Exceptions](#exceptions)
-6. [Model Validators](#model-validators)
-7. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The Security Zone models provide a structured way to represent and validate security zone configuration data for Palo Alto Networks' Strata Cloud Manager. These models ensure data integrity when creating and updating security zones, enforcing proper network interface types, container specifications, and field validations.
 
@@ -37,17 +27,17 @@ This is the base model containing fields common to all security zone operations.
 
 | Attribute                    | Type                 | Required      | Default | Description                                                                                                     |
 |------------------------------|----------------------|---------------|---------|----------------------------------------------------------------------------------------------------------------|
-| name                         | str                  | Yes           | None    | Name of security zone. Pattern: `^[0-9a-zA-Z._\- ]+$`. Max 63 chars.                                           |
-| enable_user_identification   | bool                 | No            | None    | Enable user identification for this zone.                                                                      |
-| enable_device_identification | bool                 | No            | None    | Enable device identification for this zone.                                                                    |
-| dos_profile                  | str                  | No            | None    | DoS profile name associated with this zone.                                                                    |
-| dos_log_setting              | str                  | No            | None    | DoS log setting name for this zone.                                                                            |
-| network                      | NetworkConfig        | No            | None    | Network configuration with interface assignments.                                                              |
-| user_acl                     | UserAcl              | No            | None    | User access control list configuration.                                                                        |
-| device_acl                   | DeviceAcl            | No            | None    | Device access control list configuration.                                                                      |
-| folder                       | str                  | No**          | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.                                                  |
-| snippet                      | str                  | No**          | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.                                                 |
-| device                       | str                  | No**          | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.                                                  |
+| `name` | `str` | Yes           | None    | Name of security zone. Pattern: `^[0-9a-zA-Z._\- ]+$`. Max 63 chars.                                           |
+| `enable_user_identification` | `bool` | No            | None    | Enable user identification for this zone.                                                                      |
+| `enable_device_identification` | `bool` | No            | None    | Enable device identification for this zone.                                                                    |
+| `dos_profile` | `str` | No            | None    | DoS profile name associated with this zone.                                                                    |
+| `dos_log_setting` | `str` | No            | None    | DoS log setting name for this zone.                                                                            |
+| `network` | `NetworkConfig` | No            | None    | Network configuration with interface assignments.                                                              |
+| `user_acl` | `UserAcl` | No            | None    | User access control list configuration.                                                                        |
+| `device_acl` | `DeviceAcl` | No            | None    | Device access control list configuration.                                                                      |
+| `folder` | `str` | No**          | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.                                                  |
+| `snippet` | `str` | No**          | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.                                                 |
+| `device` | `str` | No**          | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.                                                  |
 
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
@@ -61,7 +51,7 @@ Extends `SecurityZoneBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                |
 |-----------|------|----------|---------|-------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the security zone |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the security zone |
 
 ### SecurityZoneResponseModel
 
@@ -69,7 +59,7 @@ Extends `SecurityZoneBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                |
 |-----------|------|----------|---------|-------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the security zone |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the security zone |
 
 ## Enum Types
 
@@ -94,15 +84,15 @@ This model defines the network configuration for a security zone, including inte
 
 | Attribute                        | Type           | Required | Default | Description                                         |
 |----------------------------------|----------------|----------|---------|-----------------------------------------------------|
-| zone_protection_profile          | str            | No       | None    | Zone protection profile name for enhanced security  |
-| enable_packet_buffer_protection  | bool           | No       | None    | Enable packet buffer protection for this zone       |
-| log_setting                      | str            | No       | None    | Log setting name for this zone                      |
-| tap                              | List[str]      | No*      | None    | TAP interfaces assigned to this zone                |
-| virtual_wire                     | List[str]      | No*      | None    | Virtual wire interfaces assigned to this zone       |
-| layer2                           | List[str]      | No*      | None    | Layer 2 interfaces assigned to this zone            |
-| layer3                           | List[str]      | No*      | None    | Layer 3 interfaces assigned to this zone            |
-| tunnel                           | Dict[str, Any] | No*      | None    | Tunnel configuration for this zone                  |
-| external                         | List[str]      | No*      | None    | External interfaces assigned to this zone           |
+| `zone_protection_profile` | `str` | No       | None    | Zone protection profile name for enhanced security  |
+| `enable_packet_buffer_protection` | `bool` | No       | None    | Enable packet buffer protection for this zone       |
+| `log_setting` | `str` | No       | None    | Log setting name for this zone                      |
+| `tap` | `List[str]` | No*      | None    | TAP interfaces assigned to this zone                |
+| `virtual_wire` | `List[str]` | No*      | None    | Virtual wire interfaces assigned to this zone       |
+| `layer2` | `List[str]` | No*      | None    | Layer 2 interfaces assigned to this zone            |
+| `layer3` | `List[str]` | No*      | None    | Layer 3 interfaces assigned to this zone            |
+| `tunnel` | `Dict[str, Any]` | No*      | None    | Tunnel configuration for this zone                  |
+| `external` | `List[str]` | No*      | None    | External interfaces assigned to this zone           |
 
 \* Only one network interface type (tap, virtual_wire, layer2, layer3, tunnel, or external) can be configured at a time.
 
@@ -112,8 +102,8 @@ This model defines the user access control list configuration.
 
 | Attribute     | Type       | Required | Default | Description              |
 |---------------|------------|----------|---------|--------------------------|
-| include_list  | List[str]  | No       | []      | List of users to include |
-| exclude_list  | List[str]  | No       | []      | List of users to exclude |
+| `include_list` | `List[str]` | No       | []      | List of users to include |
+| `exclude_list` | `List[str]` | No       | []      | List of users to exclude |
 
 ### DeviceAcl
 
@@ -121,8 +111,8 @@ This model defines the device access control list configuration.
 
 | Attribute     | Type       | Required | Default | Description                |
 |---------------|------------|----------|---------|----------------------------|
-| include_list  | List[str]  | No       | []      | List of devices to include |
-| exclude_list  | List[str]  | No       | []      | List of devices to exclude |
+| `include_list` | `List[str]` | No       | []      | List of devices to include |
+| `exclude_list` | `List[str]` | No       | []      | List of devices to exclude |
 
 ## Exceptions
 

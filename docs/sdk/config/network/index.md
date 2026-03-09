@@ -1,14 +1,5 @@
 # Network Configuration Objects
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Available Network Objects](#available-network-objects)
-3. [Common Features](#common-features)
-4. [Usage Example](#usage-example)
-
-## Overview
-
 This section covers the configuration of network features provided by the Palo Alto Networks Strata Cloud Manager SDK. Each configuration object corresponds to a resource in the Strata Cloud Manager and provides methods for CRUD (Create, Read, Update, Delete) operations.
 
 ## Available Network Objects

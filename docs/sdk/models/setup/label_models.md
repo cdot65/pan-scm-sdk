@@ -1,14 +1,6 @@
 # Label Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Exceptions](#exceptions)
-4. [Model Validators](#model-validators)
-5. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The Label models provide a structured way to manage label resources in Palo Alto Networks' Strata Cloud Manager.
 These models represent simple key-value labels used for resource classification and organization. The models handle
@@ -31,8 +23,8 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 | Attribute   | Type | Required | Default | Description                             |
 |-------------|------|----------|---------|-----------------------------------------|
-| name        | str  | Yes      | None    | Name of label. Max length: 63 chars     |
-| description | str  | No       | None    | Description of the label                |
+| `name` | `str` | Yes      | None    | Name of label. Max length: 63 chars     |
+| `description` | `str` | No       | None    | Description of the label                |
 
 ### LabelCreateModel
 
@@ -44,7 +36,7 @@ Extends `LabelBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                         |
 |-----------|------|----------|---------|-------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the label  |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the label  |
 
 ### LabelResponseModel
 
@@ -52,7 +44,7 @@ Extends `LabelBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                         |
 |-----------|------|----------|---------|-------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the label  |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the label  |
 
 ## Exceptions
 
