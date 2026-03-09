@@ -1,171 +1,184 @@
-a.external-link {
-  /* For right to left languages */
-  direction: ltr;
-  display: inline-block;
+/* ── Deep Purple / Amber overrides ────────────────────────────────── */
+
+:root {
+  --md-admonition-icon--tip: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>');
 }
 
-a.external-link::after {
-  /* \00A0 is a non-breaking space
-          to make the mark be on the same line as the link
-      */
-  content: "\00A0[↪]";
+/* ── Typography & Readability ─────────────────────────────────────── */
+
+/* Wider content area for easier reading */
+.md-grid {
+  max-width: 1200px;
 }
 
-a.internal-link::after {
-  /* \00A0 is a non-breaking space
-          to make the mark be on the same line as the link
-      */
-  content: "\00A0↪";
+/* Relaxed line height for body text */
+.md-typeset {
+  font-size: 0.82rem;
+  line-height: 1.8;
 }
 
-.shadow {
-  box-shadow: 5px 5px 10px #999;
+/* Breathe between paragraphs */
+.md-typeset p {
+  margin-bottom: 1em;
 }
 
-/* Give space to lower icons so Gitter chat doesn't get on top of them */
-.md-footer-meta {
-  padding-bottom: 2em;
+/* Headings: clear hierarchy with spacing */
+.md-typeset h1 {
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 0.8em;
+  letter-spacing: -0.02em;
 }
 
-.user-list {
+.md-typeset h2 {
+  font-weight: 600;
+  margin-top: 2em;
+  margin-bottom: 0.6em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+}
+
+.md-typeset h3 {
+  font-weight: 600;
+  margin-top: 1.6em;
+  margin-bottom: 0.4em;
+}
+
+/* ── Hero Section (Home Page) ─────────────────────────────────────── */
+
+.hero {
+  text-align: center;
+  padding: 2rem 0 1rem;
+}
+
+.hero h1 {
+  font-size: 2.4rem;
+  margin-bottom: 0.2em;
+  border-bottom: none;
+}
+
+.hero p:first-of-type {
+  font-size: 1.15rem;
+  color: var(--md-default-fg-color--light);
+  margin-bottom: 1.2em;
+}
+
+.hero-logo {
+  width: 320px;
+  max-width: 80%;
+  height: auto;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 4px 12px rgba(248, 182, 32, 0.25));
+}
+
+[data-md-color-scheme="slate"] .hero-logo {
+  filter: drop-shadow(0 4px 12px rgba(248, 182, 32, 0.4));
+}
+
+/* ── Admonition accent colors ─────────────────────────────────────── */
+
+.md-typeset .admonition.tip,
+.md-typeset details.tip {
+  border-color: #ffb300;
+}
+
+.md-typeset .tip > .admonition-title,
+.md-typeset .tip > summary {
+  background-color: rgba(255, 179, 0, 0.1);
+}
+
+.md-typeset .admonition.info,
+.md-typeset details.info {
+  border-color: #7e57c2;
+}
+
+.md-typeset .info > .admonition-title,
+.md-typeset .info > summary {
+  background-color: rgba(126, 87, 194, 0.1);
+}
+
+/* ── Tables ───────────────────────────────────────────────────────── */
+
+.md-typeset table:not([class]) th {
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  font-weight: 600;
+}
+
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) th {
+  background-color: rgba(126, 87, 194, 0.3);
+  color: var(--md-default-fg-color);
+}
+
+.md-typeset table:not([class]) tbody tr:hover {
+  background-color: rgba(126, 87, 194, 0.04);
+}
+
+/* ── Code blocks ──────────────────────────────────────────────────── */
+
+.md-typeset code {
+  border-radius: 4px;
+  font-size: 0.82em;
+}
+
+.md-typeset pre > code {
+  line-height: 1.6;
+}
+
+/* ── Mermaid diagrams ─────────────────────────────────────────────── */
+
+.md-typeset .mermaid {
+  margin: 1.5em 0;
+  text-align: center;
+}
+
+/* ── Navigation ───────────────────────────────────────────────────── */
+
+@media screen and (min-width: 76.25em) {
+  .md-nav--lifted > .md-nav__list > .md-nav__item--active > .md-nav__link {
+    font-weight: 600;
+  }
+}
+
+/* ── Footer ───────────────────────────────────────────────────────── */
+
+.md-footer-meta__inner {
   display: flex;
   flex-wrap: wrap;
-  margin-bottom: 2rem;
+  justify-content: space-between;
 }
 
-.user-list-center {
-  justify-content: space-evenly;
+/* ── Badges ───────────────────────────────────────────────────────── */
+
+.md-typeset img[alt="CI"],
+.md-typeset img[alt="License"],
+.md-typeset img[alt="Python 3.10+"],
+.md-typeset img[alt="PyPI"] {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 4px;
 }
 
-.user {
-  margin: 1em;
-  min-width: 7em;
-}
+/* ── Content tabs accent ──────────────────────────────────────────── */
 
-.user .avatar-wrapper {
-  width: 80px;
-  height: 80px;
-  margin: 10px auto;
-  overflow: hidden;
-  border-radius: 50%;
-  position: relative;
-}
-
-.user .avatar-wrapper img {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.user .title {
-  text-align: center;
-}
-
-.user .count {
-  font-size: 80%;
-  text-align: center;
-}
-
-a.announce-link:link,
-a.announce-link:visited {
-  color: #fff;
-}
-
-a.announce-link:hover {
+.md-typeset .tabbed-labels > label:hover {
   color: var(--md-accent-fg-color);
 }
 
-.announce-wrapper {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  align-items: center;
+/* ── Lists: tighter but readable ──────────────────────────────────── */
+
+.md-typeset ul,
+.md-typeset ol {
+  margin-bottom: 1em;
 }
 
-.announce-wrapper div.item {
-  display: none;
+.md-typeset li {
+  margin-bottom: 0.3em;
 }
 
-.announce-wrapper .sponsor-badge {
-  display: block;
-  position: absolute;
-  top: -10px;
-  right: 0;
-  font-size: 0.5rem;
-  color: #999;
-  background-color: #666;
-  border-radius: 10px;
-  padding: 0 10px;
-  z-index: 10;
-}
+/* ── Horizontal rules ─────────────────────────────────────────────── */
 
-.announce-wrapper .sponsor-image {
-  display: block;
-  border-radius: 20px;
-}
-
-.announce-wrapper > div {
-  min-height: 40px;
-  display: flex;
-  align-items: center;
-}
-
-.twitter {
-  color: #00acee;
-}
-
-/* Right to left languages */
-code {
-  direction: ltr;
-  display: inline-block;
-}
-
-.md-content__inner h1 {
-  direction: ltr !important;
-}
-
-.illustration {
-  margin-top: 2em;
-  margin-bottom: 2em;
-}
-
-/* Screenshots */
-/*
-  Simulate a browser window frame.
-  Inspired by Termynal's CSS tricks with modifications
-  */
-
-.screenshot {
-  display: block;
-  background-color: #d3e0de;
-  border-radius: 4px;
-  padding: 45px 5px 5px;
-  position: relative;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-}
-
-.screenshot img {
-  display: block;
-  border-radius: 2px;
-}
-
-.screenshot:before {
-  content: "";
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  display: inline-block;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  /* A little hack to display the window buttons in one pseudo element. */
-  background: #d9515d;
-  -webkit-box-shadow:
-    25px 0 0 #f4c025,
-    50px 0 0 #3ec930;
-  box-shadow:
-    25px 0 0 #f4c025,
-    50px 0 0 #3ec930;
+.md-typeset hr {
+  margin: 2em 0;
+  border-color: var(--md-default-fg-color--lightest);
 }
