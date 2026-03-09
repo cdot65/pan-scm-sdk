@@ -202,6 +202,11 @@ The unified client provides access to the following services through attribute-b
 | `decryption_profile`               | SSL/TLS traffic inspection configurations                     |
 | `dns_security_profile`             | Protection against DNS-based threats and tunneling            |
 | `security_rule`                    | Core security policies controlling network traffic            |
+| `authentication_rule`              | Authentication policy rules for identity-based access         |
+| `decryption_rule`                  | SSL/TLS decryption policy rules                               |
+| `app_override_rule`                | Application override rules for custom app identification      |
+| `file_blocking_profile`            | File blocking security profiles                               |
+| `url_access_profile`               | URL filtering access profiles                                 |
 | `url_category`                     | Custom URL categorization for web filtering                   |
 | `vulnerability_protection_profile` | Defense against known CVEs and exploit attempts               |
 | `wildfire_antivirus_profile`       | Cloud-based malware analysis and zero-day protection          |
@@ -213,6 +218,13 @@ The unified client provides access to the following services through attribute-b
 | `label`                            | Resource classification and simple key-value object labels    |
 | `snippet`                          | Reusable configuration snippets                               |
 | `variable`                         | Typed variables with flexible container scoping               |
+| **Identity**                       |                                                               |
+| `authentication_profile`           | Authentication profiles for identity-based access control     |
+| `kerberos_server_profile`          | Kerberos server configurations for domain authentication      |
+| `ldap_server_profile`              | LDAP server configurations for directory integration          |
+| `radius_server_profile`            | RADIUS server configurations for AAA authentication           |
+| `saml_server_profile`              | SAML identity provider configurations for SSO                 |
+| `tacacs_server_profile`            | TACACS+ server configurations for centralized AAA             |
 
 ---
 
