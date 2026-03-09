@@ -180,6 +180,14 @@ nav:
           - URL Categories: sdk/config/security_services/url_categories.md
           - WildFire Antivirus Profiles: sdk/config/security_services/wildfire_antivirus.md
           - Vulnerability Protection Profiles: sdk/config/security_services/vulnerability_protection_profile.md
+      - Identity:
+          - Overview: sdk/config/identity/index.md
+          - Authentication Profiles: sdk/config/identity/authentication_profile.md
+          - Kerberos Server Profiles: sdk/config/identity/kerberos_server_profile.md
+          - LDAP Server Profiles: sdk/config/identity/ldap_server_profile.md
+          - RADIUS Server Profiles: sdk/config/identity/radius_server_profile.md
+          - SAML Server Profiles: sdk/config/identity/saml_server_profile.md
+          - TACACS+ Server Profiles: sdk/config/identity/tacacs_server_profile.md
       - Setup:
           - Overview: sdk/config/setup/index.md
           - Folders: sdk/config/setup/folder.md
@@ -264,6 +272,14 @@ nav:
           - URL Categories: sdk/models/security_services/url_categories_models.md
           - WildFire Antivirus Profiles: sdk/models/security_services/wildfire_antivirus_profile_models.md
           - Vulnerability Protection Profiles: sdk/models/security_services/vulnerability_protection_profile_models.md
+      - Identity:
+          - Overview: sdk/models/identity/index.md
+          - Authentication Profiles: sdk/models/identity/authentication_profile_models.md
+          - Kerberos Server Profiles: sdk/models/identity/kerberos_server_profile_models.md
+          - LDAP Server Profiles: sdk/models/identity/ldap_server_profile_models.md
+          - RADIUS Server Profiles: sdk/models/identity/radius_server_profile_models.md
+          - SAML Server Profiles: sdk/models/identity/saml_server_profile_models.md
+          - TACACS+ Server Profiles: sdk/models/identity/tacacs_server_profile_models.md
       - Setup:
           - Overview: sdk/models/setup/index.md
           - Folders: sdk/models/setup/folder_models.md
