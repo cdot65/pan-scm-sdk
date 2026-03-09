@@ -1,164 +1,94 @@
-# Network Location Configuration Object
+# Network Locations Configuration Object
 
-## Table of Contents
-1. [Overview](#overview)
-2. [Core Methods](#core-methods)
-3. [Model Attributes](#model-attributes)
-4. [Exceptions](#exceptions)
-5. [Basic Configuration](#basic-configuration)
-6. [Usage Examples](#usage-examples)
-7. [Best Practices](#best-practices)
-8. [Related Models](#related-models)
+Provides read-only access to geographic network location objects in Palo Alto Networks Strata Cloud Manager.
 
-## Overview
+## Class Overview
 
-The `NetworkLocations` class provides access to network location objects in Palo Alto Networks' Strata Cloud Manager. These objects represent geographic network locations that can be used for service connectivity and are read-only resources in the API.
+The `NetworkLocations` class provides access to network location objects representing geographic locations for service connectivity. This is a read-only resource supporting only list and fetch operations.
 
-## Basic Configuration
+### Methods
 
-There are two approaches to configure and use the NetworkLocations service:
+| Method    | Description                          | Parameters   | Return Type                |
+|-----------|--------------------------------------|--------------|----------------------------|
+| `list()`  | List locations with optional filters | `**filters`  | `List[NetworkLocationModel]` |
+| `fetch()` | Retrieve a location by its value     | `value: str` | `NetworkLocationModel`     |
 
-### Unified Client Interface (Recommended)
+### Model Attributes
+
+| Attribute          | Type  | Required | Default | Description                                             |
+|--------------------|-------|----------|---------|---------------------------------------------------------|
+| `value`            | str   | Yes      | None    | Unique identifier for the location (e.g., "us-west-1")  |
+| `display`          | str   | Yes      | None    | Human-readable location name                            |
+| `continent`        | str   | No       | None    | Continent where the location exists                     |
+| `region`           | str   | No       | None    | Geographic region of the location                       |
+| `latitude`         | float | No       | None    | Latitude coordinate (-90 to 90)                         |
+| `longitude`        | float | No       | None    | Longitude coordinate (-180 to 180)                      |
+| `aggregate_region` | str   | No       | None    | Higher-level regional grouping                          |
+
+### Exceptions
+
+| Exception                    | HTTP Code | Description                              |
+|------------------------------|-----------|------------------------------------------|
+| `MissingQueryParameterError` | 400       | When value parameter is missing or empty |
+| `InvalidObjectError`         | 404       | When requested location is not found     |
+
+### Basic Configuration
 
 ```python
 from scm.client import ScmClient
 
-# Initialize the SCM client
 client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
 )
 
-# Access network locations directly through the client
-locations = client.network_location.list()
+locations = client.network_location
 ```
 
-### Traditional Service Instantiation (Legacy)
-
-```python
-from scm.client import Scm
-from scm.config.deployment import NetworkLocations
-
-# Initialize the SCM client
-client = Scm(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
-
-# Create a NetworkLocations client instance
-network_locations = NetworkLocations(client)
-```
-
-!!! note
-    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
-
-## Core Methods
-
-| Method     | Description                           | Parameters                | Return Type               |
-|------------|---------------------------------------|---------------------------|---------------------------|
-| `list()`   | List locations with optional filters  | `**filters`              | `List[NetworkLocationModel]` |
-| `fetch()`  | Retrieve a location by its value      | `value: str`             | `NetworkLocationModel`     |
-
-## Model Attributes
-
-| Attribute          | Type   | Required | Default | Description                                            |
-|--------------------|--------|----------|---------|--------------------------------------------------------|
-| `value`            | str    | Yes      | None    | Unique identifier for the location (e.g., "us-west-1") |
-| `display`          | str    | Yes      | None    | Human-readable location name                           |
-| `continent`        | str    | No       | None    | Continent where the location exists                    |
-| `region`           | str    | No       | None    | Geographic region of the location                      |
-| `latitude`         | float  | No       | None    | Latitude coordinate (-90 to 90)                        |
-| `longitude`        | float  | No       | None    | Longitude coordinate (-180 to 180)                     |
-| `aggregate_region` | str    | No       | None    | Higher-level regional grouping                         |
-
-## Exceptions
-
-| Exception                   | HTTP Code | Description                                  |
-|-----------------------------|-----------|----------------------------------------------|
-| `MissingQueryParameterError` | 400      | When value parameter is missing or empty     |
-| `InvalidObjectError`         | 404      | When requested location is not found         |
-
-## Usage Examples
+## Methods
 
 ### List Network Locations
 
 ```python
-from scm.client import ScmClient
-from scm.exceptions import APIError
+locations = client.network_location.list()
 
-# Initialize client
-client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
-
-# Get all network locations
-try:
-    # Using unified client approach
-    locations = client.network_location.list()
-
-    # Print the location values
-    print(f"Found {len(locations)} network locations:")
-    for location in locations:
-        print(f"Value: {location.value}, Display: {location.display}, Region: {location.region}")
-except APIError as e:
-    print(f"Error retrieving network locations: {e.message}")
+print(f"Found {len(locations)} network locations:")
+for location in locations:
+    print(f"Value: {location.value}, Display: {location.display}, Region: {location.region}")
 ```
 
-### Filter Network Locations
+**Filtering responses:**
 
 ```python
-from scm.client import ScmClient
-from scm.exceptions import APIError
+# Filter by continent
+us_locations = client.network_location.list(continent="North America")
 
-# Initialize client
-client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
+# Filter by multiple criteria
+west_coast = client.network_location.list(
+    continent="North America",
+    aggregate_region="us-southwest"
 )
 
-try:
-    # Filter locations by continent
-    us_locations = client.network_location.list(continent="North America")
-    print(f"Found {len(us_locations)} locations in North America")
-
-    # Filter locations by multiple criteria
-    west_coast = client.network_location.list(
-        continent="North America",
-        aggregate_region="us-southwest"
-    )
-
-    # Print the results
-    print(f"Found {len(west_coast)} locations in US Southwest:")
-    for location in west_coast:
-        print(f"Value: {location.value}, Display: {location.display}")
-except APIError as e:
-    print(f"Error filtering network locations: {e.message}")
+# Filter by region
+regions = client.network_location.list(region=["us-west2", "us-east4"])
 ```
 
-### Fetch a Specific Network Location
+**Controlling pagination with max_limit:**
 
 ```python
-from scm.client import ScmClient
+client.network_location.max_limit = 500
+
+locations = client.network_location.list()
+```
+
+### Fetch a Network Location
+
+```python
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 
-# Initialize client
-client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
-
 try:
-    # Fetch a specific network location by its value
     location = client.network_location.fetch("us-west-1")
-
-    # Print the location details
-    print(f"Successfully retrieved location:")
     print(f"Value: {location.value}")
     print(f"Display name: {location.display}")
     print(f"Continent: {location.continent}")
@@ -170,136 +100,30 @@ except InvalidObjectError:
     print("Error: Location not found")
 ```
 
-## Method Details
-
-### list
+## Error Handling
 
 ```python
-def list(**filters) -> List[NetworkLocationModel]:
-```
-
-Lists network location objects with optional filtering.
-
-**Parameters:**
-
-- **filters**: Keyword arguments for filtering the results
-  - `value`: Filter by location value (string or list)
-  - `display`: Filter by display name (string or list)
-  - `region`: Filter by region (string or list)
-  - `continent`: Filter by continent (string or list)
-  - `aggregate_region`: Filter by aggregate region (string or list)
-
-**Returns:**
-
-- List of `NetworkLocationModel` objects matching the filters
-
-**Example:**
-
-```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
+from scm.exceptions import (
+    InvalidObjectError,
+    MissingQueryParameterError,
+    APIError
 )
 
-# List all locations in Europe
-europe_locations = client.network_location.list(continent="Europe")
-print(f"Found {len(europe_locations)} locations in Europe")
-
-# List specific regions
-regions = client.network_location.list(region=["us-west2", "us-east4"])
-print(f"Found {len(regions)} locations in specific regions")
-```
-
-### fetch
-
-```python
-def fetch(value: str) -> NetworkLocationModel:
-```
-
-Fetches a single network location by its value.
-
-**Parameters:**
-
-- `value`: The system value of the network location to fetch (e.g., "us-west-1")
-
-**Returns:**
-
-- `NetworkLocationModel` object if found
-
-**Raises:**
-
-- `MissingQueryParameterError`: If the value is empty
-- `InvalidObjectError`: If no location with the given value is found
-
-**Example:**
-
-```python
-from scm.client import ScmClient
-from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-
-# Initialize client
-client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
-
-# Fetch a location by its value
 try:
-    location = client.network_location.fetch("us-west-1")
-    print(f"Found location: {location.display}")
-    print(f"Continent: {location.continent}")
-    print(f"Region: {location.region}")
-except MissingQueryParameterError:
-    print("Error: Location value cannot be empty")
+    locations = client.network_location.list(continent="North America")
+except APIError as e:
+    print(f"Error retrieving network locations: {e.message}")
+
+try:
+    location = client.network_location.fetch("nonexistent-location")
 except InvalidObjectError:
-    print("Error: Location not found")
+    print("Location not found")
+except MissingQueryParameterError:
+    print("Location value cannot be empty")
 ```
 
-## Client Configuration
+## Related Topics
 
-The `NetworkLocations` client can be configured with a custom maximum limit for API requests:
-
-```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
-
-# Configure max_limit using the property setter (default is 200, max is 1000)
-client.network_location.max_limit = 500
-
-# List all network locations
-locations = client.network_location.list()
-```
-
-## Best Practices
-
-1. **API Efficiency**
-   - Use filtering parameters to reduce the amount of data returned
-   - Cache location data when appropriate to reduce API calls
-   - Use specific filters when you know what location you're looking for
-
-2. **Error Handling**
-   - Always implement proper exception handling for `fetch()` operations
-   - Validate location values before making API calls
-   - Provide meaningful error messages to users
-
-3. **Performance**
-   - Consider storing frequently used location information locally
-   - Limit the number of network location requests in performance-critical code paths
-
-## Related Models
-
-- [NetworkLocationModel](../../models/deployment/network_locations.md#Overview)
-
-!!! note "Read-Only Operations"
-    The NetworkLocations API only supports read operations (list and fetch). Create, update, and delete operations are not available for this endpoint.
+- [Network Location Models](../../models/deployment/network_locations.md#Overview)
+- [Deployment Overview](index.md)
+- [API Client](../../client.md)

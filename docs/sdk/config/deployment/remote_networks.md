@@ -1,33 +1,12 @@
 # Remote Networks Configuration Object
 
-## Table of Contents
+Manages remote network configurations with support for standard and ECMP-enabled setups in Palo Alto Networks Strata Cloud Manager.
 
-1. [Overview](#overview)
-2. [Core Methods](#core-methods)
-3. [Remote Network Model Attributes](#remote-network-model-attributes)
-4. [Exceptions](#exceptions)
-5. [Basic Configuration](#basic-configuration)
-6. [Usage Examples](#usage-examples)
-    - [Creating Remote Networks](#creating-remote-networks)
-    - [Retrieving Remote Networks](#retrieving-remote-networks)
-    - [Updating Remote Networks](#updating-remote-networks)
-    - [Listing Remote Networks](#listing-remote-networks)
-    - [Filtering Responses](#filtering-responses)
-    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
-    - [Deleting Remote Networks](#deleting-remote-networks)
-7. [Managing Configuration Changes](#managing-configuration-changes)
-    - [Performing Commits](#performing-commits)
-    - [Monitoring Jobs](#monitoring-jobs)
-8. [Error Handling](#error-handling)
-9. [Best Practices](#best-practices)
-10. [Full Script Examples](#full-script-examples)
-11. [Related Models](#related-models)
+## Class Overview
 
-## Overview
+The `RemoteNetworks` class inherits from `BaseObject` and provides CRUD operations for remote network configurations.
 
-The `RemoteNetworks` class provides functionality to manage remote network configurations in Palo Alto Networks' Strata Cloud Manager. This class inherits from `BaseObject` and provides methods for creating, retrieving, updating, and deleting remote network configurations with support for both standard and ECMP-enabled setups.
-
-## Core Methods
+### Methods
 
 | Method     | Description                        | Parameters                                 | Return Type                        |
 |------------|------------------------------------|--------------------------------------------|------------------------------------|
@@ -38,27 +17,32 @@ The `RemoteNetworks` class provides functionality to manage remote network confi
 | `list()`   | Lists networks with filtering      | `folder: str`, `**filters`                 | `List[RemoteNetworkResponseModel]` |
 | `fetch()`  | Gets network by name and container | `name: str`, `folder: str`                 | `RemoteNetworkResponseModel`       |
 
-## Remote Network Model Attributes
+### Model Attributes
 
-| Attribute               | Type                  | Required | Default          | Description                                      |
-|-------------------------|-----------------------|----------|------------------|--------------------------------------------------|
-| `name`                  | str                   | Yes      | None             | Name of network (max 63 chars)                   |
-| `id`                    | UUID                  | Yes*     | None             | Unique identifier (*response only)               |
-| `region`                | str                   | Yes      | None             | Region for deployment                            |
-| `license_type`          | str                   | No       | FWAAS-AGGREGATE  | License type                                     |
-| `spn_name`              | str                   | Yes**    | None             | Service Provider Name (**required for FWAAS)     |
-| `description`           | str                   | No       | None             | Description (max 1023 chars)                     |
-| `subnets`               | List[str]             | No       | None             | List of network subnets                          |
-| `ecmp_load_balancing`   | EcmpLoadBalancingEnum | No       | disable          | ECMP mode (enable/disable)                       |
-| `ecmp_tunnels`          | List[EcmpTunnelModel] | Yes***   | None             | ECMP tunnel configs (***if ECMP enabled)         |
-| `ipsec_tunnel`          | str                   | Yes***   | None             | IPSec tunnel name (***if ECMP disabled)          |
-| `secondary_ipsec_tunnel`| str                   | No       | None             | Secondary IPSec tunnel name                      |
-| `protocol`              | ProtocolModel         | No       | None             | BGP protocol configuration                       |
-| `folder`                | str                   | No       | None             | Folder location (max 64 chars)                   |
-| `snippet`               | str                   | No       | None             | Snippet location (max 64 chars)                  |
-| `device`                | str                   | No       | None             | Device location (max 64 chars)                   |
+| Attribute                | Type                  | Required | Default         | Description                                  |
+|--------------------------|-----------------------|----------|-----------------|----------------------------------------------|
+| `name`                   | str                   | Yes      | None            | Name of network (max 63 chars)               |
+| `id`                     | UUID                  | Yes*     | None            | Unique identifier (*response only)           |
+| `region`                 | str                   | Yes      | None            | Region for deployment                        |
+| `license_type`           | str                   | No       | FWAAS-AGGREGATE | License type                                 |
+| `spn_name`               | str                   | Yes**    | None            | Service Provider Name (**required for FWAAS) |
+| `description`            | str                   | No       | None            | Description (max 1023 chars)                 |
+| `subnets`                | List[str]             | No       | None            | List of network subnets                      |
+| `ecmp_load_balancing`    | EcmpLoadBalancingEnum | No       | disable         | ECMP mode (enable/disable)                   |
+| `ecmp_tunnels`           | List[EcmpTunnelModel] | Yes***   | None            | ECMP tunnel configs (***if ECMP enabled)     |
+| `ipsec_tunnel`           | str                   | Yes***   | None            | IPSec tunnel name (***if ECMP disabled)      |
+| `secondary_ipsec_tunnel` | str                   | No       | None            | Secondary IPSec tunnel name                  |
+| `protocol`               | ProtocolModel         | No       | None            | BGP protocol configuration                   |
+| `folder`                 | str                   | No****   | None            | Folder location (max 64 chars)               |
+| `snippet`                | str                   | No****   | None            | Snippet location (max 64 chars)              |
+| `device`                 | str                   | No****   | None            | Device location (max 64 chars)               |
 
-## Exceptions
+\* Only required for response models
+\** Required when license_type is FWAAS-AGGREGATE
+\*** Mutually exclusive: `ecmp_tunnels` when ECMP enabled, `ipsec_tunnel` when disabled
+\**** Exactly one container (`folder`, `snippet`, or `device`) must be provided for create operations
+
+### Exceptions
 
 | Exception                    | HTTP Code | Description                    |
 |------------------------------|-----------|--------------------------------|
@@ -70,86 +54,92 @@ The `RemoteNetworks` class provides functionality to manage remote network confi
 | `AuthenticationError`        | 401       | Authentication failed          |
 | `ServerError`                | 500       | Internal server error          |
 
-## Basic Configuration
-
-The Remote Networks service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
-
-### Unified Client Interface (Recommended)
+### Basic Configuration
 
 ```python
 from scm.client import ScmClient
 
-# Initialize client
 client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
 )
 
-# Access the Remote Networks service directly through the client
-# No need to create a separate RemoteNetworks instance
 networks = client.remote_network
 ```
 
-### Traditional Service Instantiation (Legacy)
+## Methods
+
+### List Remote Networks
 
 ```python
-from scm.client import Scm
-from scm.config.deployment import RemoteNetworks
-
-# Initialize client
-client = Scm(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
+filtered_networks = client.remote_network.list(
+    folder='Remote Networks',
+    regions=['us-east-1']
 )
 
-# Initialize RemoteNetworks object explicitly
-networks = RemoteNetworks(client)
+for network in filtered_networks:
+    print(f"Name: {network.name}")
+    print(f"Region: {network.region}")
 ```
 
-!!! note
-    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
-
-## Usage Examples
-
-### Creating Remote Networks
+**Filtering responses:**
 
 ```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
+exact_networks = client.remote_network.list(
+    folder='Remote Networks',
+    exact_match=True
 )
 
-# Standard remote network configuration
+combined_filters = client.remote_network.list(
+    folder='Remote Networks',
+    exact_match=True,
+    exclude_folders=['All'],
+    regions=['us-east-1']
+)
+```
+
+**Controlling pagination with max_limit:**
+
+```python
+client.remote_network.max_limit = 4000
+
+all_networks = client.remote_network.list(folder='Remote Networks')
+```
+
+### Fetch a Remote Network
+
+```python
+network = client.remote_network.fetch(
+    name="branch-office-1",
+    folder="Remote Networks"
+)
+print(f"Found network: {network.name}")
+```
+
+### Create a Remote Network
+
+```python
+# Standard remote network
 standard_config = {
     "name": "branch-office-1",
     "region": "us-east-1",
     "license_type": "FWAAS-AGGREGATE",
     "spn_name": "us-east-1-spn",
     "folder": "Remote Networks",
-    "description": "Branch office VPN connection",
     "subnets": ["10.0.0.0/24", "10.0.1.0/24"],
     "ecmp_load_balancing": "disable",
     "ipsec_tunnel": "branch-1-tunnel"
 }
-
-# Create standard remote network
 standard_network = client.remote_network.create(standard_config)
 
-# ECMP-enabled remote network configuration
+# ECMP-enabled remote network
 ecmp_config = {
     "name": "branch-office-2",
     "region": "us-west-2",
     "license_type": "FWAAS-AGGREGATE",
     "spn_name": "us-west-2-spn",
     "folder": "Remote Networks",
-    "description": "Branch office with ECMP",
-    "subnets": ["172.16.0.0/24", "172.16.1.0/24"],
     "ecmp_load_balancing": "enable",
     "ecmp_tunnels": [
         {
@@ -168,41 +158,19 @@ ecmp_config = {
         }
     ]
 }
-
-# Create ECMP-enabled remote network
 ecmp_network = client.remote_network.create(ecmp_config)
 ```
 
-### Retrieving Remote Networks
+### Update a Remote Network
 
 ```python
-# Fetch by name and folder
-network = client.remote_network.fetch(
-    name="branch-office-1",
-    folder="Remote Networks"
-)
-print(f"Found network: {network.name}")
-
-# Get by ID
-network_by_id = client.remote_network.get(network.id)
-print(f"Retrieved network: {network_by_id.name}")
-print(f"Subnets: {', '.join(network_by_id.subnets)}")
-```
-
-### Updating Remote Networks
-
-```python
-# Fetch existing network
 existing_network = client.remote_network.fetch(
     name="branch-office-1",
     folder="Remote Networks"
 )
 
-# Update attributes
 existing_network.description = "Updated branch office configuration"
 existing_network.subnets = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"]
-
-# Add BGP configuration
 existing_network.protocol = {
     "bgp": {
         "enable": True,
@@ -212,145 +180,42 @@ existing_network.protocol = {
     }
 }
 
-# Perform update
 updated_network = client.remote_network.update(existing_network)
 ```
 
-### Listing Remote Networks
+### Delete a Remote Network
 
 ```python
-# Pass filters directly into the list method
-filtered_networks = client.remote_network.list(
-    folder='Remote Networks',
-    regions=['us-east-1'],
-    license_types=['FWAAS-AGGREGATE']
-)
-
-# Process results
-for network in filtered_networks:
-    print(f"Name: {network.name}")
-    print(f"Region: {network.region}")
-    print(f"Subnets: {', '.join(network.subnets)}")
-
-# Define filter parameters as a dictionary
-list_params = {
-    "folder": "Remote Networks",
-    "regions": ["us-west-2"],
-    "spn_names": ["us-west-2-spn"]
-}
-
-# List with filters as kwargs
-filtered_networks = client.remote_network.list(**list_params)
+client.remote_network.delete("123e4567-e89b-12d3-a456-426655440000")
 ```
 
-### Filtering Responses
-
-The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
-(like `regions`, `license_types`, and `spn_names`), you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and
-`exclude_devices` parameters to control which objects are included or excluded after the initial API response is fetched.
-
-**Parameters:**
-
-- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
-- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
-- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
-- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
-
-**Examples:**
+### Get a Remote Network by ID
 
 ```python
-# Only return remote networks defined exactly in 'Remote Networks'
-exact_networks = client.remote_network.list(
-   folder='Remote Networks',
-   exact_match=True
-)
-
-for network in exact_networks:
-   print(f"Exact match: {network.name} in {network.folder}")
-
-# Exclude all remote networks from the 'All' folder
-no_all_networks = client.remote_network.list(
-   folder='Remote Networks',
-   exclude_folders=['All']
-)
-
-for network in no_all_networks:
-   assert network.folder != 'All'
-   print(f"Filtered out 'All': {network.name}")
-
-# Combine exact_match with multiple exclusions
-combined_filters = client.remote_network.list(
-   folder='Remote Networks',
-   exact_match=True,
-   exclude_folders=['All'],
-   regions=['us-east-1']
-)
-
-for network in combined_filters:
-   print(f"Combined filters result: {network.name} in {network.folder}")
+network_by_id = client.remote_network.get(network.id)
+print(f"Retrieved network: {network_by_id.name}")
 ```
 
-### Controlling Pagination with max_limit
+## Use Cases
 
-The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
-
-**Example:**
+### Committing Changes
 
 ```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
+result = client.commit(
+    folders=["Remote Networks"],
+    description="Updated remote network configurations",
+    sync=True,
+    timeout=300
 )
-
-# Configure max_limit using the property setter
-client.remote_network.max_limit = 4000
-
-# List all remote networks - auto-paginates through results
-all_networks = client.remote_network.list(folder='Remote Networks')
-
-# The networks are fetched in chunks according to the max_limit.
-# All results are returned as a single list.
-```
-
-### Deleting Remote Networks
-
-```python
-# Delete by ID
-network_id = "123e4567-e89b-12d3-a456-426655440000"
-client.remote_network.delete(network_id)
-```
-
-## Managing Configuration Changes
-
-### Performing Commits
-
-```python
-# Prepare commit parameters
-commit_params = {
-    "folders": ["Remote Networks"],
-    "description": "Updated remote network configurations",
-    "sync": True,
-    "timeout": 300  # 5 minute timeout
-}
-
-# Commit the changes directly on the client
-result = client.commit(**commit_params)
-
 print(f"Commit job ID: {result.job_id}")
 ```
 
 ### Monitoring Jobs
 
 ```python
-# Get status of specific job directly from the client
 job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs directly from the client
 recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
@@ -359,7 +224,6 @@ for job in recent_jobs.data:
 ## Error Handling
 
 ```python
-from scm.client import ScmClient
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
@@ -368,15 +232,7 @@ from scm.exceptions import (
     ReferenceNotZeroError
 )
 
-# Initialize client
-client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
-
 try:
-    # Create network configuration
     network_config = {
         "name": "test-network",
         "region": "us-east-1",
@@ -387,18 +243,12 @@ try:
         "ipsec_tunnel": "test-tunnel",
         "subnets": ["10.0.0.0/24"]
     }
-
-    # Create the network using the unified client interface
     new_network = client.remote_network.create(network_config)
-
-    # Commit changes directly from the client
     result = client.commit(
         folders=["Remote Networks"],
         description="Added test network",
         sync=True
     )
-
-    # Check job status directly from the client
     status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
@@ -413,59 +263,9 @@ except MissingQueryParameterError as e:
     print(f"Missing parameter: {e.message}")
 ```
 
-## Best Practices
+## Related Topics
 
-1. **Client Usage**
-    - Use the unified client interface (`client.remote_network`) for streamlined code
-    - Create a single client instance and reuse it across your application
-    - Perform commit operations directly on the client object (`client.commit()`)
-    - For custom max_limit settings, create a dedicated service instance if needed
-
-2. **Network Configuration**
-    - Use descriptive names for networks and tunnels
-    - Document subnet allocations
-    - Consider ECMP for high availability
-    - Validate BGP configurations
-    - Use consistent naming conventions
-
-3. **ECMP Management**
-    - Plan tunnel configurations carefully
-    - Balance traffic across tunnels
-    - Monitor tunnel health
-    - Configure appropriate timeouts
-    - Document failover scenarios
-
-4. **Container Management**
-    - Always specify the correct folder container
-    - Use consistent folder names across operations
-    - Validate folder existence before operations
-
-5. **Error Handling**
-    - Implement comprehensive error handling for all operations
-    - Check job status after commits
-    - Handle specific exceptions before generic ones
-    - Log error details for troubleshooting
-
-6. **Performance**
-    - Use appropriate pagination for list operations
-    - Cache frequently accessed networks
-    - Implement proper retry mechanisms
-    - Monitor timeout settings
-
-## Full Script Examples
-
-Refer to
-the [remote_networks.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/deployment/remote_networks.py).
-
-## Related Models
-
-- [RemoteNetworkBaseModel](../../models/deployment/remote_networks_models.md#Overview)
-- [RemoteNetworkCreateModel](../../models/deployment/remote_networks_models.md#Overview)
-- [RemoteNetworkUpdateModel](../../models/deployment/remote_networks_models.md#Overview)
-- [RemoteNetworkResponseModel](../../models/deployment/remote_networks_models.md#Overview)
-- [EcmpTunnelModel](../../models/deployment/remote_networks_models.md#Overview)
-- [ProtocolModel](../../models/deployment/remote_networks_models.md#Overview)
-- [BgpModel](../../models/deployment/remote_networks_models.md#Overview)
-- [BgpPeerModel](../../models/deployment/remote_networks_models.md#Overview)
-- [EcmpLoadBalancingEnum](../../models/deployment/remote_networks_models.md#Overview)
-- [PeeringTypeEnum](../../models/deployment/remote_networks_models.md#Overview)
+- [Remote Network Models](../../models/deployment/remote_networks_models.md#Overview)
+- [Deployment Overview](index.md)
+- [API Client](../../client.md)
+- [Full Example Scripts](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/deployment/remote_networks.py)
