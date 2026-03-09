@@ -1,24 +1,20 @@
-# VLAN Interface Configuration Object
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Core Methods](#core-methods)
-3. [VLAN Interface Model Attributes](#vlan-interface-model-attributes)
-4. [IP Addressing Modes](#ip-addressing-modes)
-5. [Exceptions](#exceptions)
-6. [Basic Configuration](#basic-configuration)
-7. [Usage Examples](#usage-examples)
-8. [Managing Configuration Changes](#managing-configuration-changes)
-9. [Error Handling](#error-handling)
-10. [Best Practices](#best-practices)
-11. [Related Models](#related-models)
-
-## Overview
+# VLAN Interface
 
 The `VlanInterface` class manages VLAN interface objects in Palo Alto Networks' Strata Cloud Manager. VLAN interfaces are Layer 3 interfaces associated with VLAN objects, used for inter-VLAN routing. They support static IP addressing or DHCP, along with ARP and DDNS configuration.
 
-## Core Methods
+## Class Overview
+
+```python
+from scm.client import ScmClient
+
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+vlan_interfaces = client.vlan_interface
+```
 
 | Method     | Description                                                | Parameters                                  | Return Type                      |
 |------------|------------------------------------------------------------|---------------------------------------------|----------------------------------|
@@ -29,7 +25,7 @@ The `VlanInterface` class manages VLAN interface objects in Palo Alto Networks' 
 | `fetch()`  | Fetches a single VLAN interface by name within a container | `name: str`, `folder`, `snippet`, `device`  | `VlanInterfaceResponseModel`     |
 | `delete()` | Deletes a VLAN interface by ID                             | `object_id: str`                            | `None`                           |
 
-## VLAN Interface Model Attributes
+### VLAN Interface Model Attributes
 
 | Attribute                      | Type                    | Required | Default | Description                                      |
 |--------------------------------|-------------------------|----------|---------|--------------------------------------------------|
@@ -51,9 +47,9 @@ The `VlanInterface` class manages VLAN interface objects in Palo Alto Networks' 
 \** Only one IP mode (static or DHCP) can be configured
 \*** Exactly one container must be provided for create operations
 
-## IP Addressing Modes
+### IP Addressing Modes
 
-### Static IP
+#### Static IP
 
 ```python
 vlan_data = {
@@ -65,7 +61,7 @@ vlan_data = {
 }
 ```
 
-### DHCP
+#### DHCP
 
 ```python
 vlan_data = {
@@ -80,7 +76,7 @@ vlan_data = {
 }
 ```
 
-## Exceptions
+### Exceptions
 
 | Exception                    | HTTP Code | Description                            |
 |------------------------------|-----------|----------------------------------------|
@@ -90,23 +86,44 @@ vlan_data = {
 | `AuthenticationError`        | 401       | Authentication failed                  |
 | `ServerError`                | 500       | Internal server error                  |
 
-## Basic Configuration
+## Methods
+
+### List VLAN Interfaces
 
 ```python
-from scm.client import ScmClient
+# List all VLAN interfaces
+vlans = client.vlan_interface.list(folder="Interfaces")
 
-client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
+for vlan in vlans:
+    print(f"Name: {vlan.name}, Tag: {vlan.vlan_tag}")
+    if vlan.ip:
+        for ip in vlan.ip:
+            print(f"  IP: {ip.name}")
+    if vlan.dhcp_client:
+        print(f"  DHCP: Enabled")
 
-vlan_interfaces = client.vlan_interface
+# Filter by VLAN tag
+vlan100_list = client.vlan_interface.list(folder="Interfaces", vlan_tag="100")
+
+# Filter by MTU
+jumbo_vlans = client.vlan_interface.list(folder="Interfaces", mtu=9000)
 ```
 
-## Usage Examples
+### Fetch a VLAN Interface
 
-### Creating VLAN Interfaces
+```python
+# Fetch by name
+vlan = client.vlan_interface.fetch(
+    name="vlan.100",
+    folder="Interfaces"
+)
+print(f"Found: {vlan.name}, Tag: {vlan.vlan_tag}")
+
+# Get by ID
+vlan_by_id = client.vlan_interface.get(vlan.id)
+```
+
+### Create a VLAN Interface
 
 ```python
 # Create VLAN interface with static IP
@@ -148,21 +165,7 @@ vlan_dhcp = {
 result = client.vlan_interface.create(vlan_dhcp)
 ```
 
-### Retrieving VLAN Interfaces
-
-```python
-# Fetch by name
-vlan = client.vlan_interface.fetch(
-    name="vlan.100",
-    folder="Interfaces"
-)
-print(f"Found: {vlan.name}, Tag: {vlan.vlan_tag}")
-
-# Get by ID
-vlan_by_id = client.vlan_interface.get(vlan.id)
-```
-
-### Updating VLAN Interfaces
+### Update a VLAN Interface
 
 ```python
 existing = client.vlan_interface.fetch(
@@ -186,34 +189,15 @@ existing.ddns_config = {
 updated = client.vlan_interface.update(existing)
 ```
 
-### Listing VLAN Interfaces
-
-```python
-# List all VLAN interfaces
-vlans = client.vlan_interface.list(folder="Interfaces")
-
-for vlan in vlans:
-    print(f"Name: {vlan.name}, Tag: {vlan.vlan_tag}")
-    if vlan.ip:
-        for ip in vlan.ip:
-            print(f"  IP: {ip.name}")
-    if vlan.dhcp_client:
-        print(f"  DHCP: Enabled")
-
-# Filter by VLAN tag
-vlan100_list = client.vlan_interface.list(folder="Interfaces", vlan_tag="100")
-
-# Filter by MTU
-jumbo_vlans = client.vlan_interface.list(folder="Interfaces", mtu=9000)
-```
-
-### Deleting VLAN Interfaces
+### Delete a VLAN Interface
 
 ```python
 client.vlan_interface.delete("123e4567-e89b-12d3-a456-426655440000")
 ```
 
-## Managing Configuration Changes
+## Use Cases
+
+#### Managing Configuration Changes
 
 ```python
 result = client.commit(
@@ -242,16 +226,7 @@ except InvalidObjectError as e:
     print(f"Invalid configuration: {e.message}")
 ```
 
-## Best Practices
-
-1. **Naming** - Use format `vlan.<tag>` for clarity (e.g., "vlan.100")
-2. **IP Mode** - Choose only one IP addressing mode (static or DHCP)
-3. **VLAN Tags** - Coordinate tags with switch infrastructure
-4. **ARP Entries** - Include interface field for proxy ARP scenarios
-5. **DDNS** - Configure for dynamic environments requiring DNS updates
-6. **Management Profile** - Apply appropriate profiles for secure access
-
-## Related Models
+## Related Topics
 
 - [VlanInterfaceCreateModel](../../models/network/vlan_interface_models.md)
 - [VlanInterfaceUpdateModel](../../models/network/vlan_interface_models.md)

@@ -1,23 +1,20 @@
-# Loopback Interface Configuration Object
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Core Methods](#core-methods)
-3. [Loopback Interface Model Attributes](#loopback-interface-model-attributes)
-4. [Exceptions](#exceptions)
-5. [Basic Configuration](#basic-configuration)
-6. [Usage Examples](#usage-examples)
-7. [Managing Configuration Changes](#managing-configuration-changes)
-8. [Error Handling](#error-handling)
-9. [Best Practices](#best-practices)
-10. [Related Models](#related-models)
-
-## Overview
+# Loopback Interface
 
 The `LoopbackInterface` class manages loopback interface objects in Palo Alto Networks' Strata Cloud Manager. Loopback interfaces are virtual interfaces that are always up and can be used for management access, BGP peering, and other services that require a stable IP address not tied to a physical interface.
 
-## Core Methods
+## Class Overview
+
+```python
+from scm.client import ScmClient
+
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+loopback_interfaces = client.loopback_interface
+```
 
 | Method     | Description                                                    | Parameters                                  | Return Type                         |
 |------------|----------------------------------------------------------------|---------------------------------------------|-------------------------------------|
@@ -28,7 +25,7 @@ The `LoopbackInterface` class manages loopback interface objects in Palo Alto Ne
 | `fetch()`  | Fetches a single loopback interface by name within a container | `name: str`, `folder`, `snippet`, `device`  | `LoopbackInterfaceResponseModel`    |
 | `delete()` | Deletes a loopback interface by ID                             | `object_id: str`                            | `None`                              |
 
-## Loopback Interface Model Attributes
+### Loopback Interface Model Attributes
 
 | Attribute                      | Type         | Required | Default | Description                                      |
 |--------------------------------|--------------|----------|---------|--------------------------------------------------|
@@ -46,7 +43,7 @@ The `LoopbackInterface` class manages loopback interface objects in Palo Alto Ne
 \* Only required for update and response models
 \** Exactly one container must be provided for create operations
 
-## Exceptions
+### Exceptions
 
 | Exception                    | HTTP Code | Description                            |
 |------------------------------|-----------|----------------------------------------|
@@ -56,23 +53,38 @@ The `LoopbackInterface` class manages loopback interface objects in Palo Alto Ne
 | `AuthenticationError`        | 401       | Authentication failed                  |
 | `ServerError`                | 500       | Internal server error                  |
 
-## Basic Configuration
+## Methods
+
+### List Loopback Interfaces
 
 ```python
-from scm.client import ScmClient
+# List all loopbacks
+loopbacks = client.loopback_interface.list(folder="Interfaces")
 
-client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
+for lb in loopbacks:
+    print(f"Name: {lb.name}")
+    if lb.ip:
+        print(f"  IPv4: {', '.join(lb.ip)}")
 
-loopback_interfaces = client.loopback_interface
+# Filter by MTU
+large_mtu = client.loopback_interface.list(folder="Interfaces", mtu=9000)
 ```
 
-## Usage Examples
+### Fetch a Loopback Interface
 
-### Creating Loopback Interfaces
+```python
+# Fetch by name
+loopback = client.loopback_interface.fetch(
+    name="loopback.1",
+    folder="Interfaces"
+)
+print(f"Found: {loopback.name}, IP: {loopback.ip}")
+
+# Get by ID
+loopback_by_id = client.loopback_interface.get(loopback.id)
+```
+
+### Create a Loopback Interface
 
 ```python
 # Create loopback with IPv4
@@ -101,21 +113,7 @@ loopback_ipv6 = {
 result = client.loopback_interface.create(loopback_ipv6)
 ```
 
-### Retrieving Loopback Interfaces
-
-```python
-# Fetch by name
-loopback = client.loopback_interface.fetch(
-    name="loopback.1",
-    folder="Interfaces"
-)
-print(f"Found: {loopback.name}, IP: {loopback.ip}")
-
-# Get by ID
-loopback_by_id = client.loopback_interface.get(loopback.id)
-```
-
-### Updating Loopback Interfaces
+### Update a Loopback Interface
 
 ```python
 existing = client.loopback_interface.fetch(name="loopback.1", folder="Interfaces")
@@ -129,28 +127,15 @@ else:
 updated = client.loopback_interface.update(existing)
 ```
 
-### Listing Loopback Interfaces
-
-```python
-# List all loopbacks
-loopbacks = client.loopback_interface.list(folder="Interfaces")
-
-for lb in loopbacks:
-    print(f"Name: {lb.name}")
-    if lb.ip:
-        print(f"  IPv4: {', '.join(lb.ip)}")
-
-# Filter by MTU
-large_mtu = client.loopback_interface.list(folder="Interfaces", mtu=9000)
-```
-
-### Deleting Loopback Interfaces
+### Delete a Loopback Interface
 
 ```python
 client.loopback_interface.delete("123e4567-e89b-12d3-a456-426655440000")
 ```
 
-## Managing Configuration Changes
+## Use Cases
+
+#### Managing Configuration Changes
 
 ```python
 result = client.commit(
@@ -174,14 +159,7 @@ except ObjectNotPresentError as e:
     print(f"Interface not found: {e.message}")
 ```
 
-## Best Practices
-
-1. **Naming** - Use descriptive names like "loopback.mgmt" or "loopback.bgp"
-2. **IP Addresses** - Use /32 for IPv4 and /128 for IPv6 on loopbacks
-3. **Management Profile** - Apply interface management profiles for security
-4. **Documentation** - Use comments to document the purpose of each loopback
-
-## Related Models
+## Related Topics
 
 - [LoopbackInterfaceCreateModel](../../models/network/loopback_interface_models.md)
 - [LoopbackInterfaceUpdateModel](../../models/network/loopback_interface_models.md)

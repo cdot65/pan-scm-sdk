@@ -1,29 +1,4 @@
-# BGP Route Map Redistribution Configuration Object
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Core Methods](#core-methods)
-3. [BGP Route Map Redistribution Model Attributes](#bgp-route-map-redistribution-model-attributes)
-4. [Source Protocol Configuration](#source-protocol-configuration)
-5. [Exceptions](#exceptions)
-6. [Basic Configuration](#basic-configuration)
-7. [Usage Examples](#usage-examples)
-    - [Creating BGP Route Map Redistributions](#creating-bgp-route-map-redistributions)
-    - [Retrieving BGP Route Map Redistributions](#retrieving-bgp-route-map-redistributions)
-    - [Updating BGP Route Map Redistributions](#updating-bgp-route-map-redistributions)
-    - [Listing BGP Route Map Redistributions](#listing-bgp-route-map-redistributions)
-    - [Filtering Responses](#filtering-responses)
-    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
-    - [Deleting BGP Route Map Redistributions](#deleting-bgp-route-map-redistributions)
-8. [Managing Configuration Changes](#managing-configuration-changes)
-    - [Performing Commits](#performing-commits)
-    - [Monitoring Jobs](#monitoring-jobs)
-9. [Error Handling](#error-handling)
-10. [Best Practices](#best-practices)
-11. [Related Models](#related-models)
-
-## Overview
+# BGP Route Map Redistribution
 
 The `BgpRouteMapRedistribution` class manages BGP route map redistribution objects in Palo Alto Networks' Strata Cloud Manager. It extends from `BaseObject` and offers methods to create, retrieve, update, list, fetch, and delete BGP route map redistributions. This is the most complex routing model, using 2-level oneOf discrimination:
 
@@ -42,7 +17,21 @@ This produces 7 possible crossover variants, each with variant-specific match an
 | connected_static | ospf   | Simple match| OSPF set   |
 | connected_static | rib    | Simple match| RIB set    |
 
-## Core Methods
+## Class Overview
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
+# Access the BGP Route Map Redistribution service directly through the client
+bgp_route_map_redists = client.bgp_route_map_redistribution
+```
 
 | Method     | Description                                                                | Parameters                                                                                                                       | Return Type                                       |
 |------------|----------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------|
@@ -53,7 +42,7 @@ This produces 7 possible crossover variants, each with variant-specific match an
 | `fetch()`  | Fetches a single BGP route map redistribution by name within a container   | `name: str`, `folder: Optional[str]`, `snippet: Optional[str]`, `device: Optional[str]`                                          | `BgpRouteMapRedistributionResponseModel`          |
 | `delete()` | Deletes a BGP route map redistribution by its ID                           | `object_id: str`                                                                                                                 | `None`                                            |
 
-## BGP Route Map Redistribution Model Attributes
+### BGP Route Map Redistribution Model Attributes
 
 | Attribute          | Type                                          | Required | Default | Description                                         |
 |--------------------|-----------------------------------------------|----------|---------|-----------------------------------------------------|
@@ -71,9 +60,9 @@ This produces 7 possible crossover variants, each with variant-specific match an
 
 At most one source protocol (`bgp`, `ospf`, or `connected_static`) can be set per redistribution object.
 
-## Source Protocol Configuration
+### Source Protocol Configuration
 
-### BgpRouteMapRedistBgpSource
+#### BgpRouteMapRedistBgpSource
 
 BGP as source protocol. Targets are mutually exclusive.
 
@@ -82,7 +71,7 @@ BGP as source protocol. Targets are mutually exclusive.
 | `ospf`    | BgpRouteMapRedistBgpToOspf  | No       | Redistribute BGP routes to OSPF    |
 | `rib`     | BgpRouteMapRedistBgpToRib   | No       | Redistribute BGP routes to RIB     |
 
-### BgpRouteMapRedistOspfSource
+#### BgpRouteMapRedistOspfSource
 
 OSPF as source protocol. Targets are mutually exclusive.
 
@@ -91,7 +80,7 @@ OSPF as source protocol. Targets are mutually exclusive.
 | `bgp`     | BgpRouteMapRedistOspfToBgp   | No       | Redistribute OSPF routes to BGP    |
 | `rib`     | BgpRouteMapRedistOspfToRib   | No       | Redistribute OSPF routes to RIB    |
 
-### BgpRouteMapRedistConnectedStaticSource
+#### BgpRouteMapRedistConnectedStaticSource
 
 Connected/Static as source protocol. Targets are mutually exclusive.
 
@@ -101,7 +90,7 @@ Connected/Static as source protocol. Targets are mutually exclusive.
 | `ospf`    | BgpRouteMapRedistConnStaticToOspf     | No       | Redistribute connected/static routes to OSPF   |
 | `rib`     | BgpRouteMapRedistConnStaticToRib      | No       | Redistribute connected/static routes to RIB    |
 
-### Route Map Entry (all target containers)
+#### Route Map Entry (all target containers)
 
 Each target container holds a `route_map` list of entries. The entry structure is the same across all variants:
 
@@ -113,7 +102,7 @@ Each target container holds a `route_map` list of entries. The entry structure i
 | `match`       | (variant-specific)  | No       | Match criteria                 |
 | `set`         | (variant-specific)  | No       | Set actions                    |
 
-### BGP Match (for BGP source variants)
+#### BGP Match (for BGP source variants)
 
 | Attribute             | Type                            | Required | Description                     |
 |-----------------------|---------------------------------|----------|---------------------------------|
@@ -129,7 +118,7 @@ Each target container holds a `route_map` list of entries. The entry structure i
 | `peer`                | str                             | No       | Peer type: "local" or "none"    |
 | `ipv4`                | BgpRouteMapRedistBgpMatchIpv4   | No       | IPv4 match (address, next_hop, route_source) |
 
-### Simple Match (for OSPF/connected_static source variants)
+#### Simple Match (for OSPF/connected_static source variants)
 
 | Attribute   | Type                               | Required | Description                |
 |-------------|-------------------------------------|----------|----------------------------|
@@ -138,7 +127,7 @@ Each target container holds a `route_map` list of entries. The entry structure i
 | `tag`       | int                                | No       | Tag to match               |
 | `ipv4`      | BgpRouteMapRedistSimpleMatchIpv4   | No       | IPv4 match (address, next_hop) |
 
-### BGP Set (when target is BGP)
+#### BGP Set (when target is BGP)
 
 Full BGP set fields including communities, AS-path, local preference, weight, etc.
 
@@ -159,7 +148,7 @@ Full BGP set fields including communities, AS-path, local preference, weight, et
 | `large_community`            | List[str]                      | No       | Large communities to set            |
 | `overwrite_large_community`  | bool                           | No       | Overwrite large communities         |
 
-### OSPF Set (when target is OSPF)
+#### OSPF Set (when target is OSPF)
 
 | Attribute     | Type                       | Required | Description                           |
 |---------------|----------------------------|----------|---------------------------------------|
@@ -167,13 +156,13 @@ Full BGP set fields including communities, AS-path, local preference, weight, et
 | `metric_type` | str                        | No       | OSPF metric type                      |
 | `tag`         | int                        | No       | Tag to set                            |
 
-### RIB Set (when target is RIB)
+#### RIB Set (when target is RIB)
 
 | Attribute | Type                       | Required | Description                |
 |-----------|----------------------------|----------|----------------------------|
 | `ipv4`    | BgpRouteMapRedistSetIpv4   | No       | IPv4 set (source_address)  |
 
-## Exceptions
+### Exceptions
 
 | Exception                    | HTTP Code | Description                                                                   |
 |------------------------------|-----------|-------------------------------------------------------------------------------|
@@ -185,11 +174,69 @@ Full BGP set fields including communities, AS-path, local preference, weight, et
 | `AuthenticationError`        | 401       | Authentication failed                                                         |
 | `ServerError`                | 500       | Internal server error                                                         |
 
-## Basic Configuration
+## Methods
 
-The BGP Route Map Redistribution service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+### List BGP Route Map Redistributions
 
-### Unified Client Interface (Recommended)
+```python
+# List all route map redistributions in a folder
+redists = client.bgp_route_map_redistribution.list(
+   folder="Texas"
+)
+
+# Process results
+for redist in redists:
+   source = "unknown"
+   if redist.bgp:
+      source = "bgp"
+   elif redist.ospf:
+      source = "ospf"
+   elif redist.connected_static:
+      source = "connected_static"
+   print(f"Name: {redist.name} (source: {source})")
+```
+
+#### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
+you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control
+which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
+
+```python
+# Only return redistributions defined exactly in 'Texas'
+exact_redists = client.bgp_route_map_redistribution.list(
+   folder='Texas',
+   exact_match=True
+)
+
+for redist in exact_redists:
+   print(f"Exact match: {redist.name} in {redist.folder}")
+
+# Exclude all redistributions from the 'All' folder
+no_all_redists = client.bgp_route_map_redistribution.list(
+   folder='Texas',
+   exclude_folders=['All']
+)
+
+for redist in no_all_redists:
+   assert redist.folder != 'All'
+   print(f"Filtered out 'All': {redist.name}")
+```
+
+#### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
+
+**Example:**
 
 ```python
 from scm.client import ScmClient
@@ -201,33 +248,37 @@ client = ScmClient(
    tsg_id="your_tsg_id"
 )
 
-# Access the BGP Route Map Redistribution service directly through the client
-bgp_route_map_redists = client.bgp_route_map_redistribution
+# Configure max_limit using the property setter
+client.bgp_route_map_redistribution.max_limit = 4000
+
+# List all redistributions - auto-paginates through results
+all_redists = client.bgp_route_map_redistribution.list(folder='Texas')
 ```
 
-### Traditional Service Instantiation (Legacy)
+### Fetch a BGP Route Map Redistribution
 
 ```python
-from scm.client import Scm
-from scm.config.network import BgpRouteMapRedistribution
-
-# Initialize client
-client = Scm(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
+# Fetch by name and folder
+redist = client.bgp_route_map_redistribution.fetch(
+   name="ospf-to-bgp-redist",
+   folder="Texas"
 )
+print(f"Found redistribution: {redist.name}")
 
-# Initialize BgpRouteMapRedistribution object explicitly
-bgp_route_map_redists = BgpRouteMapRedistribution(client)
+# Determine the source protocol
+if redist.bgp:
+   print("  Source: BGP")
+elif redist.ospf:
+   print("  Source: OSPF")
+elif redist.connected_static:
+   print("  Source: Connected/Static")
+
+# Get by ID
+redist_by_id = client.bgp_route_map_redistribution.get(redist.id)
+print(f"Retrieved redistribution: {redist_by_id.name}")
 ```
 
-!!! note
-    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
-
-## Usage Examples
-
-### Creating BGP Route Map Redistributions
+### Create a BGP Route Map Redistribution
 
 ```python
 from scm.client import ScmClient
@@ -337,30 +388,7 @@ conn_bgp_redist = client.bgp_route_map_redistribution.create(conn_to_bgp_data)
 print(f"Created connected-to-BGP redistribution with ID: {conn_bgp_redist.id}")
 ```
 
-### Retrieving BGP Route Map Redistributions
-
-```python
-# Fetch by name and folder
-redist = client.bgp_route_map_redistribution.fetch(
-   name="ospf-to-bgp-redist",
-   folder="Texas"
-)
-print(f"Found redistribution: {redist.name}")
-
-# Determine the source protocol
-if redist.bgp:
-   print("  Source: BGP")
-elif redist.ospf:
-   print("  Source: OSPF")
-elif redist.connected_static:
-   print("  Source: Connected/Static")
-
-# Get by ID
-redist_by_id = client.bgp_route_map_redistribution.get(redist.id)
-print(f"Retrieved redistribution: {redist_by_id.name}")
-```
-
-### Updating BGP Route Map Redistributions
+### Update a BGP Route Map Redistribution
 
 ```python
 # Fetch existing redistribution
@@ -383,86 +411,7 @@ existing_redist.ospf.bgp.route_map.insert(0, {
 updated_redist = client.bgp_route_map_redistribution.update(existing_redist)
 ```
 
-### Listing BGP Route Map Redistributions
-
-```python
-# List all route map redistributions in a folder
-redists = client.bgp_route_map_redistribution.list(
-   folder="Texas"
-)
-
-# Process results
-for redist in redists:
-   source = "unknown"
-   if redist.bgp:
-      source = "bgp"
-   elif redist.ospf:
-      source = "ospf"
-   elif redist.connected_static:
-      source = "connected_static"
-   print(f"Name: {redist.name} (source: {source})")
-```
-
-### Filtering Responses
-
-The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
-you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control
-which objects are included or excluded after the initial API response is fetched.
-
-**Parameters:**
-
-- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
-- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
-- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
-- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
-
-**Examples:**
-
-```python
-# Only return redistributions defined exactly in 'Texas'
-exact_redists = client.bgp_route_map_redistribution.list(
-   folder='Texas',
-   exact_match=True
-)
-
-for redist in exact_redists:
-   print(f"Exact match: {redist.name} in {redist.folder}")
-
-# Exclude all redistributions from the 'All' folder
-no_all_redists = client.bgp_route_map_redistribution.list(
-   folder='Texas',
-   exclude_folders=['All']
-)
-
-for redist in no_all_redists:
-   assert redist.folder != 'All'
-   print(f"Filtered out 'All': {redist.name}")
-```
-
-### Controlling Pagination with max_limit
-
-The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
-
-**Example:**
-
-```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-# Configure max_limit using the property setter
-client.bgp_route_map_redistribution.max_limit = 4000
-
-# List all redistributions - auto-paginates through results
-all_redists = client.bgp_route_map_redistribution.list(folder='Texas')
-```
-
-### Deleting BGP Route Map Redistributions
+### Delete a BGP Route Map Redistribution
 
 ```python
 # Delete by ID
@@ -470,9 +419,9 @@ redist_id = "123e4567-e89b-12d3-a456-426655440000"
 client.bgp_route_map_redistribution.delete(redist_id)
 ```
 
-## Managing Configuration Changes
+## Use Cases
 
-### Performing Commits
+#### Performing Commits
 
 ```python
 # Prepare commit parameters
@@ -489,7 +438,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-### Monitoring Jobs
+#### Monitoring Jobs
 
 ```python
 # Get status of specific job directly from the client
@@ -565,47 +514,7 @@ except MissingQueryParameterError as e:
    print(f"Missing parameter: {e.message}")
 ```
 
-## Best Practices
-
-1. **Client Usage**
-   - Use the unified client interface (`client.bgp_route_map_redistribution`) for streamlined code
-   - Create a single client instance and reuse it across your application
-   - Perform commit operations directly on the client object (`client.commit()`)
-
-2. **Redistribution Design**
-   - Only one source protocol (`bgp`, `ospf`, or `connected_static`) can be set per object
-   - Only one target protocol can be set within each source
-   - Create separate redistribution objects for different source-target combinations
-   - Use descriptive names that indicate the source-target direction (e.g., "ospf-to-bgp-redist")
-
-3. **Match and Set by Variant**
-   - BGP source variants have richer match criteria (AS path, communities, local preference)
-   - OSPF/connected_static source variants use simpler match criteria (interface, metric, tag)
-   - Target BGP set actions include full BGP attributes (communities, AS-path, weight)
-   - Target OSPF set actions are limited to metric, metric_type, and tag
-   - Target RIB set actions are limited to IPv4 source_address
-
-4. **API Quirks**
-   - The metric action uses `substract` (not `subtract`) to match the API spelling
-   - The `as` field in aggregator uses `as_` in Python (aliased to `as` for serialization)
-
-5. **Container Management**
-   - Always specify exactly one container (folder, snippet, or device)
-   - Use consistent container names across operations
-   - Validate container existence before operations
-
-6. **Error Handling**
-   - Implement comprehensive error handling for all operations
-   - Check job status after commits
-   - Handle specific exceptions before generic ones
-   - Log error details for troubleshooting
-
-7. **Performance**
-   - Use appropriate pagination for list operations
-   - Cache frequently accessed redistribution configurations
-   - Implement proper retry mechanisms
-
-## Related Models
+## Related Topics
 
 - [BgpRouteMapRedistributionBaseModel](../../models/network/bgp_route_map_redistribution_models.md#Overview)
 - [BgpRouteMapRedistributionCreateModel](../../models/network/bgp_route_map_redistribution_models.md#Overview)

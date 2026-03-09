@@ -1,29 +1,4 @@
-# IKE Crypto Profile Configuration Object
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Core Methods](#core-methods)
-3. [IKE Crypto Profile Model Attributes](#ike-crypto-profile-model-attributes)
-4. [Exceptions](#exceptions)
-5. [Basic Configuration](#basic-configuration)
-6. [Usage Examples](#usage-examples)
-    - [Creating IKE Crypto Profiles](#creating-ike-crypto-profiles)
-    - [Retrieving IKE Crypto Profiles](#retrieving-ike-crypto-profiles)
-    - [Updating IKE Crypto Profiles](#updating-ike-crypto-profiles)
-    - [Listing IKE Crypto Profiles](#listing-ike-crypto-profiles)
-    - [Filtering Responses](#filtering-responses)
-    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
-    - [Deleting IKE Crypto Profiles](#deleting-ike-crypto-profiles)
-7. [Managing Configuration Changes](#managing-configuration-changes)
-    - [Performing Commits](#performing-commits)
-    - [Monitoring Jobs](#monitoring-jobs)
-8. [Error Handling](#error-handling)
-9. [Best Practices](#best-practices)
-10. [Full Script Examples](#full-script-examples)
-11. [Related Models](#related-models)
-
-## Overview
+# IKE Crypto Profile
 
 The `IKECryptoProfile` class provides functionality to manage IKE (Internet Key Exchange) Crypto Profile objects in Palo Alto Networks' Strata Cloud Manager. This class inherits from `BaseObject` and provides methods for creating, retrieving, updating, and deleting IKE crypto profiles used for IPsec VPN tunnels.
 
@@ -34,7 +9,21 @@ IKE Crypto Profiles define:
 - Diffie-Hellman groups for secure key exchange
 - Lifetime settings for security key rotation
 
-## Core Methods
+## Class Overview
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Access the IKE Crypto Profile service directly through the client
+ike_profiles = client.ike_crypto_profile
+```
 
 | Method     | Description                           | Parameters                                              | Return Type                      |
 |------------|---------------------------------------|---------------------------------------------------------|----------------------------------|
@@ -45,7 +34,7 @@ IKE Crypto Profiles define:
 | `list()`   | Lists profiles with filtering         | `folder: str`, `snippet: str`, `device: str`, `**filters` | `List[IKECryptoProfileResponseModel]` |
 | `fetch()`  | Gets profile by name and container    | `name: str`, `folder: str`, `snippet: str`, `device: str` | `IKECryptoProfileResponseModel`  |
 
-## IKE Crypto Profile Model Attributes
+### IKE Crypto Profile Model Attributes
 
 | Attribute                | Type                    | Required | Default | Description                                                    |
 |--------------------------|-------------------------|----------|---------|----------------------------------------------------------------|
@@ -63,7 +52,7 @@ IKE Crypto Profiles define:
 \* Only required for update and response models
 \** Exactly one container field (folder/snippet/device) must be provided
 
-## Exceptions
+### Exceptions
 
 | Exception                    | HTTP Code | Description                            |
 |------------------------------|-----------|----------------------------------------|
@@ -74,111 +63,9 @@ IKE Crypto Profiles define:
 | `AuthenticationError`        | 401       | Authentication failed                  |
 | `ServerError`                | 500       | Internal server error                  |
 
-## Basic Configuration
+## Methods
 
-The IKE Crypto Profile service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
-
-### Unified Client Interface (Recommended)
-
-```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
-
-# Access the IKE Crypto Profile service directly through the client
-ike_profiles = client.ike_crypto_profile
-```
-
-### Traditional Service Instantiation (Legacy)
-
-```python
-from scm.client import Scm
-from scm.config.network import IKECryptoProfile
-
-# Initialize client
-client = Scm(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
-
-# Initialize IKECryptoProfile object explicitly
-ike_profiles = IKECryptoProfile(client)
-```
-
-!!! note
-    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
-
-## Usage Examples
-
-### Creating IKE Crypto Profiles
-
-```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
-
-# Prepare IKE crypto profile configuration
-profile_config = {
-    "name": "ike-crypto-sha256-aes256",
-    "hash": ["sha256", "sha384"],
-    "encryption": ["aes-256-cbc", "aes-256-gcm"],
-    "dh_group": ["group14", "group19", "group20"],
-    "lifetime": {"hours": 8},
-    "authentication_multiple": 3,
-    "folder": "Texas"
-}
-
-# Create the IKE crypto profile
-new_profile = client.ike_crypto_profile.create(profile_config)
-print(f"Created IKE crypto profile: {new_profile.name} (ID: {new_profile.id})")
-```
-
-### Retrieving IKE Crypto Profiles
-
-```python
-# Fetch by name and folder
-profile = client.ike_crypto_profile.fetch(
-    name="ike-crypto-sha256-aes256",
-    folder="Texas"
-)
-print(f"Found profile: {profile.name}")
-
-# Get by ID
-profile_by_id = client.ike_crypto_profile.get(profile.id)
-print(f"Retrieved profile: {profile_by_id.name}")
-```
-
-### Updating IKE Crypto Profiles
-
-```python
-# Fetch existing profile
-existing = client.ike_crypto_profile.fetch(
-    name="ike-crypto-sha256-aes256",
-    folder="Texas"
-)
-
-# Modify attributes using dot notation
-existing.hash = ["sha384", "sha512"]
-existing.encryption = ["aes-256-gcm"]
-existing.lifetime = {"days": 1}
-
-# Perform update
-updated_profile = client.ike_crypto_profile.update(existing)
-print(f"Updated profile: {updated_profile.name}")
-```
-
-### Listing IKE Crypto Profiles
+### List IKE Crypto Profiles
 
 ```python
 # List all profiles in a folder
@@ -192,7 +79,7 @@ for profile in profiles:
     print(f"  DH Groups: {[g.value for g in profile.dh_group]}")
 ```
 
-### Filtering Responses
+#### Filtering Responses
 
 The `list()` method supports additional filtering parameters:
 
@@ -222,7 +109,7 @@ profiles = client.ike_crypto_profile.list(
 )
 ```
 
-### Controlling Pagination with max_limit
+#### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000.
 
@@ -243,7 +130,69 @@ client.ike_crypto_profile.max_limit = 1000
 all_profiles = client.ike_crypto_profile.list(folder="Texas")
 ```
 
-### Deleting IKE Crypto Profiles
+### Fetch an IKE Crypto Profile
+
+```python
+# Fetch by name and folder
+profile = client.ike_crypto_profile.fetch(
+    name="ike-crypto-sha256-aes256",
+    folder="Texas"
+)
+print(f"Found profile: {profile.name}")
+
+# Get by ID
+profile_by_id = client.ike_crypto_profile.get(profile.id)
+print(f"Retrieved profile: {profile_by_id.name}")
+```
+
+### Create an IKE Crypto Profile
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Prepare IKE crypto profile configuration
+profile_config = {
+    "name": "ike-crypto-sha256-aes256",
+    "hash": ["sha256", "sha384"],
+    "encryption": ["aes-256-cbc", "aes-256-gcm"],
+    "dh_group": ["group14", "group19", "group20"],
+    "lifetime": {"hours": 8},
+    "authentication_multiple": 3,
+    "folder": "Texas"
+}
+
+# Create the IKE crypto profile
+new_profile = client.ike_crypto_profile.create(profile_config)
+print(f"Created IKE crypto profile: {new_profile.name} (ID: {new_profile.id})")
+```
+
+### Update an IKE Crypto Profile
+
+```python
+# Fetch existing profile
+existing = client.ike_crypto_profile.fetch(
+    name="ike-crypto-sha256-aes256",
+    folder="Texas"
+)
+
+# Modify attributes using dot notation
+existing.hash = ["sha384", "sha512"]
+existing.encryption = ["aes-256-gcm"]
+existing.lifetime = {"days": 1}
+
+# Perform update
+updated_profile = client.ike_crypto_profile.update(existing)
+print(f"Updated profile: {updated_profile.name}")
+```
+
+### Delete an IKE Crypto Profile
 
 ```python
 # Get the profile to delete
@@ -257,9 +206,9 @@ client.ike_crypto_profile.delete(str(profile.id))
 print(f"Deleted profile: {profile.name}")
 ```
 
-## Managing Configuration Changes
+## Use Cases
 
-### Performing Commits
+#### Performing Commits
 
 ```python
 # Prepare commit parameters
@@ -276,7 +225,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-### Monitoring Jobs
+#### Monitoring Jobs
 
 ```python
 # Get status of specific job
@@ -339,40 +288,7 @@ except MissingQueryParameterError as e:
     print(f"Missing parameter: {e.message}")
 ```
 
-## Best Practices
-
-1. **Client Usage**
-    - Use the unified client interface (`client.ike_crypto_profile`) for streamlined code
-    - Create a single client instance and reuse it across your application
-    - Perform commit operations directly on the client object (`client.commit()`)
-
-2. **Algorithm Selection**
-    - Use strong hash algorithms (SHA-256 or higher) for security
-    - Prefer AES-256 encryption for sensitive data
-    - Use higher DH groups (group14, group19, group20) for better security
-    - Avoid deprecated algorithms (MD5, DES, 3DES) in production
-
-3. **Lifetime Configuration**
-    - Set appropriate lifetimes based on security requirements
-    - Shorter lifetimes provide better security but more overhead
-    - Balance security needs with performance considerations
-
-4. **Container Management**
-    - Always specify exactly one container (folder, snippet, or device)
-    - Use consistent folder structures across related configurations
-    - Validate container existence before creating profiles
-
-5. **Error Handling**
-    - Implement comprehensive error handling for all operations
-    - Check job status after commits
-    - Handle specific exceptions before generic ones
-    - Log error details for troubleshooting
-
-## Full Script Examples
-
-Refer to the [ike_crypto_profile.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/network/ike_crypto_profile.py).
-
-## Related Models
+## Related Topics
 
 - [IKECryptoProfileBaseModel](../../models/network/ike_crypto_profile_models.md)
 - [IKECryptoProfileCreateModel](../../models/network/ike_crypto_profile_models.md)
@@ -385,3 +301,5 @@ Refer to the [ike_crypto_profile.py example](https://github.com/cdot65/pan-scm-s
 - [LifetimeMinutes](../../models/network/ike_crypto_profile_models.md)
 - [LifetimeHours](../../models/network/ike_crypto_profile_models.md)
 - [LifetimeDays](../../models/network/ike_crypto_profile_models.md)
+
+Refer to the [ike_crypto_profile.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/network/ike_crypto_profile.py).
