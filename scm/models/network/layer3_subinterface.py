@@ -9,7 +9,12 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from scm.models.network._interface_common import ArpEntry, DdnsConfig, DhcpClient, StaticIpEntry
+from scm.models.network._interface_common import (
+    ArpEntry,
+    DdnsConfig,
+    DhcpClient,
+    StaticIpEntry,
+)
 
 
 class Layer3SubinterfaceBaseModel(BaseModel):

@@ -13,6 +13,13 @@ from .app_override_rules import (
     AppOverrideRuleRulebase,
     AppOverrideRuleUpdateModel,
 )
+from .authentication_rules import (
+    AuthenticationRuleCreateModel,
+    AuthenticationRuleMoveModel,
+    AuthenticationRuleResponseModel,
+    AuthenticationRuleRulebase,
+    AuthenticationRuleUpdateModel,
+)
 from .decryption_profiles import (
     DecryptionProfileCreateModel,
     DecryptionProfileResponseModel,
@@ -24,13 +31,6 @@ from .decryption_rules import (
     DecryptionRuleResponseModel,
     DecryptionRuleRulebase,
     DecryptionRuleUpdateModel,
-)
-from .authentication_rules import (
-    AuthenticationRuleCreateModel,
-    AuthenticationRuleMoveModel,
-    AuthenticationRuleResponseModel,
-    AuthenticationRuleRulebase,
-    AuthenticationRuleUpdateModel,
 )
 from .dns_security_profiles import (
     DNSSecurityProfileCreateModel,

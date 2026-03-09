@@ -22,8 +22,8 @@ from scm.client import Scm
 from scm.models.network import (
     BgpFilteringProfileResponseModel,
     BgpRedistributionProfileResponseModel,
-    BgpRouteMapResponseModel,
     BgpRouteMapRedistributionResponseModel,
+    BgpRouteMapResponseModel,
 )
 
 # Load .env file

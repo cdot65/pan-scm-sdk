@@ -1,12 +1,12 @@
 """scm.config.objects: Object resource service classes."""
 # scm/config/objects/__init__.py
 
-from .auto_tag_actions import AutoTagActions
 from .address import Address
 from .address_group import AddressGroup
 from .application import Application
 from .application_filters import ApplicationFilters
 from .application_group import ApplicationGroup
+from .auto_tag_actions import AutoTagActions
 from .dynamic_user_group import DynamicUserGroup
 from .external_dynamic_lists import ExternalDynamicLists
 from .hip_object import HIPObject

@@ -25,6 +25,10 @@ from scm.models.network import (
     BgpRouteMapRedistOspfToBgpEntry,
     BgpRouteMapRedistOspfToRib,
     BgpRouteMapRedistOspfToRibEntry,
+    BgpRouteMapRedistributionBaseModel,
+    BgpRouteMapRedistributionCreateModel,
+    BgpRouteMapRedistributionResponseModel,
+    BgpRouteMapRedistributionUpdateModel,
     BgpRouteMapRedistSetAggregator,
     BgpRouteMapRedistSetIpv4,
     BgpRouteMapRedistSetMetric,
@@ -33,12 +37,7 @@ from scm.models.network import (
     BgpRouteMapRedistSetToRib,
     BgpRouteMapRedistSimpleMatch,
     BgpRouteMapRedistSimpleMatchIpv4,
-    BgpRouteMapRedistributionBaseModel,
-    BgpRouteMapRedistributionCreateModel,
-    BgpRouteMapRedistributionResponseModel,
-    BgpRouteMapRedistributionUpdateModel,
 )
-
 
 # --- Match Models ---
 

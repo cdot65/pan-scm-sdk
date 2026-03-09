@@ -8,12 +8,7 @@ Contains Pydantic models for representing URL access profile objects and related
 from typing import Dict, List, Optional
 from uuid import UUID
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    model_validator,
-)
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 # Component Models

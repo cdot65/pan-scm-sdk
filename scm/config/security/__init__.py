@@ -3,9 +3,9 @@
 
 from .anti_spyware_profile import AntiSpywareProfile
 from .app_override_rule import AppOverrideRule
+from .authentication_rule import AuthenticationRule
 from .decryption_profile import DecryptionProfile
 from .decryption_rule import DecryptionRule
-from .authentication_rule import AuthenticationRule
 from .dns_security_profile import DNSSecurityProfile
 from .file_blocking_profile import FileBlockingProfile
 from .security_rule import SecurityRule

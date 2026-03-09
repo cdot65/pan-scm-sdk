@@ -12,9 +12,7 @@ from requests.exceptions import HTTPError
 # Local SDK imports
 from scm.config.security.url_access_profile import URLAccessProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.security.url_access_profiles import (
-    URLAccessProfileResponseModel,
-)
+from scm.models.security.url_access_profiles import URLAccessProfileResponseModel
 from tests.factories.security.url_access_profile import (
     URLAccessProfileCreateApiFactory,
     URLAccessProfileResponseFactory,

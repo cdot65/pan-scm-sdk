@@ -2,8 +2,8 @@
 
 """Tests for auto tag action model validation."""
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from scm.models.objects.auto_tag_actions import (
     AutoTagActionCreateModel,

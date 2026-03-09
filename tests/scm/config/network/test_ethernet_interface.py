@@ -1,7 +1,7 @@
 """Unit tests for the Ethernet Interface class."""
 
-import uuid
 from unittest.mock import MagicMock
+import uuid
 
 import pytest
 

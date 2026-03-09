@@ -9,13 +9,7 @@ from enum import Enum
 from typing import Annotated, Any, Dict, List, Optional, Union
 from uuid import UUID
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    field_validator,
-    model_validator,
-)
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from scm.utils.tag_colors import normalize_color_name
 

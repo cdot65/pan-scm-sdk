@@ -3,6 +3,7 @@
 """Tests for RADIUS server profile identity configuration."""
 
 from unittest.mock import MagicMock
+
 import pytest
 from requests.exceptions import HTTPError
 

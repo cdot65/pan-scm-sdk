@@ -13,7 +13,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-
 # --- Match Models ---
 
 

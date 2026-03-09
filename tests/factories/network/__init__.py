@@ -1,5 +1,12 @@
 """Network factories for testing."""
 
+from tests.factories.network.dns_proxy import (
+    DnsProxyCreateApiFactory,
+    DnsProxyCreateModelFactory,
+    DnsProxyResponseFactory,
+    DnsProxyUpdateApiFactory,
+    DnsProxyUpdateModelFactory,
+)
 from tests.factories.network.nat_rules import (
     InterfaceAddressFactory,
     NatRuleCreateApiFactory,
@@ -10,6 +17,13 @@ from tests.factories.network.nat_rules import (
     NatRuleUpdateApiFactory,
     NatRuleUpdateModelFactory,
     SourceTranslationFactory,
+)
+from tests.factories.network.pbf_rule import (
+    PbfRuleCreateApiFactory,
+    PbfRuleCreateModelFactory,
+    PbfRuleResponseFactory,
+    PbfRuleUpdateApiFactory,
+    PbfRuleUpdateModelFactory,
 )
 from tests.factories.network.qos_profile import (
     QosProfileCreateApiFactory,
@@ -26,20 +40,6 @@ from tests.factories.network.qos_rule import (
     QosRuleResponseFactory,
     QosRuleUpdateApiFactory,
     QosRuleUpdateModelFactory,
-)
-from tests.factories.network.dns_proxy import (
-    DnsProxyCreateApiFactory,
-    DnsProxyCreateModelFactory,
-    DnsProxyResponseFactory,
-    DnsProxyUpdateApiFactory,
-    DnsProxyUpdateModelFactory,
-)
-from tests.factories.network.pbf_rule import (
-    PbfRuleCreateApiFactory,
-    PbfRuleCreateModelFactory,
-    PbfRuleResponseFactory,
-    PbfRuleUpdateApiFactory,
-    PbfRuleUpdateModelFactory,
 )
 
 # Explicitly export these factories

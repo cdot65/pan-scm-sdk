@@ -12,7 +12,9 @@ from requests.exceptions import HTTPError
 # Local SDK imports
 from scm.config.identity import KerberosServerProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.identity.kerberos_server_profiles import KerberosServerProfileResponseModel
+from scm.models.identity.kerberos_server_profiles import (
+    KerberosServerProfileResponseModel,
+)
 from tests.factories.identity.kerberos_server_profile import (
     KerberosServerProfileCreateApiFactory,
     KerberosServerProfileResponseFactory,

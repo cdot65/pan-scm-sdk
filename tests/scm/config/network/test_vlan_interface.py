@@ -1,7 +1,7 @@
 """Unit tests for the VLAN Interface class."""
 
-import uuid
 from unittest.mock import MagicMock
+import uuid
 
 import pytest
 

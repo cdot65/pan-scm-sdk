@@ -20,7 +20,6 @@ from scm.models.security.authentication_rules import (
     AuthenticationRuleUpdateModel,
 )
 
-
 # -------------------- Test Classes for Enum Values --------------------
 
 
