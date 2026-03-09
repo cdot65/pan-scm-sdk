@@ -3,12 +3,15 @@
 """Tests for authentication profile identity configuration."""
 
 from unittest.mock import MagicMock
+
 import pytest
 from requests.exceptions import HTTPError
 
 from scm.config.identity import AuthenticationProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.identity.authentication_profiles import AuthenticationProfileResponseModel
+from scm.models.identity.authentication_profiles import (
+    AuthenticationProfileResponseModel,
+)
 from tests.factories.identity.authentication_profile import (
     AuthenticationProfileCreateApiFactory,
     AuthenticationProfileResponseFactory,

@@ -2,14 +2,13 @@
 
 from uuid import UUID
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from scm.models.network.aggregate_interface import (
     AggregateInterfaceCreateModel,
     AggregateInterfaceResponseModel,
     AggregateInterfaceUpdateModel,
-    AggregateLayer2,
     AggregateLayer3,
 )
 

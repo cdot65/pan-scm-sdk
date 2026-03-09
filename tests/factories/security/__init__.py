@@ -2,6 +2,14 @@
 
 """Factory definitions for security objects."""
 
+from tests.factories.security.anti_spyware_profile import (
+    AntiSpywareProfileBaseFactory,
+    AntiSpywareProfileCreateApiFactory,
+    AntiSpywareProfileCreateModelFactory,
+    AntiSpywareProfileResponseFactory,
+    AntiSpywareProfileUpdateApiFactory,
+    AntiSpywareProfileUpdateModelFactory,
+)
 from tests.factories.security.app_override_rule import (
     AppOverrideRuleCreateApiFactory,
     AppOverrideRuleCreateModelFactory,
@@ -11,13 +19,12 @@ from tests.factories.security.app_override_rule import (
     AppOverrideRuleUpdateApiFactory,
     AppOverrideRuleUpdateModelFactory,
 )
-from tests.factories.security.anti_spyware_profile import (
-    AntiSpywareProfileBaseFactory,
-    AntiSpywareProfileCreateApiFactory,
-    AntiSpywareProfileCreateModelFactory,
-    AntiSpywareProfileResponseFactory,
-    AntiSpywareProfileUpdateApiFactory,
-    AntiSpywareProfileUpdateModelFactory,
+from tests.factories.security.decryption_profile import (
+    DecryptionProfileCreateApiFactory,
+    DecryptionProfileCreateModelFactory,
+    DecryptionProfileResponseFactory,
+    DecryptionProfileUpdateApiFactory,
+    DecryptionProfileUpdateModelFactory,
 )
 from tests.factories.security.decryption_rule import (
     DecryptionRuleCreateApiFactory,
@@ -27,22 +34,6 @@ from tests.factories.security.decryption_rule import (
     DecryptionRuleResponseFactory,
     DecryptionRuleUpdateApiFactory,
     DecryptionRuleUpdateModelFactory,
-)
-from tests.factories.security.decryption_profile import (
-    DecryptionProfileCreateApiFactory,
-    DecryptionProfileCreateModelFactory,
-    DecryptionProfileResponseFactory,
-    DecryptionProfileUpdateApiFactory,
-    DecryptionProfileUpdateModelFactory,
-)
-from tests.factories.security.file_blocking_profile import (
-    FileBlockingProfileBaseFactory,
-    FileBlockingProfileCreateApiFactory,
-    FileBlockingProfileCreateModelFactory,
-    FileBlockingProfileResponseFactory,
-    FileBlockingProfileUpdateApiFactory,
-    FileBlockingProfileUpdateModelFactory,
-    FileBlockingRuleDictFactory,
 )
 from tests.factories.security.dns_security_profile import (
     BotnetDomainsFactory,
@@ -56,6 +47,15 @@ from tests.factories.security.dns_security_profile import (
     ListEntryBaseFactory,
     SinkholeSettingsFactory,
     WhitelistEntryFactory,
+)
+from tests.factories.security.file_blocking_profile import (
+    FileBlockingProfileBaseFactory,
+    FileBlockingProfileCreateApiFactory,
+    FileBlockingProfileCreateModelFactory,
+    FileBlockingProfileResponseFactory,
+    FileBlockingProfileUpdateApiFactory,
+    FileBlockingProfileUpdateModelFactory,
+    FileBlockingRuleDictFactory,
 )
 from tests.factories.security.security_rule import (
     SecurityRuleCreateApiFactory,

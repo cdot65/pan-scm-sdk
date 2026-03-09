@@ -8,12 +8,7 @@ Contains Pydantic models for representing RADIUS server profile objects and rela
 from typing import Dict, List, Optional
 from uuid import UUID
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    model_validator,
-)
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 # Component Models

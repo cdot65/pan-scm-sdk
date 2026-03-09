@@ -49,7 +49,12 @@ from tests.factories.deployment.service_connections import (
 )
 
 # Import network related factories
-from tests.factories.network import (
+from tests.factories.network import (  # QoS Profile factories; QoS Rule factories; DNS Proxy factories; PBF Rule factories
+    DnsProxyCreateApiFactory,
+    DnsProxyCreateModelFactory,
+    DnsProxyResponseFactory,
+    DnsProxyUpdateApiFactory,
+    DnsProxyUpdateModelFactory,
     InterfaceAddressFactory,
     NatRuleCreateApiFactory,
     NatRuleCreateModelFactory,
@@ -58,14 +63,16 @@ from tests.factories.network import (
     NatRuleResponseFactory,
     NatRuleUpdateApiFactory,
     NatRuleUpdateModelFactory,
-    SourceTranslationFactory,
-    # QoS Profile factories
+    PbfRuleCreateApiFactory,
+    PbfRuleCreateModelFactory,
+    PbfRuleResponseFactory,
+    PbfRuleUpdateApiFactory,
+    PbfRuleUpdateModelFactory,
     QosProfileCreateApiFactory,
     QosProfileCreateModelFactory,
     QosProfileResponseFactory,
     QosProfileUpdateApiFactory,
     QosProfileUpdateModelFactory,
-    # QoS Rule factories
     QosRuleCreateApiFactory,
     QosRuleCreateModelFactory,
     QosRuleMoveApiFactory,
@@ -73,18 +80,7 @@ from tests.factories.network import (
     QosRuleResponseFactory,
     QosRuleUpdateApiFactory,
     QosRuleUpdateModelFactory,
-    # DNS Proxy factories
-    DnsProxyCreateApiFactory,
-    DnsProxyCreateModelFactory,
-    DnsProxyResponseFactory,
-    DnsProxyUpdateApiFactory,
-    DnsProxyUpdateModelFactory,
-    # PBF Rule factories
-    PbfRuleCreateApiFactory,
-    PbfRuleCreateModelFactory,
-    PbfRuleResponseFactory,
-    PbfRuleUpdateApiFactory,
-    PbfRuleUpdateModelFactory,
+    SourceTranslationFactory,
 )
 from tests.factories.objects.address import (
     AddressCreateApiFactory,

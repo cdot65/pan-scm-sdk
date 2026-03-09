@@ -2,13 +2,15 @@
 
 """Tests for app override rule service."""
 
+from unittest.mock import MagicMock
+
 # Standard library imports
 import uuid
-from unittest.mock import MagicMock
+
+from pydantic import ValidationError
 
 # External libraries
 import pytest
-from pydantic import ValidationError
 from requests.exceptions import HTTPError
 
 # Local SDK imports

@@ -28,9 +28,7 @@ from dotenv import load_dotenv
 import pytest
 
 from scm.client import Scm
-from scm.models.network.logical_router import (
-    LogicalRouterResponseModel,
-)
+from scm.models.network.logical_router import LogicalRouterResponseModel
 
 # Load .env file
 load_dotenv()

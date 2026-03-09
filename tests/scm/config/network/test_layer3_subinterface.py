@@ -1,7 +1,7 @@
 """Unit tests for the Layer3 Subinterface class."""
 
-import uuid
 from unittest.mock import MagicMock
+import uuid
 
 import pytest
 

@@ -8,12 +8,7 @@ Contains Pydantic models for representing authentication profile objects and rel
 from typing import Dict, List, Optional
 from uuid import UUID
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    model_validator,
-)
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 # Nested Models for Method

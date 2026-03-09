@@ -11,8 +11,8 @@ from scm.models.identity.saml_server_profiles import (
     SamlServerProfileCreateModel,
     SamlServerProfileResponseModel,
     SamlServerProfileUpdateModel,
-    SamlSsoBindings,
     SamlSloBindings,
+    SamlSsoBindings,
 )
 from tests.factories.identity.saml_server_profile import (
     SamlServerProfileCreateModelFactory,

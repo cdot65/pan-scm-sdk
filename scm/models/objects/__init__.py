@@ -2,11 +2,6 @@
 # scm/models/objects/__init__.py
 
 from .address import AddressCreateModel, AddressResponseModel, AddressUpdateModel
-from .auto_tag_actions import (
-    AutoTagActionCreateModel,
-    AutoTagActionResponseModel,
-    AutoTagActionUpdateModel,
-)
 from .address_group import (
     AddressGroupCreateModel,
     AddressGroupResponseModel,
@@ -26,6 +21,11 @@ from .application_group import (
     ApplicationGroupCreateModel,
     ApplicationGroupResponseModel,
     ApplicationGroupUpdateModel,
+)
+from .auto_tag_actions import (
+    AutoTagActionCreateModel,
+    AutoTagActionResponseModel,
+    AutoTagActionUpdateModel,
 )
 from .dynamic_user_group import (
     DynamicUserGroupCreateModel,

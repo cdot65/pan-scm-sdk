@@ -7,11 +7,7 @@ import pytest
 
 from scm.config.network import QosRule
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.network import (
-    QosRulebase,
-    QosRuleResponseModel,
-    QosRuleUpdateModel,
-)
+from scm.models.network import QosRulebase, QosRuleResponseModel, QosRuleUpdateModel
 from tests.factories.network.qos_rule import QosRuleMoveApiFactory
 
 

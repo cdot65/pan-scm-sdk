@@ -12,9 +12,7 @@ from requests.exceptions import HTTPError
 # Local SDK imports
 from scm.config.security.file_blocking_profile import FileBlockingProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.security.file_blocking_profiles import (
-    FileBlockingProfileResponseModel,
-)
+from scm.models.security.file_blocking_profiles import FileBlockingProfileResponseModel
 from tests.factories.security.file_blocking_profile import (
     FileBlockingProfileCreateApiFactory,
     FileBlockingProfileResponseFactory,
