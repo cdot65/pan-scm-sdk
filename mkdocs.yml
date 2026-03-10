@@ -9,7 +9,7 @@ copyright: Copyright &copy; 2023-2025 Calvin Remsburg
 theme:
   name: material
   logo: images/logo.svg
-  favicon: images/logo.svg
+  favicon: images/logo.png
   palette:
     - scheme: default
       primary: deep purple
