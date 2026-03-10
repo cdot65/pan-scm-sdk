@@ -200,6 +200,12 @@ class Scm:
 
         In OAuth2 client credentials mode, automatically refreshes the token if expired.
         In bearer token mode, the token is used as-is with no refresh capability.
+
+        Args:
+                endpoint: str instance.
+                params: (Default: None)
+                **kwargs: The parameter value.
+
         """
         # Only check token expiration if using OAuth2 client credentials flow
         if self.oauth_client and self.oauth_client.is_expired:
@@ -220,6 +226,11 @@ class Scm:
 
         In OAuth2 client credentials mode, automatically refreshes the token if expired.
         In bearer token mode, the token is used as-is with no refresh capability.
+
+        Args:
+                endpoint: str instance.
+                **kwargs: The parameter value.
+
         """
         # Only check token expiration if using OAuth2 client credentials flow
         if self.oauth_client and self.oauth_client.is_expired:
@@ -239,6 +250,11 @@ class Scm:
 
         In OAuth2 client credentials mode, automatically refreshes the token if expired.
         In bearer token mode, the token is used as-is with no refresh capability.
+
+        Args:
+                endpoint: str instance.
+                **kwargs: The parameter value.
+
         """
         # Only check token expiration if using OAuth2 client credentials flow
         if self.oauth_client and self.oauth_client.is_expired:
@@ -258,6 +274,11 @@ class Scm:
 
         In OAuth2 client credentials mode, automatically refreshes the token if expired.
         In bearer token mode, the token is used as-is with no refresh capability.
+
+        Args:
+                endpoint: str instance.
+                **kwargs: The parameter value.
+
         """
         # Only check token expiration if using OAuth2 client credentials flow
         if self.oauth_client and self.oauth_client.is_expired:

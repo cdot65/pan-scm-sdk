@@ -57,7 +57,16 @@ class Device(BaseObject):
 
     @max_limit.setter
     def max_limit(self, value: int) -> None:
-        """Set a new maximum limit for API requests."""
+        """Set a new maximum limit for API requests.
+
+        Args:
+            value: int instance.
+
+
+        Returns:
+            None: The current maximum limit.
+
+        """
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
@@ -161,7 +170,16 @@ class Device(BaseObject):
         data: List[DeviceResponseModel],
         filters: Dict[str, Any],
     ) -> List[DeviceResponseModel]:
-        """Apply client-side filters to a list of devices."""
+        """Apply client-side filters to a list of devices.
+
+        Args:
+            data: A dictionary containing the resource data.
+            filters: Dict[str, Any] instance.
+
+        Returns:
+            List[DeviceResponseModel]: The filtered list of resources.
+
+        """
         filtered = data
 
         if not filters:

@@ -36,19 +36,39 @@ class Layer2Subinterface(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
-        """Initialize the Layer2Subinterface service with the given API client."""
+        """Initialize the Layer2Subinterface service with the given API client.
+
+        Args:
+            api_client: The API client instance.
+            max_limit: Maximum number of items per API request. Defaults to API maximum.
+
+        """
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
         self._max_limit = self._validate_max_limit(max_limit)
 
     @property
     def max_limit(self) -> int:
-        """Get the current maximum limit for API requests."""
+        """Get the current maximum limit for API requests.
+
+        Returns:
+            int
+
+        """
         return self._max_limit
 
     @max_limit.setter
     def max_limit(self, value: int) -> None:
-        """Set a new maximum limit for API requests."""
+        """Set a new maximum limit for API requests.
+
+        Args:
+            value: int instance.
+
+
+        Returns:
+            None: The current maximum limit.
+
+        """
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
@@ -85,20 +105,44 @@ class Layer2Subinterface(BaseObject):
         return limit_int
 
     def create(self, data: Dict[str, Any]) -> Layer2SubinterfaceResponseModel:
-        """Create a new layer2 subinterface object."""
+        """Create a new layer2 subinterface object.
+
+        Args:
+            data: A dictionary containing the resource data.
+
+        Returns:
+            Layer2SubinterfaceResponseModel: The created resource.
+
+        """
         subinterface = Layer2SubinterfaceCreateModel(**data)
         payload = subinterface.model_dump(exclude_unset=True, by_alias=True)
         response: Dict[str, Any] = self.api_client.post(self.ENDPOINT, json=payload)
         return Layer2SubinterfaceResponseModel(**response)
 
     def get(self, object_id: str) -> Layer2SubinterfaceResponseModel:
-        """Get a layer2 subinterface object by ID."""
+        """Get a layer2 subinterface object by ID.
+
+        Args:
+            object_id: The UUID of the resource to retrieve.
+
+        Returns:
+            Layer2SubinterfaceResponseModel: The retrieved resource.
+
+        """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.get(endpoint)
         return Layer2SubinterfaceResponseModel(**response)
 
     def update(self, subinterface: Layer2SubinterfaceUpdateModel) -> Layer2SubinterfaceResponseModel:
-        """Update an existing layer2 subinterface object."""
+        """Update an existing layer2 subinterface object.
+
+        Args:
+            subinterface: The update model instance containing the modified data.
+
+        Returns:
+            Layer2SubinterfaceResponseModel: The updated resource.
+
+        """
         payload = subinterface.model_dump(exclude_unset=True, by_alias=True)
         object_id = str(subinterface.id)
         payload.pop("id", None)
@@ -107,7 +151,12 @@ class Layer2Subinterface(BaseObject):
         return Layer2SubinterfaceResponseModel(**response)
 
     def delete(self, object_id: str) -> None:
-        """Delete a layer2 subinterface object."""
+        """Delete a layer2 subinterface object.
+
+        Args:
+            object_id: The UUID of the resource to retrieve.
+
+        """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)
 
@@ -116,7 +165,16 @@ class Layer2Subinterface(BaseObject):
         interfaces: List[Layer2SubinterfaceResponseModel],
         filters: Dict[str, Any],
     ) -> List[Layer2SubinterfaceResponseModel]:
-        """Apply client-side filtering to the list of layer2 subinterfaces."""
+        """Apply client-side filtering to the list of layer2 subinterfaces.
+
+        Args:
+            interfaces: List[Layer2SubinterfaceResponseModel] instance.
+            filters: Dict[str, Any] instance.
+
+        Returns:
+            List[Layer2SubinterfaceResponseModel]: The filtered list of resources.
+
+        """
         filter_criteria = interfaces
 
         if "vlan_tag" in filters:
@@ -149,7 +207,17 @@ class Layer2Subinterface(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Build container parameters dictionary."""
+        """Build container parameters dictionary.
+
+        Args:
+            folder: The folder in which the resource is defined.
+            snippet: The snippet in which the resource is defined.
+            device: The device in which the resource is defined.
+
+        Returns:
+            dict: A dictionary of container parameters.
+
+        """
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -167,7 +235,22 @@ class Layer2Subinterface(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[Layer2SubinterfaceResponseModel]:
-        """List layer2 subinterface objects with optional filtering."""
+        """List layer2 subinterface objects with optional filtering.
+
+        Args:
+            folder: The folder in which the resource is defined.
+            snippet: The snippet in which the resource is defined.
+            device: The device in which the resource is defined.
+            exact_match: If True, only return objects whose container exactly matches the provided container parameter.
+            exclude_folders: List of folder names to exclude from results.
+            exclude_snippets: List of snippet values to exclude from results.
+            exclude_devices: List of device values to exclude from results.
+            **filters: Additional filters (e.g., types, values, tags).
+
+        Returns:
+            List[Layer2SubinterfaceResponseModel]: A list of resources.
+
+        """
         if folder == "":
             raise MissingQueryParameterError(
                 message="Field 'folder' cannot be empty",
@@ -255,7 +338,18 @@ class Layer2Subinterface(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> Layer2SubinterfaceResponseModel:
-        """Fetch a single layer2 subinterface by name."""
+        """Fetch a single layer2 subinterface by name.
+
+        Args:
+            name: The name of the resource to fetch.
+            folder: The folder in which the resource is defined.
+            snippet: The snippet in which the resource is defined.
+            device: The device in which the resource is defined.
+
+        Returns:
+            Layer2SubinterfaceResponseModel: The fetched resource.
+
+        """
         if not name:
             raise MissingQueryParameterError(
                 message="Field 'name' cannot be empty",

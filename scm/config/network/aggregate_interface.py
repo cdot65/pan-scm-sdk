@@ -36,19 +36,39 @@ class AggregateInterface(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
-        """Initialize the AggregateInterface service with the given API client."""
+        """Initialize the AggregateInterface service with the given API client.
+
+        Args:
+            api_client: The API client instance.
+            max_limit: Maximum number of items per API request. Defaults to API maximum.
+
+        """
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
         self._max_limit = self._validate_max_limit(max_limit)
 
     @property
     def max_limit(self) -> int:
-        """Get the current maximum limit for API requests."""
+        """Get the current maximum limit for API requests.
+
+        Returns:
+            int
+
+        """
         return self._max_limit
 
     @max_limit.setter
     def max_limit(self, value: int) -> None:
-        """Set a new maximum limit for API requests."""
+        """Set a new maximum limit for API requests.
+
+        Args:
+            value: int instance.
+
+
+        Returns:
+            None: The current maximum limit.
+
+        """
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
@@ -85,20 +105,44 @@ class AggregateInterface(BaseObject):
         return limit_int
 
     def create(self, data: Dict[str, Any]) -> AggregateInterfaceResponseModel:
-        """Create a new aggregate interface object."""
+        """Create a new aggregate interface object.
+
+        Args:
+            data: A dictionary containing the resource data.
+
+        Returns:
+            AggregateInterfaceResponseModel: The created resource.
+
+        """
         aggregate = AggregateInterfaceCreateModel(**data)
         payload = aggregate.model_dump(exclude_unset=True, by_alias=True)
         response: Dict[str, Any] = self.api_client.post(self.ENDPOINT, json=payload)
         return AggregateInterfaceResponseModel(**response)
 
     def get(self, object_id: str) -> AggregateInterfaceResponseModel:
-        """Get an aggregate interface object by ID."""
+        """Get an aggregate interface object by ID.
+
+        Args:
+            object_id: The UUID of the resource to retrieve.
+
+        Returns:
+            AggregateInterfaceResponseModel: The retrieved resource.
+
+        """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.get(endpoint)
         return AggregateInterfaceResponseModel(**response)
 
     def update(self, aggregate: AggregateInterfaceUpdateModel) -> AggregateInterfaceResponseModel:
-        """Update an existing aggregate interface object."""
+        """Update an existing aggregate interface object.
+
+        Args:
+            aggregate: The update model instance containing the modified data.
+
+        Returns:
+            AggregateInterfaceResponseModel: The updated resource.
+
+        """
         payload = aggregate.model_dump(exclude_unset=True, by_alias=True)
         object_id = str(aggregate.id)
         payload.pop("id", None)
@@ -107,7 +151,12 @@ class AggregateInterface(BaseObject):
         return AggregateInterfaceResponseModel(**response)
 
     def delete(self, object_id: str) -> None:
-        """Delete an aggregate interface object."""
+        """Delete an aggregate interface object.
+
+        Args:
+            object_id: The UUID of the resource to retrieve.
+
+        """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)
 
@@ -116,7 +165,16 @@ class AggregateInterface(BaseObject):
         interfaces: List[AggregateInterfaceResponseModel],
         filters: Dict[str, Any],
     ) -> List[AggregateInterfaceResponseModel]:
-        """Apply client-side filtering to the list of aggregate interfaces."""
+        """Apply client-side filtering to the list of aggregate interfaces.
+
+        Args:
+            interfaces: List[AggregateInterfaceResponseModel] instance.
+            filters: Dict[str, Any] instance.
+
+        Returns:
+            List[AggregateInterfaceResponseModel]: The filtered list of resources.
+
+        """
         filter_criteria = interfaces
 
         # Filter by interface mode (layer2/layer3)
@@ -142,7 +200,17 @@ class AggregateInterface(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Build container parameters dictionary."""
+        """Build container parameters dictionary.
+
+        Args:
+            folder: The folder in which the resource is defined.
+            snippet: The snippet in which the resource is defined.
+            device: The device in which the resource is defined.
+
+        Returns:
+            dict: A dictionary of container parameters.
+
+        """
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -160,7 +228,22 @@ class AggregateInterface(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[AggregateInterfaceResponseModel]:
-        """List aggregate interface objects with optional filtering."""
+        """List aggregate interface objects with optional filtering.
+
+        Args:
+            folder: The folder in which the resource is defined.
+            snippet: The snippet in which the resource is defined.
+            device: The device in which the resource is defined.
+            exact_match: If True, only return objects whose container exactly matches the provided container parameter.
+            exclude_folders: List of folder names to exclude from results.
+            exclude_snippets: List of snippet values to exclude from results.
+            exclude_devices: List of device values to exclude from results.
+            **filters: Additional filters (e.g., types, values, tags).
+
+        Returns:
+            List[AggregateInterfaceResponseModel]: A list of resources.
+
+        """
         if folder == "":
             raise MissingQueryParameterError(
                 message="Field 'folder' cannot be empty",
@@ -248,7 +331,18 @@ class AggregateInterface(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> AggregateInterfaceResponseModel:
-        """Fetch a single aggregate interface by name."""
+        """Fetch a single aggregate interface by name.
+
+        Args:
+            name: The name of the resource to fetch.
+            folder: The folder in which the resource is defined.
+            snippet: The snippet in which the resource is defined.
+            device: The device in which the resource is defined.
+
+        Returns:
+            AggregateInterfaceResponseModel: The fetched resource.
+
+        """
         if not name:
             raise MissingQueryParameterError(
                 message="Field 'name' cannot be empty",

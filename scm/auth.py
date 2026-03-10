@@ -142,14 +142,24 @@ class OAuth2Client:
 
     @property
     def token_expires_soon(self) -> bool:
-        """Check if the token will expire soon, accounting for buffer time."""
+        """Check if the token will expire soon, accounting for buffer time.
+
+        Returns:
+            bool
+
+        """
         if not self.session.token:
             return True
         return time.time() >= self.session.token.get("expires_at", 0) - self.TOKEN_EXPIRY_BUFFER
 
     @property
     def is_expired(self) -> bool:
-        """Check if the token has expired."""
+        """Check if the token has expired.
+
+        Returns:
+            bool
+
+        """
         try:
             if not self.session.token:
                 return True
