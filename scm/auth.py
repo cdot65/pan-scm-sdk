@@ -199,7 +199,7 @@ class OAuth2Client:
                 include_client_id=True,
                 client_kwargs={"tsg_id": self.auth_request.tsg_id},
                 timeout=30,  # Add explicit timeout
-                verify=True,  # Ensure SSL verification
+                verify=self.verify_ssl,
             )
 
             # Update session token
