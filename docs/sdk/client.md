@@ -23,7 +23,8 @@ class Scm:
             api_base_url: str = "https://api.strata.paloaltonetworks.com",
             token_url: str = "https://auth.apps.paloaltonetworks.com/am/oauth2/access_token",
             log_level: str = "ERROR",
-            access_token: Optional[str] = None
+            access_token: Optional[str] = None,
+            verify_ssl: bool = True
     )
 ```
 
@@ -31,11 +32,12 @@ class Scm:
 
 | Attribute      | Type             | Description                           |
 |----------------|------------------|---------------------------------------|
-| `api_base_url` | str              | Base URL for the API endpoints        |
-| `token_url`    | str              | URL for obtaining OAuth tokens        |
-| `oauth_client` | OAuth2Client     | OAuth2 client handling authentication |
-| `session`      | requests.Session | HTTP session for making requests      |
-| `logger`       | Logger           | Logger instance for SDK logging       |
+| `api_base_url` | str              | Base URL for the API endpoints                          |
+| `token_url`    | str              | URL for obtaining OAuth tokens                          |
+| `oauth_client` | OAuth2Client     | OAuth2 client handling authentication                   |
+| `session`      | requests.Session | HTTP session for making requests                        |
+| `logger`       | Logger           | Logger instance for SDK logging                         |
+| `verify_ssl`   | bool             | Whether TLS certificate verification is enabled (default: True) |
 
 ## Authentication Methods
 
@@ -87,6 +89,24 @@ client = Scm(
         sync=True
     )
     ```
+
+### 3. Disabling TLS Certificate Verification
+
+For development or testing environments with self-signed certificates, you can disable TLS verification:
+
+```python
+from scm.client import Scm
+
+client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    verify_ssl=False
+)
+```
+
+!!! warning "Security Risk"
+    Setting `verify_ssl=False` disables TLS certificate verification for **all** HTTP requests made by the client. This exposes your application to man-in-the-middle attacks and should **never** be used in production environments. Only disable TLS verification when connecting to trusted internal services with self-signed certificates during development or testing.
 
 ## Client Usage Patterns
 

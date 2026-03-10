@@ -1218,3 +1218,33 @@ class TestClientCommitMethods(TestClientBase):
             },
             verify=ANY,
         )
+
+
+class TestClientSecretRedaction:
+    """Tests that client_secret is redacted from debug log output (#305)."""
+
+    @patch("scm.client.OAuth2Client")
+    def test_debug_log_redacts_client_secret(self, mock_oauth2client):
+        """Ensure client_secret value never appears in debug log messages."""
+        import logging
+
+        mock_oauth_client = mock_oauth2client.return_value
+        mock_oauth_client.session = MagicMock()
+        mock_oauth_client.is_expired = False
+        mock_oauth_client.signing_key = MagicMock(key="mocked_key")
+
+        secret = "super_secret_value_12345"
+        logger = logging.getLogger("scm")
+        with patch.object(logger, "debug", wraps=logger.debug) as mock_debug:
+            Scm(
+                client_id="test_client_id",
+                client_secret=secret,
+                tsg_id="test_tsg_id",
+            )
+
+            # Check that no debug call contains the raw secret
+            for call in mock_debug.call_args_list:
+                msg = call[0][0] if call[0] else ""
+                assert secret not in str(msg), (
+                    f"client_secret leaked in log: {msg}"
+                )

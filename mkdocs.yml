@@ -148,6 +148,15 @@ nav:
           - Tunnel Interfaces: sdk/config/network/tunnel_interface.md
           - VLAN Interfaces: sdk/config/network/vlan_interface.md
           - Zone Protection Profiles: sdk/config/network/zone_protection_profile.md
+          - BGP Address Family Profiles: sdk/config/network/bgp_address_family_profile.md
+          - BGP Auth Profiles: sdk/config/network/bgp_auth_profile.md
+          - BGP Filtering Profiles: sdk/config/network/bgp_filtering_profile.md
+          - BGP Redistribution Profiles: sdk/config/network/bgp_redistribution_profile.md
+          - BGP Route Maps: sdk/config/network/bgp_route_map.md
+          - BGP Route Map Redistribution: sdk/config/network/bgp_route_map_redistribution.md
+          - OSPF Auth Profiles: sdk/config/network/ospf_auth_profile.md
+          - Route Access Lists: sdk/config/network/route_access_list.md
+          - Route Prefix Lists: sdk/config/network/route_prefix_list.md
       - Objects:
           - Overview: sdk/config/objects/index.md
           - Addresses: sdk/config/objects/address.md
@@ -180,6 +189,9 @@ nav:
           - URL Categories: sdk/config/security_services/url_categories.md
           - WildFire Antivirus Profiles: sdk/config/security_services/wildfire_antivirus.md
           - Vulnerability Protection Profiles: sdk/config/security_services/vulnerability_protection_profile.md
+          - App Override Rules: sdk/config/security_services/app_override_rule.md
+          - File Blocking Profiles: sdk/config/security_services/file_blocking_profile.md
+          - URL Access Profiles: sdk/config/security_services/url_access_profile.md
       - Identity:
           - Overview: sdk/config/identity/index.md
           - Authentication Profiles: sdk/config/identity/authentication_profile.md
@@ -236,6 +248,16 @@ nav:
           - Tunnel Interfaces: sdk/models/network/tunnel_interface_models.md
           - VLAN Interfaces: sdk/models/network/vlan_interface_models.md
           - Zone Protection Profiles: sdk/models/network/zone_protection_profile_models.md
+          - BGP Address Family Profiles: sdk/models/network/bgp_address_family_profile_models.md
+          - BGP Auth Profiles: sdk/models/network/bgp_auth_profile_models.md
+          - BGP Filtering Profiles: sdk/models/network/bgp_filtering_profile_models.md
+          - BGP Redistribution Profiles: sdk/models/network/bgp_redistribution_profile_models.md
+          - BGP Route Maps: sdk/models/network/bgp_route_map_models.md
+          - BGP Route Map Redistribution: sdk/models/network/bgp_route_map_redistribution_models.md
+          - OSPF Auth Profiles: sdk/models/network/ospf_auth_profile_models.md
+          - Route Access Lists: sdk/models/network/route_access_list_models.md
+          - Route Prefix Lists: sdk/models/network/route_prefix_list_models.md
+          - NAT Rules (Legacy): sdk/models/network/nat_rules_models.md
       - Objects:
           - Overview: sdk/models/objects/index.md
           - Addresses: sdk/models/objects/address_models.md
@@ -272,6 +294,9 @@ nav:
           - URL Categories: sdk/models/security_services/url_categories_models.md
           - WildFire Antivirus Profiles: sdk/models/security_services/wildfire_antivirus_profile_models.md
           - Vulnerability Protection Profiles: sdk/models/security_services/vulnerability_protection_profile_models.md
+          - App Override Rules: sdk/models/security_services/app_override_rule_models.md
+          - File Blocking Profiles: sdk/models/security_services/file_blocking_profile_models.md
+          - URL Access Profiles: sdk/models/security_services/url_access_profile_models.md
       - Identity:
           - Overview: sdk/models/identity/index.md
           - Authentication Profiles: sdk/models/identity/authentication_profile_models.md

@@ -138,7 +138,9 @@ class Scm:
             token_url=token_url,
         )
 
-        self.logger.debug(f"Auth request: {auth_request.model_dump()}")
+        safe_fields = {k: v for k, v in auth_request.model_dump().items() if k != "client_secret"}
+        safe_fields["client_secret"] = "***"
+        self.logger.debug(f"Auth request: {safe_fields}")
         self.oauth_client = OAuth2Client(auth_request, verify_ssl=self.verify_ssl)
         self.session = self.oauth_client.session
         self.logger.debug(f"Session created: {self.session.headers}, verify_ssl={self.verify_ssl}")
