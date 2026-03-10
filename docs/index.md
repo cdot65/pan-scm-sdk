@@ -8,7 +8,7 @@ hide:
 </style>
 
 <p align="center">
-    <a href="https://paloaltonetworks.com"><img src="images/logo.png" alt="PaloAltoNetworks" class="hero-logo"></a>
+    <a href="https://paloaltonetworks.com"><img src="images/logo.svg" alt="PaloAltoNetworks" class="hero-logo"></a>
 </p>
 <p align="center">
     <em><code>pan-scm-sdk</code>: Python SDK to manage Palo Alto Networks Strata Cloud Manager</em>
