@@ -393,3 +393,61 @@ class TestOAuth2Client:
             OAuth2Client(auth_request)
 
         assert "HTTP error: 500 - API error: E001" in str(exc_info.value)
+
+
+class TestTokenRefreshVerifySSL:
+    """Tests that token refresh respects verify_ssl setting (#306)."""
+
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        """Setup test fixtures."""
+        self.mock_token = {
+            "access_token": "mock_token",
+            "token_type": "Bearer",
+            "expires_in": 3600,
+        }
+        self.mock_jwt_payload = {
+            "aud": "test_client_id",
+            "exp": 1735689600,
+            "sub": "test_subject",
+        }
+        self.mock_oauth_session = patch("scm.auth.OAuth2Session").start()
+        self.mock_jwks_client = patch("scm.auth.PyJWKClient").start()
+        self.mock_jwt = patch("scm.auth.jwt").start()
+
+        self.mock_session = MagicMock()
+        self.mock_session.token = self.mock_token
+        self.mock_oauth_session.return_value = self.mock_session
+
+        self.mock_signing_key = MagicMock()
+        self.mock_signing_key.key = "mock_key"
+        mock_jwks_instance = MagicMock()
+        mock_jwks_instance.get_signing_key_from_jwt.return_value = self.mock_signing_key
+        self.mock_jwks_client.return_value = mock_jwks_instance
+
+        self.mock_jwt.decode.return_value = self.mock_jwt_payload
+
+        yield
+        patch.stopall()
+
+    def test_refresh_token_passes_verify_false(self):
+        """When verify_ssl=False, refresh_token must call fetch_token with verify=False."""
+        auth_request = AuthRequestModel(
+            client_id="test_client_id",
+            client_secret="test_client_secret",
+            token_url="https://api.test.com/oauth2/token",
+            scope="test_scope",
+            tsg_id="test_tsg_id",
+        )
+        client = OAuth2Client(auth_request, verify_ssl=False)
+
+        # Reset mock to clear the initial fetch_token call
+        self.mock_session.fetch_token.reset_mock()
+
+        client.refresh_token()
+
+        # Verify refresh call used verify=False
+        call_kwargs = self.mock_session.fetch_token.call_args[1]
+        assert call_kwargs["verify"] is False, (
+            f"Expected verify=False but got verify={call_kwargs['verify']}"
+        )
