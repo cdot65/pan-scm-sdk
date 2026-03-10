@@ -38,19 +38,39 @@ class AutoTagActions(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
-        """Initialize the AutoTagActions service with the given API client."""
+        """Initialize the AutoTagActions service with the given API client.
+
+        Args:
+            api_client: The API client instance.
+            max_limit: Maximum number of items per API request. Defaults to API maximum.
+
+        """
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
         self._max_limit = self._validate_max_limit(max_limit)
 
     @property
     def max_limit(self) -> int:
-        """Get the current maximum limit for API requests."""
+        """Get the current maximum limit for API requests.
+
+        Returns:
+            int
+
+        """
         return self._max_limit
 
     @max_limit.setter
     def max_limit(self, value: int) -> None:
-        """Set a new maximum limit for API requests."""
+        """Set a new maximum limit for API requests.
+
+        Args:
+            value: int instance.
+
+
+        Returns:
+            None: The current maximum limit.
+
+        """
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
@@ -95,6 +115,10 @@ class AutoTagActions(BaseObject):
         Returns:
             AutoTagActionResponseModel
 
+
+        Args:
+                data: A dictionary containing the resource data.
+
         """
         auto_tag_action = AutoTagActionCreateModel(**data)
         payload = auto_tag_action.model_dump(exclude_unset=True)
@@ -114,6 +138,10 @@ class AutoTagActions(BaseObject):
 
         Returns:
             AutoTagActionResponseModel
+
+
+        Args:
+                object_id: The UUID of the resource to retrieve.
 
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -151,7 +179,16 @@ class AutoTagActions(BaseObject):
         auto_tag_actions: List[AutoTagActionResponseModel],
         filters: Dict[str, Any],
     ) -> List[AutoTagActionResponseModel]:
-        """Apply client-side filtering to the list of auto-tag actions."""
+        """Apply client-side filtering to the list of auto-tag actions.
+
+        Args:
+            auto_tag_actions: List[AutoTagActionResponseModel] instance.
+            filters: Dict[str, Any] instance.
+
+        Returns:
+            List[AutoTagActionResponseModel]: The filtered list of resources.
+
+        """
         return auto_tag_actions
 
     @staticmethod
@@ -160,7 +197,17 @@ class AutoTagActions(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Build container parameters dictionary."""
+        """Build container parameters dictionary.
+
+        Args:
+            folder: The folder in which the resource is defined.
+            snippet: The snippet in which the resource is defined.
+            device: The device in which the resource is defined.
+
+        Returns:
+            dict: A dictionary of container parameters.
+
+        """
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()

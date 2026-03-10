@@ -38,7 +38,13 @@ class RemoteNetworks(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
-        """Initialize the RemoteNetworks service with the given API client."""
+        """Initialize the RemoteNetworks service with the given API client.
+
+        Args:
+            api_client: The API client instance.
+            max_limit: Maximum number of items per API request. Defaults to API maximum.
+
+        """
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -50,12 +56,26 @@ class RemoteNetworks(BaseObject):
 
     @property
     def max_limit(self) -> int:
-        """Get the current maximum limit for API requests."""
+        """Get the current maximum limit for API requests.
+
+        Returns:
+            int
+
+        """
         return self._max_limit
 
     @max_limit.setter
     def max_limit(self, value: int) -> None:
-        """Set a new maximum limit for API requests."""
+        """Set a new maximum limit for API requests.
+
+        Args:
+            value: int instance.
+
+
+        Returns:
+            None: The current maximum limit.
+
+        """
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
@@ -111,6 +131,10 @@ class RemoteNetworks(BaseObject):
         Returns:
             RemoteNetworkResponseModel
 
+
+        Args:
+                data: A dictionary containing the resource data.
+
         """
         remote_network = RemoteNetworkCreateModel(**data)
         payload = remote_network.model_dump(exclude_unset=True)
@@ -128,6 +152,10 @@ class RemoteNetworks(BaseObject):
 
         Returns:
             RemoteNetworkResponseModel
+
+
+        Args:
+                object_id: The UUID of the resource to retrieve.
 
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -194,6 +222,14 @@ class RemoteNetworks(BaseObject):
               (the calling code can short-circuit the entire result to []).
             - If filter_value is a list, match if obj_value is in that list.
             - If filter_value is a single string, match if obj_value == filter_value.
+
+            Args:
+                    obj_value: The parameter value.
+                    filter_value: The parameter value.
+
+            Returns:
+                    bool
+
             """
             if isinstance(filter_value, list):
                 # If it's empty => no results for this filter
@@ -240,6 +276,16 @@ class RemoteNetworks(BaseObject):
             subnets_value = filters["subnets"]
 
             def has_subnet_overlap(rn_subnets, f_subnets) -> bool:
+                """Check for subnet overlap.
+
+                Args:
+                    rn_subnets: The parameter value.
+                    f_subnets: The parameter value.
+
+                Returns:
+                    bool: True if overlap exists.
+
+                """
                 if not rn_subnets:
                     return False
                 return any(s in rn_subnets for s in f_subnets)
@@ -307,7 +353,15 @@ class RemoteNetworks(BaseObject):
         # snippet: Optional[str],
         # device: Optional[str],
     ) -> dict:
-        """Build container parameters dictionary."""
+        """Build container parameters dictionary.
+
+        Args:
+            folder: The folder in which the resource is defined.
+
+        Returns:
+            dict: A dictionary of container parameters.
+
+        """
         return {k: v for k, v in {"folder": folder}.items() if v is not None}
 
     def list(

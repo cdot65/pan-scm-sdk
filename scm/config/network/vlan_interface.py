@@ -36,19 +36,39 @@ class VlanInterface(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
-        """Initialize the VlanInterface service with the given API client."""
+        """Initialize the VlanInterface service with the given API client.
+
+        Args:
+            api_client: The API client instance.
+            max_limit: Maximum number of items per API request. Defaults to API maximum.
+
+        """
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
         self._max_limit = self._validate_max_limit(max_limit)
 
     @property
     def max_limit(self) -> int:
-        """Get the current maximum limit for API requests."""
+        """Get the current maximum limit for API requests.
+
+        Returns:
+            int
+
+        """
         return self._max_limit
 
     @max_limit.setter
     def max_limit(self, value: int) -> None:
-        """Set a new maximum limit for API requests."""
+        """Set a new maximum limit for API requests.
+
+        Args:
+            value: int instance.
+
+
+        Returns:
+            None: The current maximum limit.
+
+        """
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
@@ -85,20 +105,44 @@ class VlanInterface(BaseObject):
         return limit_int
 
     def create(self, data: Dict[str, Any]) -> VlanInterfaceResponseModel:
-        """Create a new VLAN interface object."""
+        """Create a new VLAN interface object.
+
+        Args:
+            data: A dictionary containing the resource data.
+
+        Returns:
+            VlanInterfaceResponseModel: The created resource.
+
+        """
         vlan = VlanInterfaceCreateModel(**data)
         payload = vlan.model_dump(exclude_unset=True, by_alias=True)
         response: Dict[str, Any] = self.api_client.post(self.ENDPOINT, json=payload)
         return VlanInterfaceResponseModel(**response)
 
     def get(self, object_id: str) -> VlanInterfaceResponseModel:
-        """Get a VLAN interface object by ID."""
+        """Get a VLAN interface object by ID.
+
+        Args:
+            object_id: The UUID of the resource to retrieve.
+
+        Returns:
+            VlanInterfaceResponseModel: The retrieved resource.
+
+        """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.get(endpoint)
         return VlanInterfaceResponseModel(**response)
 
     def update(self, vlan: VlanInterfaceUpdateModel) -> VlanInterfaceResponseModel:
-        """Update an existing VLAN interface object."""
+        """Update an existing VLAN interface object.
+
+        Args:
+            vlan: The update model instance containing the modified data.
+
+        Returns:
+            VlanInterfaceResponseModel: The updated resource.
+
+        """
         payload = vlan.model_dump(exclude_unset=True, by_alias=True)
         object_id = str(vlan.id)
         payload.pop("id", None)
@@ -107,7 +151,12 @@ class VlanInterface(BaseObject):
         return VlanInterfaceResponseModel(**response)
 
     def delete(self, object_id: str) -> None:
-        """Delete a VLAN interface object."""
+        """Delete a VLAN interface object.
+
+        Args:
+            object_id: The UUID of the resource to retrieve.
+
+        """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)
 
@@ -116,7 +165,16 @@ class VlanInterface(BaseObject):
         interfaces: List[VlanInterfaceResponseModel],
         filters: Dict[str, Any],
     ) -> List[VlanInterfaceResponseModel]:
-        """Apply client-side filtering to the list of VLAN interfaces."""
+        """Apply client-side filtering to the list of VLAN interfaces.
+
+        Args:
+            interfaces: List[VlanInterfaceResponseModel] instance.
+            filters: Dict[str, Any] instance.
+
+        Returns:
+            List[VlanInterfaceResponseModel]: The filtered list of resources.
+
+        """
         filter_criteria = interfaces
 
         if "vlan_tag" in filters:
@@ -149,7 +207,17 @@ class VlanInterface(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Build container parameters dictionary."""
+        """Build container parameters dictionary.
+
+        Args:
+            folder: The folder in which the resource is defined.
+            snippet: The snippet in which the resource is defined.
+            device: The device in which the resource is defined.
+
+        Returns:
+            dict: A dictionary of container parameters.
+
+        """
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -167,7 +235,22 @@ class VlanInterface(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[VlanInterfaceResponseModel]:
-        """List VLAN interface objects with optional filtering."""
+        """List VLAN interface objects with optional filtering.
+
+        Args:
+            folder: The folder in which the resource is defined.
+            snippet: The snippet in which the resource is defined.
+            device: The device in which the resource is defined.
+            exact_match: If True, only return objects whose container exactly matches the provided container parameter.
+            exclude_folders: List of folder names to exclude from results.
+            exclude_snippets: List of snippet values to exclude from results.
+            exclude_devices: List of device values to exclude from results.
+            **filters: Additional filters (e.g., types, values, tags).
+
+        Returns:
+            List[VlanInterfaceResponseModel]: A list of resources.
+
+        """
         if folder == "":
             raise MissingQueryParameterError(
                 message="Field 'folder' cannot be empty",
@@ -255,7 +338,18 @@ class VlanInterface(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> VlanInterfaceResponseModel:
-        """Fetch a single VLAN interface by name."""
+        """Fetch a single VLAN interface by name.
+
+        Args:
+            name: The name of the resource to fetch.
+            folder: The folder in which the resource is defined.
+            snippet: The snippet in which the resource is defined.
+            device: The device in which the resource is defined.
+
+        Returns:
+            VlanInterfaceResponseModel: The fetched resource.
+
+        """
         if not name:
             raise MissingQueryParameterError(
                 message="Field 'name' cannot be empty",

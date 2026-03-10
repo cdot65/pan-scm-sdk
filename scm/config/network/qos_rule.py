@@ -40,7 +40,13 @@ class QosRule(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
-        """Initialize the QosRule service with the given API client."""
+        """Initialize the QosRule service with the given API client.
+
+        Args:
+            api_client: The API client instance.
+            max_limit: Maximum number of items per API request. Defaults to API maximum.
+
+        """
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -49,12 +55,26 @@ class QosRule(BaseObject):
 
     @property
     def max_limit(self) -> int:
-        """Get the current maximum limit for API requests."""
+        """Get the current maximum limit for API requests.
+
+        Returns:
+            int
+
+        """
         return self._max_limit
 
     @max_limit.setter
     def max_limit(self, value: int) -> None:
-        """Set a new maximum limit for API requests."""
+        """Set a new maximum limit for API requests.
+
+        Args:
+            value: int instance.
+
+
+        Returns:
+            None: The current maximum limit.
+
+        """
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
@@ -207,7 +227,17 @@ class QosRule(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Build container parameters dictionary."""
+        """Build container parameters dictionary.
+
+        Args:
+            folder: The folder in which the resource is defined.
+            snippet: The snippet in which the resource is defined.
+            device: The device in which the resource is defined.
+
+        Returns:
+            dict: A dictionary of container parameters.
+
+        """
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -508,6 +538,10 @@ class QosRule(BaseObject):
                 - destination: Where to move the rule ('top', 'bottom', 'before', 'after')
                 - rulebase: Which rulebase to use ('pre', 'post')
                 - destination_rule: UUID of reference rule (required for 'before'/'after')
+
+
+        Returns:
+            None: The moved resource.
 
         """
         rule_id_str = str(rule_id)

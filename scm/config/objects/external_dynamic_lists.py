@@ -47,7 +47,13 @@ class ExternalDynamicLists(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
-        """Initialize the ExternalDynamicLists service with the given API client."""
+        """Initialize the ExternalDynamicLists service with the given API client.
+
+        Args:
+            api_client: The API client instance.
+            max_limit: Maximum number of items per API request. Defaults to API maximum.
+
+        """
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -56,12 +62,26 @@ class ExternalDynamicLists(BaseObject):
 
     @property
     def max_limit(self) -> int:
-        """Get the current maximum limit for API requests."""
+        """Get the current maximum limit for API requests.
+
+        Returns:
+            int
+
+        """
         return self._max_limit
 
     @max_limit.setter
     def max_limit(self, value: int) -> None:
-        """Set a new maximum limit for API requests."""
+        """Set a new maximum limit for API requests.
+
+        Args:
+            value: int instance.
+
+
+        Returns:
+            None: The current maximum limit.
+
+        """
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
@@ -117,6 +137,10 @@ class ExternalDynamicLists(BaseObject):
         Returns:
             ExternalDynamicListsResponseModel
 
+
+        Args:
+                data: A dictionary containing the resource data.
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         edl = ExternalDynamicListsCreateModel(**data)
@@ -141,6 +165,10 @@ class ExternalDynamicLists(BaseObject):
 
         Returns:
             ExternalDynamicListsResponseModel
+
+
+        Args:
+                edl_id: str instance.
 
         """
         # Send the request to the remote API
@@ -244,7 +272,17 @@ class ExternalDynamicLists(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Build container parameters dictionary."""
+        """Build container parameters dictionary.
+
+        Args:
+            folder: The folder in which the resource is defined.
+            snippet: The snippet in which the resource is defined.
+            device: The device in which the resource is defined.
+
+        Returns:
+            dict: A dictionary of container parameters.
+
+        """
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()

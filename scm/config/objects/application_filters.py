@@ -38,7 +38,13 @@ class ApplicationFilters(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
-        """Initialize the ApplicationFilters service with the given API client."""
+        """Initialize the ApplicationFilters service with the given API client.
+
+        Args:
+            api_client: The API client instance.
+            max_limit: Maximum number of items per API request. Defaults to API maximum.
+
+        """
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -47,12 +53,26 @@ class ApplicationFilters(BaseObject):
 
     @property
     def max_limit(self) -> int:
-        """Get the current maximum limit for API requests."""
+        """Get the current maximum limit for API requests.
+
+        Returns:
+            int
+
+        """
         return self._max_limit
 
     @max_limit.setter
     def max_limit(self, value: int) -> None:
-        """Set a new maximum limit for API requests."""
+        """Set a new maximum limit for API requests.
+
+        Args:
+            value: int instance.
+
+
+        Returns:
+            None: The current maximum limit.
+
+        """
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
@@ -108,6 +128,10 @@ class ApplicationFilters(BaseObject):
         Returns:
             ApplicationFiltersResponseModel
 
+
+        Args:
+                data: A dictionary containing the resource data.
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         application_filter = ApplicationFiltersCreateModel(**data)
@@ -132,6 +156,10 @@ class ApplicationFilters(BaseObject):
 
         Returns:
             ApplicationFiltersResponseModel
+
+
+        Args:
+                object_id: The UUID of the resource to retrieve.
 
         """
         # Send the request to the remote API
@@ -261,7 +289,16 @@ class ApplicationFilters(BaseObject):
         folder: Optional[str],
         snippet: Optional[str],
     ) -> dict:
-        """Build container parameters dictionary."""
+        """Build container parameters dictionary.
+
+        Args:
+            folder: The folder in which the resource is defined.
+            snippet: The snippet in which the resource is defined.
+
+        Returns:
+            dict: A dictionary of container parameters.
+
+        """
         return {k: v for k, v in {"folder": folder, "snippet": snippet}.items() if v is not None}
 
     def list(
