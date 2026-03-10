@@ -64,8 +64,8 @@
 }
 
 .hero-logo {
-  width: 320px;
-  max-width: 80%;
+  width: 200px;
+  max-width: 60%;
   height: auto;
   margin-bottom: 0.5rem;
   filter: drop-shadow(0 4px 12px rgba(248, 182, 32, 0.25));
