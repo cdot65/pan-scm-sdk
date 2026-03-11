@@ -6,8 +6,8 @@ Currently, we are providing security updates only for the latest version of our 
 
 | Version | Supported          |
 |---------| ------------------ |
-| 0.1.x   | :white_check_mark: |
-| < 0.1   | :x:                |
+| 0.12.x  | :white_check_mark: |
+| < 0.12  | :x:                |
 
 ## Reporting a Vulnerability
 
