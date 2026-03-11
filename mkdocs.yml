@@ -108,7 +108,7 @@ nav:
       - Contributing: about/contributing.md
       - Release Notes: about/release-notes.md
       - License: about/license.md
-  - SDK Reference:
+  - Services:
       - Overview: sdk/index.md
       - Auth: sdk/auth.md
       - Client: sdk/client.md

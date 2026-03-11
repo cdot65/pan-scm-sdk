@@ -118,13 +118,13 @@ Models for Prisma Access Insights:
 
 ---
 
-## Relationship to SDK Reference
+## Relationship to Services
 
-The **Data Models** define *what* data looks like, while the **[SDK Reference](../index.md)** documents *how* to
+The **Data Models** define *what* data looks like, while the **[Services](../index.md)** documentation covers *how* to
 perform operations. For example:
 
 - Use `AddressCreateModel` (Data Models) to understand required fields
-- Use `client.address.create()` (SDK Reference) to actually create the address
+- Use `client.address.create()` (Services) to actually create the address
 
 ```python
 from scm.client import Scm
