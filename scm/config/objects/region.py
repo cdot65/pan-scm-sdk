@@ -68,11 +68,7 @@ class Region(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -127,12 +123,11 @@ class Region(BaseObject):
     ) -> RegionResponseModel:
         """Create a new region object.
 
+        Args:
+            data: A dictionary containing the resource data.
+
         Returns:
             RegionResponseModel
-
-
-        Args:
-                data: A dictionary containing the resource data.
 
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
@@ -157,12 +152,11 @@ class Region(BaseObject):
     ) -> RegionResponseModel:
         """Get a region object by ID.
 
+        Args:
+            object_id: The UUID of the resource to retrieve.
+
         Returns:
             RegionResponseModel
-
-
-        Args:
-                object_id: The UUID of the resource to retrieve.
 
         """
         # Send the request to the remote API
@@ -216,6 +210,9 @@ class Region(BaseObject):
 
         Returns:
             List[RegionResponseModel]: Filtered list of regions
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         filter_criteria = regions
@@ -325,6 +322,10 @@ class Region(BaseObject):
 
         Returns:
             List[RegionResponseModel]: A list of region objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -471,6 +472,10 @@ class Region(BaseObject):
 
         Returns:
             RegionResponseModel: The fetched region object as a Pydantic model.
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

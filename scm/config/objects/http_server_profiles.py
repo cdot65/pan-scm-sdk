@@ -66,11 +66,7 @@ class HTTPServerProfile(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -216,6 +212,9 @@ class HTTPServerProfile(BaseObject):
         Returns:
             List[HTTPServerProfileResponseModel]: Filtered list of HTTP server profiles
 
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         filter_criteria = http_server_profiles
 
@@ -304,6 +303,10 @@ class HTTPServerProfile(BaseObject):
 
         Returns:
             List[HTTPServerProfileResponseModel]: A list of HTTP server profile objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -438,6 +441,10 @@ class HTTPServerProfile(BaseObject):
 
         Returns:
             HTTPServerProfileResponseModel: The fetched HTTP server profile object as a Pydantic model.
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

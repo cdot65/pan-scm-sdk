@@ -69,11 +69,7 @@ class AppOverrideRule(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -129,13 +125,15 @@ class AppOverrideRule(BaseObject):
     ) -> AppOverrideRuleResponseModel:
         """Create a new app override rule object.
 
+        Args:
+            data: A dictionary containing the resource data.
+            rulebase: (Default: 'pre')
+
         Returns:
             AppOverrideRuleResponseModel
 
-
-        Args:
-                data: A dictionary containing the resource data.
-                rulebase: (Default: 'pre')
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         # Validate that the rulebase is of type `pre` or `post`
@@ -179,13 +177,15 @@ class AppOverrideRule(BaseObject):
     ) -> AppOverrideRuleResponseModel:
         """Get an app override rule object by ID.
 
+        Args:
+            object_id: The UUID of the resource to retrieve.
+            rulebase: (Default: 'pre')
+
         Returns:
             AppOverrideRuleResponseModel
 
-
-        Args:
-                object_id: The UUID of the resource to retrieve.
-                rulebase: (Default: 'pre')
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         # Validate that the rulebase is of type `pre` or `post`
@@ -220,6 +220,9 @@ class AppOverrideRule(BaseObject):
 
         Returns:
             AppOverrideRuleResponseModel
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         # Validate that the rulebase is of type `pre` or `post`
@@ -268,6 +271,9 @@ class AppOverrideRule(BaseObject):
 
         Returns:
             List[AppOverrideRuleResponseModel]: Filtered list of app override rules
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         filter_criteria = rules
@@ -444,6 +450,10 @@ class AppOverrideRule(BaseObject):
         Returns:
             List[AppOverrideRuleResponseModel]: A list of app override rule objects
 
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         # Validate that the rulebase is of type `pre` or `post`
         if not isinstance(rulebase, AppOverrideRuleRulebase):
@@ -593,6 +603,10 @@ class AppOverrideRule(BaseObject):
         Returns:
             AppOverrideRuleResponseModel: The fetched app override rule object as a Pydantic model.
 
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -683,6 +697,9 @@ class AppOverrideRule(BaseObject):
         Args:
             object_id (str): The ID of the object to delete.
             rulebase: Which rulebase to use ('pre' or 'post'), defaults to 'pre'
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         # Validate that the rulebase is of type `pre` or `post`

@@ -67,11 +67,7 @@ class AuthSettings(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -242,6 +238,9 @@ class AuthSettings(BaseObject):
         Returns:
             List[AuthSettingsResponseModel]: A list of authentication settings objects
 
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         if folder != "Mobile Users":
             raise InvalidObjectError(
@@ -296,6 +295,10 @@ class AuthSettings(BaseObject):
 
         Returns:
             AuthSettingsResponseModel: The fetched authentication settings object
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

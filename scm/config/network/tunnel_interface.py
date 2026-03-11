@@ -62,11 +62,7 @@ class TunnelInterface(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -209,6 +205,9 @@ class TunnelInterface(BaseObject):
         Returns:
             List[TunnelInterfaceResponseModel]: Filtered list of tunnel interfaces
 
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         filter_criteria = interfaces
 
@@ -295,6 +294,10 @@ class TunnelInterface(BaseObject):
 
         Returns:
             List[TunnelInterfaceResponseModel]: A list of tunnel interface objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -421,6 +424,10 @@ class TunnelInterface(BaseObject):
 
         Returns:
             TunnelInterfaceResponseModel: The fetched tunnel interface object
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

@@ -69,11 +69,7 @@ class AuthenticationRule(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -129,13 +125,15 @@ class AuthenticationRule(BaseObject):
     ) -> AuthenticationRuleResponseModel:
         """Create a new authentication rule object.
 
+        Args:
+            data: A dictionary containing the resource data.
+            rulebase: (Default: 'pre')
+
         Returns:
             AuthenticationRuleResponseModel
 
-
-        Args:
-                data: A dictionary containing the resource data.
-                rulebase: (Default: 'pre')
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         # Validate that the rulebase is of type `pre` or `post`
@@ -179,13 +177,15 @@ class AuthenticationRule(BaseObject):
     ) -> AuthenticationRuleResponseModel:
         """Get an authentication rule object by ID.
 
+        Args:
+            object_id: The UUID of the resource to retrieve.
+            rulebase: (Default: 'pre')
+
         Returns:
             AuthenticationRuleResponseModel
 
-
-        Args:
-                object_id: The UUID of the resource to retrieve.
-                rulebase: (Default: 'pre')
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         # Validate that the rulebase is of type `pre` or `post`
@@ -220,6 +220,9 @@ class AuthenticationRule(BaseObject):
 
         Returns:
             AuthenticationRuleResponseModel
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         # Validate that the rulebase is of type `pre` or `post`
@@ -268,6 +271,9 @@ class AuthenticationRule(BaseObject):
 
         Returns:
             List[AuthenticationRuleResponseModel]: Filtered list of authentication rules
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         filter_criteria = rules
@@ -460,6 +466,10 @@ class AuthenticationRule(BaseObject):
         Returns:
             List[AuthenticationRuleResponseModel]: A list of authentication rule objects
 
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         # Validate that the rulebase is of type `pre` or `post`
         if not isinstance(rulebase, AuthenticationRuleRulebase):
@@ -609,6 +619,10 @@ class AuthenticationRule(BaseObject):
         Returns:
             AuthenticationRuleResponseModel: The fetched authentication rule object as a Pydantic model.
 
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -699,6 +713,9 @@ class AuthenticationRule(BaseObject):
         Args:
             object_id (str): The ID of the object to delete.
             rulebase: Which rulebase to use ('pre' or 'post'), defaults to 'pre'
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         # Validate that the rulebase is of type `pre` or `post`

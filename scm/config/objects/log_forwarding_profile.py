@@ -66,11 +66,7 @@ class LogForwardingProfile(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -218,6 +214,9 @@ class LogForwardingProfile(BaseObject):
         Returns:
             List[LogForwardingProfileResponseModel]: Filtered list of profiles
 
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         filter_criteria = profiles
 
@@ -334,6 +333,10 @@ class LogForwardingProfile(BaseObject):
 
         Returns:
             List[LogForwardingProfileResponseModel]: A list of log forwarding profile objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -468,6 +471,10 @@ class LogForwardingProfile(BaseObject):
 
         Returns:
             LogForwardingProfileResponseModel: The fetched profile object as a Pydantic model.
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
+            MissingQueryParameterError: If a required query parameter is missing or empty.
 
         """
         if not name:

@@ -64,11 +64,7 @@ class Tag(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -123,12 +119,11 @@ class Tag(BaseObject):
     ) -> TagResponseModel:
         """Create a new tag object.
 
+        Args:
+            data: A dictionary containing the resource data.
+
         Returns:
             TagResponseModel
-
-
-        Args:
-                data: A dictionary containing the resource data.
 
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
@@ -152,12 +147,11 @@ class Tag(BaseObject):
     ) -> TagResponseModel:
         """Get a tag object by ID.
 
+        Args:
+            object_id: The UUID of the resource to retrieve.
+
         Returns:
             TagResponseModel
-
-
-        Args:
-                object_id: The UUID of the resource to retrieve.
 
         """
         # Send the request to the remote API
@@ -210,6 +204,9 @@ class Tag(BaseObject):
 
         Returns:
             List[TagResponseModel]: Filtered list of tags
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         filter_criteria = tags
@@ -296,6 +293,10 @@ class Tag(BaseObject):
 
         Returns:
             List[TagResponseModel]: A list of tag objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -430,6 +431,10 @@ class Tag(BaseObject):
 
         Returns:
             TagResponseModel: The fetched tag object as a Pydantic model.
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

@@ -64,11 +64,7 @@ class AutoTagActions(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -112,12 +108,11 @@ class AutoTagActions(BaseObject):
     ) -> AutoTagActionResponseModel:
         """Create a new auto tag action object.
 
+        Args:
+            data: A dictionary containing the resource data.
+
         Returns:
             AutoTagActionResponseModel
-
-
-        Args:
-                data: A dictionary containing the resource data.
 
         """
         auto_tag_action = AutoTagActionCreateModel(**data)
@@ -136,12 +131,11 @@ class AutoTagActions(BaseObject):
     ) -> AutoTagActionResponseModel:
         """Get an auto tag action object by ID.
 
+        Args:
+            object_id: The UUID of the resource to retrieve.
+
         Returns:
             AutoTagActionResponseModel
-
-
-        Args:
-                object_id: The UUID of the resource to retrieve.
 
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -239,6 +233,10 @@ class AutoTagActions(BaseObject):
 
         Returns:
             List[AutoTagActionResponseModel]: A list of auto tag action objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -366,6 +364,10 @@ class AutoTagActions(BaseObject):
 
         Returns:
             AutoTagActionResponseModel
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

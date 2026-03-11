@@ -66,11 +66,7 @@ class Service(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -125,12 +121,11 @@ class Service(BaseObject):
     ) -> ServiceResponseModel:
         """Create a new service object.
 
+        Args:
+            data: A dictionary containing the resource data.
+
         Returns:
             ServiceResponseModel
-
-
-        Args:
-                data: A dictionary containing the resource data.
 
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
@@ -154,12 +149,11 @@ class Service(BaseObject):
     ) -> ServiceResponseModel:
         """Get a service object by ID.
 
+        Args:
+            object_id: The UUID of the resource to retrieve.
+
         Returns:
             ServiceResponseModel
-
-
-        Args:
-                object_id: The UUID of the resource to retrieve.
 
         """
         # Send the request to the remote API
@@ -212,6 +206,9 @@ class Service(BaseObject):
 
         Returns:
             List[ServiceResponseModel]: Filtered list of services
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         filter_criteria = services
@@ -304,6 +301,10 @@ class Service(BaseObject):
 
         Returns:
             List[ServiceResponseModel]: A list of service objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -438,6 +439,10 @@ class Service(BaseObject):
 
         Returns:
             ServiceResponseModel: The fetched service object as a Pydantic model.
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

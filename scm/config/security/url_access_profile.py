@@ -66,11 +66,7 @@ class URLAccessProfile(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -125,12 +121,11 @@ class URLAccessProfile(BaseObject):
     ) -> URLAccessProfileResponseModel:
         """Create a new URL access profile object.
 
+        Args:
+            data: A dictionary containing the resource data.
+
         Returns:
             URLAccessProfileResponseModel
-
-
-        Args:
-                data: A dictionary containing the resource data.
 
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
@@ -154,12 +149,11 @@ class URLAccessProfile(BaseObject):
     ) -> URLAccessProfileResponseModel:
         """Get a URL access profile object by ID.
 
+        Args:
+            object_id: The UUID of the resource to retrieve.
+
         Returns:
             URLAccessProfileResponseModel
-
-
-        Args:
-                object_id: The UUID of the resource to retrieve.
 
         """
         # Send the request to the remote API
@@ -267,6 +261,10 @@ class URLAccessProfile(BaseObject):
 
         Returns:
             List[URLAccessProfileResponseModel]: A list of URL access profile objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -401,6 +399,10 @@ class URLAccessProfile(BaseObject):
 
         Returns:
             URLAccessProfileResponseModel: The fetched URL access profile object as a Pydantic model.
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

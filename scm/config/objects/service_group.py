@@ -66,11 +66,7 @@ class ServiceGroup(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -125,12 +121,11 @@ class ServiceGroup(BaseObject):
     ) -> ServiceGroupResponseModel:
         """Create a new service group object.
 
+        Args:
+            data: A dictionary containing the resource data.
+
         Returns:
             ServiceGroupResponseModel
-
-
-        Args:
-                data: A dictionary containing the resource data.
 
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
@@ -154,12 +149,11 @@ class ServiceGroup(BaseObject):
     ) -> ServiceGroupResponseModel:
         """Get a service group object by ID.
 
+        Args:
+            object_id: The UUID of the resource to retrieve.
+
         Returns:
             ServiceGroupResponseModel
-
-
-        Args:
-                object_id: The UUID of the resource to retrieve.
 
         """
         # Send the request to the remote API
@@ -212,6 +206,9 @@ class ServiceGroup(BaseObject):
 
         Returns:
             List[ServiceGroupResponseModel]: Filtered list of service groups
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         filter_criteria = service_groups
@@ -301,6 +298,10 @@ class ServiceGroup(BaseObject):
 
         Returns:
             List[ServiceGroupResponseModel]: A list of service group objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -435,6 +436,10 @@ class ServiceGroup(BaseObject):
 
         Returns:
             ServiceGroupResponseModel
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

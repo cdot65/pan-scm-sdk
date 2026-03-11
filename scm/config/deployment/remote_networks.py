@@ -69,11 +69,7 @@ class RemoteNetworks(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -128,12 +124,11 @@ class RemoteNetworks(BaseObject):
     ) -> RemoteNetworkResponseModel:
         """Create a new Remote Network object.
 
+        Args:
+            data: A dictionary containing the resource data.
+
         Returns:
             RemoteNetworkResponseModel
-
-
-        Args:
-                data: A dictionary containing the resource data.
 
         """
         remote_network = RemoteNetworkCreateModel(**data)
@@ -150,12 +145,11 @@ class RemoteNetworks(BaseObject):
     ) -> RemoteNetworkResponseModel:
         """Get a Remote Network object by ID.
 
+        Args:
+            object_id: The UUID of the resource to retrieve.
+
         Returns:
             RemoteNetworkResponseModel
-
-
-        Args:
-                object_id: The UUID of the resource to retrieve.
 
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -389,6 +383,10 @@ class RemoteNetworks(BaseObject):
         Returns:
             List[RemoteNetworkResponseModel]: A list of remote network objects
 
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -513,6 +511,10 @@ class RemoteNetworks(BaseObject):
 
         Returns:
             RemoteNetworkResponseModel: The fetched remote network object.
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

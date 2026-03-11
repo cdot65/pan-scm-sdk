@@ -66,11 +66,7 @@ class IPsecTunnel(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -214,6 +210,9 @@ class IPsecTunnel(BaseObject):
         Returns:
             List[IPsecTunnelResponseModel]: Filtered list of IPsec tunnels
 
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         filter_criteria = tunnels
 
@@ -285,6 +284,10 @@ class IPsecTunnel(BaseObject):
 
         Returns:
             List[IPsecTunnelResponseModel]: A list of IPsec tunnel objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -419,6 +422,10 @@ class IPsecTunnel(BaseObject):
 
         Returns:
             IPsecTunnelResponseModel: The fetched IPsec tunnel object
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:
