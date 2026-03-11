@@ -278,6 +278,6 @@ except APIError as e:
 
 ## Next Steps
 
-- Explore the [SDK Reference Documentation](../sdk/index.md) for detailed information on all available services and methods.
+- Explore the [Services Documentation](../sdk/index.md) for detailed information on all available services and methods.
 - Check out the [Client Module](../sdk/client.md) documentation for more information on the unified client interface.
 - Refer to the [examples directory](https://github.com/cdot65/pan-scm-sdk/tree/main/examples) for complete script examples.
