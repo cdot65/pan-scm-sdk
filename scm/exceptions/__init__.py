@@ -153,6 +153,11 @@ class BadXPathError(BadRequestError):
     """Raised when an invalid XPath is used (E013: Bad XPath)."""
 
 
+# Rate Limit Errors (HTTP 429)
+class RateLimitError(ClientError):
+    """Raised when rate limited (HTTP 429 Too Many Requests)."""
+
+
 # Not Found Errors (HTTP 404)
 class NotFoundError(ClientError):
     """Raised when a resource is not found (HTTP 404 Not Found)."""
@@ -201,6 +206,16 @@ class MethodAPINotSupportedError(APINotImplementedError):
     """Raised when the method is not supported (E012: Method Not Supported)."""
 
 
+# Bad Gateway (HTTP 502)
+class BadGatewayError(ServerError):
+    """Raised when a bad gateway error occurs (HTTP 502 Bad Gateway)."""
+
+
+# Service Unavailable (HTTP 503)
+class ServiceUnavailableError(ServerError):
+    """Raised when the service is unavailable (HTTP 503 Service Unavailable)."""
+
+
 # Gateway Timeout (HTTP 504)
 class GatewayTimeoutError(ServerError):
     """Raised when a gateway timeout occurs (HTTP 504 Gateway Timeout)."""
@@ -221,7 +236,10 @@ class ErrorHandler:
         404: NotFoundError,
         405: MethodNotAllowedError,
         409: ConflictError,
+        429: RateLimitError,
         500: ServerError,
+        502: BadGatewayError,
+        503: ServiceUnavailableError,
         501: APINotImplementedError,
         504: GatewayTimeoutError,
     }

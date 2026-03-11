@@ -12,6 +12,7 @@ from scm.exceptions import (
     APINotImplementedError,
     AuthenticationError,
     AuthorizationError,
+    BadGatewayError,
     BadRequestError,
     BadXPathError,
     ClientError,
@@ -38,8 +39,10 @@ from scm.exceptions import (
     ObjectNotUniqueError,
     OutputFormatMismatchError,
     PasswordChangeRequiredError,
+    RateLimitError,
     ReferenceNotZeroError,
     ServerError,
+    ServiceUnavailableError,
     SessionTimeoutError,
     UnauthorizedError,
     VersionAPINotSupportedError,
@@ -470,6 +473,81 @@ class TestErrorHandlerNestedErrorType(TestExceptionsBase):
         assert exception.http_status_code == 400
         assert exception.message == "Invalid Query Parameter"
         assert exception.details == response_data["_errors"][0]["details"]
+
+
+class TestRateLimitError(TestExceptionsBase):
+    """Tests for RateLimitError (HTTP 429)."""
+
+    def test_rate_limit_error_inheritance(self):
+        """Test RateLimitError inherits from ClientError."""
+        error = RateLimitError("Rate limited")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, RateLimitError)
+
+    def test_error_handler_429_mapping(self):
+        """Test HTTP 429 maps to RateLimitError."""
+        response_data = {
+            "_errors": [
+                {
+                    "code": "RATE_LIMIT",
+                    "message": "Too many requests",
+                }
+            ]
+        }
+        with pytest.raises(RateLimitError) as exc_info:
+            ErrorHandler.raise_for_error(response_data, 429)
+        assert exc_info.value.http_status_code == 429
+
+
+class TestBadGatewayError(TestExceptionsBase):
+    """Tests for BadGatewayError (HTTP 502)."""
+
+    def test_bad_gateway_error_inheritance(self):
+        """Test BadGatewayError inherits from ServerError."""
+        error = BadGatewayError("Bad gateway")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ServerError)
+        assert isinstance(error, BadGatewayError)
+
+    def test_error_handler_502_mapping(self):
+        """Test HTTP 502 maps to BadGatewayError."""
+        response_data = {
+            "_errors": [
+                {
+                    "code": "BAD_GATEWAY",
+                    "message": "Bad gateway",
+                }
+            ]
+        }
+        with pytest.raises(BadGatewayError) as exc_info:
+            ErrorHandler.raise_for_error(response_data, 502)
+        assert exc_info.value.http_status_code == 502
+
+
+class TestServiceUnavailableError(TestExceptionsBase):
+    """Tests for ServiceUnavailableError (HTTP 503)."""
+
+    def test_service_unavailable_error_inheritance(self):
+        """Test ServiceUnavailableError inherits from ServerError."""
+        error = ServiceUnavailableError("Service unavailable")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ServerError)
+        assert isinstance(error, ServiceUnavailableError)
+
+    def test_error_handler_503_mapping(self):
+        """Test HTTP 503 maps to ServiceUnavailableError."""
+        response_data = {
+            "_errors": [
+                {
+                    "code": "SERVICE_UNAVAILABLE",
+                    "message": "Service unavailable",
+                }
+            ]
+        }
+        with pytest.raises(ServiceUnavailableError) as exc_info:
+            ErrorHandler.raise_for_error(response_data, 503)
+        assert exc_info.value.http_status_code == 503
 
 
 # -------------------- End of Test Classes --------------------

@@ -81,6 +81,12 @@ All inherit from `BadRequestError`:
 - `MalformedCommandError`: Malformed command (E003)
 - `BadXPathError`: Invalid XPath used (E013)
 
+### Rate Limit Errors (HTTP 429)
+
+Inherits from `RateLimitError`:
+
+- `RateLimitError`: Too many requests (HTTP 429)
+
 ### Not Found Errors (HTTP 404)
 
 All inherit from `NotFoundError`:
@@ -100,6 +106,18 @@ All inherit from `ConflictError`:
 All inherit from `MethodNotAllowedError`:
 
 - `ActionNotSupportedError`: Action not supported (E012)
+
+### Bad Gateway Errors (HTTP 502)
+
+Inherits from `BadGatewayError`:
+
+- `BadGatewayError`: Bad gateway (HTTP 502)
+
+### Service Unavailable Errors (HTTP 503)
+
+Inherits from `ServiceUnavailableError`:
+
+- `ServiceUnavailableError`: Service unavailable (HTTP 503)
 
 ### Not Implemented Errors (HTTP 501)
 
@@ -132,7 +150,10 @@ ERROR_STATUS_CODE_MAP = {
     404: NotFoundError,
     405: MethodNotAllowedError,
     409: ConflictError,
+    429: RateLimitError,
     500: ServerError,
+    502: BadGatewayError,
+    503: ServiceUnavailableError,
     501: APINotImplementedError,
     504: GatewayTimeoutError,
 }
