@@ -69,11 +69,7 @@ class Schedule(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -214,6 +210,9 @@ class Schedule(BaseObject):
         Returns:
             List[ScheduleResponseModel]: Filtered list of schedules
 
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         filtered_schedules = schedules
 
@@ -310,6 +309,10 @@ class Schedule(BaseObject):
 
         Returns:
             List[ScheduleResponseModel]: A list of schedule objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":

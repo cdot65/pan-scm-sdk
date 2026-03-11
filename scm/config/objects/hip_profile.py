@@ -66,11 +66,7 @@ class HIPProfile(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -245,6 +241,10 @@ class HIPProfile(BaseObject):
         Returns:
             List[HIPProfileResponseModel]: A list of HIP profiles
 
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -375,6 +375,10 @@ class HIPProfile(BaseObject):
 
         Returns:
             HIPProfileResponseModel: The fetched HIP profile as a Pydantic model.
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

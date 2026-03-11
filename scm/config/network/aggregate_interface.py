@@ -62,11 +62,7 @@ class AggregateInterface(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -174,6 +170,9 @@ class AggregateInterface(BaseObject):
         Returns:
             List[AggregateInterfaceResponseModel]: The filtered list of resources.
 
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         filter_criteria = interfaces
 
@@ -242,6 +241,10 @@ class AggregateInterface(BaseObject):
 
         Returns:
             List[AggregateInterfaceResponseModel]: A list of resources.
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -341,6 +344,10 @@ class AggregateInterface(BaseObject):
 
         Returns:
             AggregateInterfaceResponseModel: The fetched resource.
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

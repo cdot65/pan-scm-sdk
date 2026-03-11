@@ -66,11 +66,7 @@ class ApplicationFilters(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -125,12 +121,11 @@ class ApplicationFilters(BaseObject):
     ) -> ApplicationFiltersResponseModel:
         """Create a new application filter object.
 
+        Args:
+            data: A dictionary containing the resource data.
+
         Returns:
             ApplicationFiltersResponseModel
-
-
-        Args:
-                data: A dictionary containing the resource data.
 
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
@@ -154,12 +149,11 @@ class ApplicationFilters(BaseObject):
     ) -> ApplicationFiltersResponseModel:
         """Get an application filter object by ID.
 
+        Args:
+            object_id: The UUID of the resource to retrieve.
+
         Returns:
             ApplicationFiltersResponseModel
-
-
-        Args:
-                object_id: The UUID of the resource to retrieve.
 
         """
         # Send the request to the remote API
@@ -212,6 +206,9 @@ class ApplicationFilters(BaseObject):
 
         Returns:
             List[ApplicationFiltersResponseModel]: Filtered list of application filters
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         filter_criteria = application_filters
@@ -327,6 +324,10 @@ class ApplicationFilters(BaseObject):
 
         Returns:
             List[ApplicationFiltersResponseModel]: A list of application filter objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -452,6 +453,10 @@ class ApplicationFilters(BaseObject):
 
         Returns:
             ApplicationFiltersResponseModel: The fetched application filter object as a Pydantic model.
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

@@ -69,11 +69,7 @@ class SecurityRule(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -129,13 +125,15 @@ class SecurityRule(BaseObject):
     ) -> SecurityRuleResponseModel:
         """Create a new security rule object.
 
+        Args:
+            data: A dictionary containing the resource data.
+            rulebase: (Default: 'pre')
+
         Returns:
             SecurityRuleResponseModel
 
-
-        Args:
-                data: A dictionary containing the resource data.
-                rulebase: (Default: 'pre')
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         # Validate that the rulebase is of type `pre` or `post`
@@ -179,13 +177,15 @@ class SecurityRule(BaseObject):
     ) -> SecurityRuleResponseModel:
         """Get a security rule object by ID.
 
+        Args:
+            object_id: The UUID of the resource to retrieve.
+            rulebase: (Default: 'pre')
+
         Returns:
             SecurityRuleResponseModel
 
-
-        Args:
-                object_id: The UUID of the resource to retrieve.
-                rulebase: (Default: 'pre')
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         # Validate that the rulebase is of type `pre` or `post`
@@ -220,6 +220,9 @@ class SecurityRule(BaseObject):
 
         Returns:
             SecurityRuleResponseModel
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         # Validate that the rulebase is of type `pre` or `post`
@@ -268,6 +271,9 @@ class SecurityRule(BaseObject):
 
         Returns:
             List[SecurityRuleResponseModel]: Filtered list of security rules
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         filter_criteria = rules
@@ -509,6 +515,10 @@ class SecurityRule(BaseObject):
         Returns:
             List[SecurityRuleResponseModel]: A list of security rule objects
 
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         # Validate that the rulebase is of type `pre` or `post`
         if not isinstance(rulebase, SecurityRuleRulebase):
@@ -658,6 +668,10 @@ class SecurityRule(BaseObject):
         Returns:
             SecurityRuleResponseModel: The fetched security rule object as a Pydantic model.
 
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -748,6 +762,9 @@ class SecurityRule(BaseObject):
         Args:
             object_id (str): The ID of the object to delete.
             rulebase: Which rulebase to use ('pre' or 'post'), defaults to 'pre'
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         # Validate that the rulebase is of type `pre` or `post`

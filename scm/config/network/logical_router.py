@@ -66,11 +66,7 @@ class LogicalRouter(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -214,6 +210,9 @@ class LogicalRouter(BaseObject):
         Returns:
             List[LogicalRouterResponseModel]: Filtered list of logical routers
 
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         filter_criteria = routers
 
@@ -285,6 +284,10 @@ class LogicalRouter(BaseObject):
 
         Returns:
             List[LogicalRouterResponseModel]: A list of logical router objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -419,6 +422,10 @@ class LogicalRouter(BaseObject):
 
         Returns:
             LogicalRouterResponseModel: The fetched logical router object
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

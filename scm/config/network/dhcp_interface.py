@@ -76,11 +76,7 @@ class DhcpInterface(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -220,6 +216,9 @@ class DhcpInterface(BaseObject):
         Returns:
             List[DhcpInterfaceResponseModel]: Filtered list of DHCP interfaces
 
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         filter_criteria = dhcp_interfaces
 
@@ -291,6 +290,10 @@ class DhcpInterface(BaseObject):
 
         Returns:
             List[DhcpInterfaceResponseModel]: A list of DHCP interface objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -416,6 +419,10 @@ class DhcpInterface(BaseObject):
 
         Returns:
             DhcpInterfaceResponseModel: The fetched DHCP interface object
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

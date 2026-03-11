@@ -69,11 +69,7 @@ class Snippet(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -195,6 +191,9 @@ class Snippet(BaseObject):
 
         Returns:
             List['SnippetResponseModel']: The filtered list of resources.
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         filtered_data = data

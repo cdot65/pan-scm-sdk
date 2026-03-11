@@ -66,11 +66,7 @@ class SecurityZone(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -214,6 +210,9 @@ class SecurityZone(BaseObject):
         Returns:
             List[SecurityZoneResponseModel]: Filtered list of security zones
 
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         filter_criteria = zones
 
@@ -323,6 +322,10 @@ class SecurityZone(BaseObject):
 
         Returns:
             List[SecurityZoneResponseModel]: A list of security zone objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -457,6 +460,10 @@ class SecurityZone(BaseObject):
 
         Returns:
             SecurityZoneResponseModel: The fetched security zone object
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

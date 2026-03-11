@@ -75,11 +75,7 @@ class ExternalDynamicLists(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -134,12 +130,11 @@ class ExternalDynamicLists(BaseObject):
     ) -> ExternalDynamicListsResponseModel:
         """Create a new EDL object.
 
+        Args:
+            data: A dictionary containing the resource data.
+
         Returns:
             ExternalDynamicListsResponseModel
-
-
-        Args:
-                data: A dictionary containing the resource data.
 
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
@@ -163,12 +158,11 @@ class ExternalDynamicLists(BaseObject):
     ) -> ExternalDynamicListsResponseModel:
         """Get an EDL by ID.
 
+        Args:
+            edl_id: str instance.
+
         Returns:
             ExternalDynamicListsResponseModel
-
-
-        Args:
-                edl_id: str instance.
 
         """
         # Send the request to the remote API
@@ -221,6 +215,9 @@ class ExternalDynamicLists(BaseObject):
 
         Returns:
             List[ExternalDynamicListsResponseModel]: Filtered list of EDLs
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         filter_criteria = edls
@@ -318,6 +315,10 @@ class ExternalDynamicLists(BaseObject):
 
         Returns:
             List[ExternalDynamicListsResponseModel]: A list of EDL objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -452,6 +453,10 @@ class ExternalDynamicLists(BaseObject):
 
         Returns:
             ExternalDynamicListsResponseModel: The fetched address object as a Pydantic model.
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

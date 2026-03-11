@@ -62,11 +62,7 @@ class LoopbackInterface(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -209,6 +205,9 @@ class LoopbackInterface(BaseObject):
         Returns:
             List[LoopbackInterfaceResponseModel]: Filtered list of loopback interfaces
 
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         filter_criteria = interfaces
 
@@ -295,6 +294,10 @@ class LoopbackInterface(BaseObject):
 
         Returns:
             List[LoopbackInterfaceResponseModel]: A list of loopback interface objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -421,6 +424,10 @@ class LoopbackInterface(BaseObject):
 
         Returns:
             LoopbackInterfaceResponseModel: The fetched loopback interface object
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

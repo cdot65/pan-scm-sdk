@@ -66,11 +66,7 @@ class SamlServerProfile(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -125,12 +121,11 @@ class SamlServerProfile(BaseObject):
     ) -> SamlServerProfileResponseModel:
         """Create a new SAML server profile object.
 
+        Args:
+            data: A dictionary containing the resource data.
+
         Returns:
             SamlServerProfileResponseModel
-
-
-        Args:
-                data: A dictionary containing the resource data.
 
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
@@ -154,12 +149,11 @@ class SamlServerProfile(BaseObject):
     ) -> SamlServerProfileResponseModel:
         """Get a SAML server profile object by ID.
 
+        Args:
+            object_id: The UUID of the resource to retrieve.
+
         Returns:
             SamlServerProfileResponseModel
-
-
-        Args:
-                object_id: The UUID of the resource to retrieve.
 
         """
         # Send the request to the remote API
@@ -265,6 +259,10 @@ class SamlServerProfile(BaseObject):
 
         Returns:
             List[SamlServerProfileResponseModel]: A list of SAML server profile objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -399,6 +397,10 @@ class SamlServerProfile(BaseObject):
 
         Returns:
             SamlServerProfileResponseModel: The fetched SAML server profile object as a Pydantic model.
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

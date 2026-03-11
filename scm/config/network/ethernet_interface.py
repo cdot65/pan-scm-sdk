@@ -62,11 +62,7 @@ class EthernetInterface(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -174,6 +170,9 @@ class EthernetInterface(BaseObject):
         Returns:
             List[EthernetInterfaceResponseModel]: The filtered list of resources.
 
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         filter_criteria = interfaces
 
@@ -270,6 +269,10 @@ class EthernetInterface(BaseObject):
 
         Returns:
             List[EthernetInterfaceResponseModel]: A list of resources.
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -369,6 +372,10 @@ class EthernetInterface(BaseObject):
 
         Returns:
             EthernetInterfaceResponseModel: The fetched resource.
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

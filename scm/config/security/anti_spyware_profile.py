@@ -66,11 +66,7 @@ class AntiSpywareProfile(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -125,12 +121,11 @@ class AntiSpywareProfile(BaseObject):
     ) -> AntiSpywareProfileResponseModel:
         """Create a new anti-spyware profile object.
 
+        Args:
+            data: A dictionary containing the resource data.
+
         Returns:
             AntiSpywareProfileResponseModel
-
-
-        Args:
-                data: A dictionary containing the resource data.
 
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
@@ -154,12 +149,11 @@ class AntiSpywareProfile(BaseObject):
     ) -> AntiSpywareProfileResponseModel:
         """Get an anti-spyware profile object by ID.
 
+        Args:
+            object_id: The UUID of the resource to retrieve.
+
         Returns:
             AntiSpywareProfileResponseModel
-
-
-        Args:
-                object_id: The UUID of the resource to retrieve.
 
         """
         # Send the request to the remote API
@@ -212,6 +206,9 @@ class AntiSpywareProfile(BaseObject):
 
         Returns:
             List[AntiSpywareProfileResponseModel]: Filtered list of profiles
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         filter_criteria = profiles
@@ -284,6 +281,10 @@ class AntiSpywareProfile(BaseObject):
 
         Returns:
             List[AntiSpywareProfileResponseModel]: A list of anti-spyware profile objects
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -418,6 +419,10 @@ class AntiSpywareProfile(BaseObject):
 
         Returns:
             AntiSpywareProfileResponseModel: The fetched anti-spyware profile object as a Pydantic model.
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

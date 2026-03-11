@@ -67,11 +67,7 @@ class BandwidthAllocations(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -187,6 +183,10 @@ class BandwidthAllocations(BaseObject):
             name: Name of the aggregated bandwidth region
             spn_name_list: Comma-separated list of SPN names in the region
 
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -246,6 +246,9 @@ class BandwidthAllocations(BaseObject):
 
         Returns:
             List[BandwidthAllocationResponseModel]: Filtered list of bandwidth allocations
+
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         filtered_allocations = allocations
@@ -345,6 +348,9 @@ class BandwidthAllocations(BaseObject):
         Returns:
             List[BandwidthAllocationResponseModel]: A list of bandwidth allocation objects
 
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         # Pagination logic
         limit = self._max_limit
@@ -400,6 +406,10 @@ class BandwidthAllocations(BaseObject):
 
         Returns:
             Optional[BandwidthAllocationResponseModel]: The bandwidth allocation or None if not found
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:

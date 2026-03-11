@@ -62,11 +62,7 @@ class Layer2Subinterface(BaseObject):
         """Set a new maximum limit for API requests.
 
         Args:
-            value: int instance.
-
-
-        Returns:
-            None: The current maximum limit.
+            value: The maximum number of items to return in a single API request.
 
         """
         self._max_limit = self._validate_max_limit(value)
@@ -174,6 +170,9 @@ class Layer2Subinterface(BaseObject):
         Returns:
             List[Layer2SubinterfaceResponseModel]: The filtered list of resources.
 
+        Raises:
+            InvalidObjectError: If the provided data or response format is invalid.
+
         """
         filter_criteria = interfaces
 
@@ -249,6 +248,10 @@ class Layer2Subinterface(BaseObject):
 
         Returns:
             List[Layer2SubinterfaceResponseModel]: A list of resources.
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if folder == "":
@@ -348,6 +351,10 @@ class Layer2Subinterface(BaseObject):
 
         Returns:
             Layer2SubinterfaceResponseModel: The fetched resource.
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided data or response format is invalid.
 
         """
         if not name:
