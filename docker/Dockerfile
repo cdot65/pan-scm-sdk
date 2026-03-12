@@ -27,9 +27,9 @@ COPY . .
 # Set the locale to avoid issues with emoji rendering
 ENV LANG=C.UTF-8
 
-## Create a non-root user
-#RUN adduser -D panadmin
-#USER panadmin
-#
+# Create a non-root user
+RUN adduser -D panadmin
+USER panadmin
+
 # Default command (PyCharm will override)
 CMD ["sleep", "infinity"]

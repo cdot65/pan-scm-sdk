@@ -31,6 +31,10 @@ jobs:
         run: |
           make quality
 
+      - name: Security audit
+        run: |
+          poetry run pip-audit
+
       - name: Run Tests with Coverage
         env:
           CLIENT_ID: fake_client_id
