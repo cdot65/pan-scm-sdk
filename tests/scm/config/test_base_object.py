@@ -378,3 +378,18 @@ class TestBaseObject:
             sync=True,
             timeout=600,
         )
+
+    def test_docstring_uses_raises_section(self):
+        """Ensure BaseObject docstring uses 'Raises:' not 'Error:' section heading."""
+        doc = BaseObject.__doc__
+        assert doc is not None, "BaseObject should have a docstring"
+        # Check for "Error:" as a section heading (line starts with it after whitespace)
+        lines = doc.split("\n")
+        for line in lines:
+            stripped = line.strip()
+            assert stripped != "Error:", (
+                "BaseObject docstring should not use 'Error:' section heading"
+            )
+        # Verify "Raises:" section heading exists
+        has_raises = any(line.strip() == "Raises:" for line in lines)
+        assert has_raises, "BaseObject docstring should have 'Raises:' section"

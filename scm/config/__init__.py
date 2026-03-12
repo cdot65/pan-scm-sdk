@@ -21,10 +21,10 @@ class BaseObject:
         ENDPOINT (str): API endpoint for the object, to be defined in subclasses.
         api_client (Scm): Instance of the API client for making HTTP requests.
 
-    Error:
+    Raises:
         APIError: May be raised for any API-related errors during operations.
 
-    Return:
+    Returns:
         Dict[str, Any] or List[Dict[str, Any]]: API response data for CRUD operations.
 
     """
