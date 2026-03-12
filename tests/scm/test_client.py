@@ -1248,3 +1248,78 @@ class TestClientSecretRedaction:
                 assert secret not in str(msg), (
                     f"client_secret leaked in log: {msg}"
                 )
+
+
+class TestBearerTokenRedaction:
+    """Tests that Authorization headers are redacted from debug log output (#328)."""
+
+    @patch("requests.Session")
+    def test_debug_log_redacts_bearer_token(self, mock_session_cls):
+        """Ensure bearer token never appears in debug log messages."""
+        import logging
+
+        mock_session = mock_session_cls.return_value
+        mock_session.headers = {"Authorization": "Bearer secret_token_abc123"}
+
+        token = "secret_token_abc123"
+        logger = logging.getLogger("scm")
+        with patch.object(logger, "debug", wraps=logger.debug) as mock_debug:
+            Scm(access_token=token, log_level="DEBUG")
+
+            for call in mock_debug.call_args_list:
+                msg = call[0][0] if call[0] else ""
+                assert token not in str(msg), (
+                    f"Bearer token leaked in log: {msg}"
+                )
+                assert "Bearer" not in str(msg), (
+                    f"Authorization header leaked in log: {msg}"
+                )
+
+    @patch("requests.Session")
+    def test_debug_log_contains_redacted_placeholder(self, mock_session_cls):
+        """Ensure redacted placeholder appears in session debug log."""
+        import logging
+
+        mock_session = mock_session_cls.return_value
+        mock_session.headers = {"Authorization": "Bearer secret_token_abc123"}
+
+        logger = logging.getLogger("scm")
+        with patch.object(logger, "debug", wraps=logger.debug) as mock_debug:
+            Scm(access_token="secret_token_abc123", log_level="DEBUG")
+
+            session_log_calls = [
+                str(c[0][0]) for c in mock_debug.call_args_list
+                if c[0] and "Session created" in str(c[0][0])
+            ]
+            assert len(session_log_calls) > 0, "No 'Session created' debug log found"
+            assert "***" in session_log_calls[0], (
+                "Redacted placeholder '***' not found in session log"
+            )
+
+    @patch("scm.client.OAuth2Client")
+    def test_oauth2_session_log_redacts_auth_header(self, mock_oauth2client):
+        """Ensure OAuth2 session log also redacts Authorization header."""
+        import logging
+
+        mock_oauth_client = mock_oauth2client.return_value
+        mock_session = MagicMock()
+        mock_session.headers = {"Authorization": "Bearer oauth_token_xyz"}
+        mock_session.items = mock_session.headers.items
+        mock_oauth_client.session = mock_session
+        mock_oauth_client.is_expired = False
+        mock_oauth_client.signing_key = MagicMock(key="mocked_key")
+
+        logger = logging.getLogger("scm")
+        with patch.object(logger, "debug", wraps=logger.debug) as mock_debug:
+            Scm(
+                client_id="test_id",
+                client_secret="test_secret",
+                tsg_id="test_tsg",
+                log_level="DEBUG",
+            )
+
+            for call in mock_debug.call_args_list:
+                msg = str(call[0][0]) if call[0] else ""
+                assert "oauth_token_xyz" not in msg, (
+                    f"OAuth bearer token leaked in log: {msg}"
+                )

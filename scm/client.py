@@ -117,9 +117,11 @@ class Scm:
             self.session = requests.Session()
             self.session.headers["Authorization"] = f"Bearer {access_token}"
             self.session.verify = self.verify_ssl
-            self.logger.debug(
-                f"Session created with bearer token: {self.session.headers}, verify_ssl={self.verify_ssl}"
-            )
+            safe_headers = {
+                k: ("***" if k.lower() == "authorization" else v)
+                for k, v in self.session.headers.items()
+            }
+            self.logger.debug(f"Session created: {safe_headers}, verify_ssl={self.verify_ssl}")
             return
 
         # OAuth2 client credentials flow authentication mode
@@ -143,7 +145,11 @@ class Scm:
         self.logger.debug(f"Auth request: {safe_fields}")
         self.oauth_client = OAuth2Client(auth_request, verify_ssl=self.verify_ssl)
         self.session = self.oauth_client.session
-        self.logger.debug(f"Session created: {self.session.headers}, verify_ssl={self.verify_ssl}")
+        safe_headers = {
+            k: ("***" if k.lower() == "authorization" else v)
+            for k, v in self.session.headers.items()
+        }
+        self.logger.debug(f"Session created: {safe_headers}, verify_ssl={self.verify_ssl}")
 
     def request(
         self,
