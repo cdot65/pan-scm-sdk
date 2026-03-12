@@ -25,9 +25,9 @@ COPY . .
 # Set the locale to avoid issues with emoji rendering
 ENV LANG=C.UTF-8
 
-# Create a non-root user with access to /app
-RUN adduser -D panadmin && chown -R panadmin:panadmin /app
-USER panadmin
+# NOTE: Non-root user is not enabled because docker-compose.yml mounts
+# the host directory as a volume (-v .:/app), which bypasses COPY/chown.
+# A non-root user would need a separate production Dockerfile.
 
 # Default command (PyCharm will override)
 CMD ["sleep", "infinity"]
