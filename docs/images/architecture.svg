@@ -160,9 +160,9 @@
   <rect x="560" y="790" width="340" height="45" class="box" fill="#fff8e1" fill-opacity="0.7" stroke="#ffb300"/>
   <text x="730" y="818" class="pattern-label">Create: extra="forbid" | Response: extra="ignore"</text>
 
-  <!-- ═══════════════ OPERATIONS & INSIGHTS ═══════════════ -->
+  <!-- ═══════════════ OPERATIONS AND INSIGHTS ═══════════════ -->
   <rect x="20" y="870" width="440" height="100" class="zone" fill="#fff3e0" fill-opacity="0.45" stroke="#ffb300" stroke-opacity="0.5"/>
-  <text x="40" y="895" class="zone-label" fill="#e65100">operations/ & insights/</text>
+  <text x="40" y="895" class="zone-label" fill="#e65100">operations/ &amp; insights/</text>
 
   <rect x="40" y="910" width="120" height="42" class="box" fill="#ffe0b2" fill-opacity="0.6" stroke="#ffb300"/>
   <text x="100" y="936" class="box-label">Jobs</text>
