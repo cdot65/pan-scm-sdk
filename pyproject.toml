@@ -55,6 +55,7 @@ ipython = "^8.28.0"
 python-dotenv = "^1.2.0"
 reportlab = "^4.4.0"
 rich = "^14.0.0"
+pip-audit = "^2.10.0"
 
 [tool.ruff]
 line-length = 100
