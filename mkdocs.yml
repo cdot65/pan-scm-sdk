@@ -102,6 +102,7 @@ nav:
   - Home: index.md
   - About:
       - Introduction: about/introduction.md
+      - Architecture: about/architecture.md
       - Installation: about/installation.md
       - Getting Started: about/getting-started.md
       - Troubleshooting: about/troubleshooting.md
