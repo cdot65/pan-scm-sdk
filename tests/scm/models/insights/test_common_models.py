@@ -2,8 +2,8 @@
 
 """Tests for Insights common models."""
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from scm.models.insights.common import InsightsResponse, InsightsResponseHeader
 

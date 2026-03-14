@@ -2,8 +2,8 @@
 
 """Tests for shared network interface common models."""
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from scm.models.network._interface_common import (
     AdjustTcpMss,
