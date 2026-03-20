@@ -367,10 +367,10 @@ except ValueError as e:
 ### Creating a Basic Source NAT Rule (Dynamic IP and Port)
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -399,10 +399,10 @@ print(f"Created NAT rule: {response.name} (ID: {response.id})")
 ### Creating a Destination NAT Rule
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -431,10 +431,10 @@ print(f"Created destination NAT rule: {response.name}")
 ### Creating a Static IP NAT Rule with Bi-directional Support
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -464,10 +464,10 @@ print(f"Created static NAT rule: {response.name}")
 ### Creating a NAT Rule with Interface Address
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -498,10 +498,10 @@ print(f"Created interface NAT rule: {response.name}")
 ### Updating a NAT Rule
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -527,10 +527,10 @@ print(f"Updated NAT rule: {updated.name}")
 ### Moving a NAT Rule
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

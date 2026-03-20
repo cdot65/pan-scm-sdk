@@ -149,10 +149,10 @@ except ValueError as e:
 ### Creating a Variable
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -174,10 +174,10 @@ print(f"Created variable: {response.name} with ID: {response.id}")
 ### Updating a Variable
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -198,10 +198,10 @@ print(f"Updated variable: {updated.name}")
 ### Listing Variables
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -225,10 +225,10 @@ labeled_variables = client.variable.list(labels=["network"])
 ### Fetching a Variable by Name
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

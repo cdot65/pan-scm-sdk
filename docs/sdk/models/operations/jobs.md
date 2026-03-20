@@ -255,10 +255,10 @@ print(f"Showing {len(response.data)} of {response.total} jobs")
 ### Using Jobs with Unified Client
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
    client_id="your_client_id",
    client_secret="your_client_secret",
    tsg_id="your_tsg_id"
@@ -294,11 +294,11 @@ print(f"Found {parent_jobs.total} top-level jobs")
 ### Monitoring Long-Running Jobs
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 import time
 
 # Initialize client
-client = ScmClient(
+client = Scm(
    client_id="your_client_id",
    client_secret="your_client_secret",
    tsg_id="your_tsg_id"

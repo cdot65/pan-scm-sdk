@@ -266,10 +266,10 @@ except ValueError as e:
 ### Creating a Basic Decryption Rule
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -297,10 +297,10 @@ print(f"Created rule: {response.name}")
 ### Creating a Rule with SSL Forward Proxy
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -331,10 +331,10 @@ print(f"Created rule with SSL forward proxy: {response.name}")
 ### Creating a Rule with SSL Inbound Inspection
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -363,10 +363,10 @@ print(f"Created rule with SSL inbound inspection: {response.name}")
 ### Updating a Decryption Rule
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -394,10 +394,10 @@ print(f"Updated rule: {updated.name}")
 ### Moving a Decryption Rule
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

@@ -157,11 +157,11 @@ except ValueError as e:
 
 ```python
 # Using dictionary approach
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.models.deployment import BackboneRoutingEnum
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -254,10 +254,10 @@ result = client.bgp_routing.update(partial_update)
 
 ```python
 # Working with response models
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

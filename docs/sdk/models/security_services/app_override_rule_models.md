@@ -223,10 +223,10 @@ except ValueError as e:
 ### Creating a Basic App Override Rule
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -253,10 +253,10 @@ print(f"Created rule: {response.name}")
 ### Creating a Rule with Multiple Ports and Tags
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -285,10 +285,10 @@ print(f"Port: {response.port}")
 ### Creating a UDP Rule
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -315,10 +315,10 @@ print(f"Created UDP rule: {response.name}")
 ### Updating an App Override Rule
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -342,10 +342,10 @@ print(f"Updated rule: {updated.name}")
 ### Moving an App Override Rule
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

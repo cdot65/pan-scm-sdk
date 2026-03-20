@@ -237,10 +237,10 @@ except ValueError as e:
 ### Creating a Basic Authentication Rule
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -267,10 +267,10 @@ print(f"Created rule: {response.name}")
 ### Creating a Rule with Timeout and HIP Profiles
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -301,10 +301,10 @@ print(f"Created rule with HIP profiles: {response.name}")
 ### Updating an Authentication Rule
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -329,10 +329,10 @@ print(f"Updated rule: {updated.name}")
 ### Moving an Authentication Rule
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

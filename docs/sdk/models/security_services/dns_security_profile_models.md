@@ -218,10 +218,10 @@ action = ListActionRequestModel(root={"block": {}})
 ### Creating a DNS Security Profile
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -264,10 +264,10 @@ print(f"Created profile: {response.name}")
 ### Creating a Profile with Multiple Categories
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -315,10 +315,10 @@ print(f"Created profile with {len(response.botnet_domains.dns_security_categorie
 ### Updating a DNS Security Profile
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

@@ -5,10 +5,10 @@ The `SecurityZone` class manages security zone objects in Palo Alto Networks' St
 ## Class Overview
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
    client_id="your_client_id",
    client_secret="your_client_secret",
    tsg_id="your_tsg_id"
@@ -16,7 +16,7 @@ client = ScmClient(
 
 # Access the Security Zone service directly through the client
 # No need to create a separate SecurityZone instance
-# The ScmClient automatically handles authentication and token refresh
+# The Scm automatically handles authentication and token refresh
 zones = client.security_zone
 ```
 
@@ -264,10 +264,10 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 **Example:**
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
    client_id="your_client_id",
    client_secret="your_client_secret",
    tsg_id="your_tsg_id"
@@ -300,10 +300,10 @@ print(f"Retrieved security zone: {zone_by_id.name}")
 ### Create a Security Zone
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
    client_id="your_client_id",
    client_secret="your_client_secret",
    tsg_id="your_tsg_id"
@@ -413,7 +413,7 @@ for job in recent_jobs.data:
 ## Error Handling
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.exceptions import (
    InvalidObjectError,
    MissingQueryParameterError,
@@ -423,7 +423,7 @@ from scm.exceptions import (
 )
 
 # Initialize client
-client = ScmClient(
+client = Scm(
    client_id="your_client_id",
    client_secret="your_client_secret",
    tsg_id="your_tsg_id"

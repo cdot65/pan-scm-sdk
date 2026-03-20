@@ -281,10 +281,10 @@ except ValueError as e:
 ### Creating an IKE Gateway with Pre-shared Key
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -324,10 +324,10 @@ print(f"Created gateway: {response.name} (ID: {response.id})")
 ### Creating an IKE Gateway with Certificate Authentication
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -366,10 +366,10 @@ print(f"Created gateway: {response.name}")
 ### Creating an IKE Gateway with Dynamic Peer Address
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -402,10 +402,10 @@ print(f"Created dynamic gateway: {response.name}")
 ### Updating an IKE Gateway
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

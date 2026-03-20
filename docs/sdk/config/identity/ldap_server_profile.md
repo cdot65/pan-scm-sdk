@@ -4,12 +4,12 @@ The `LdapServerProfile` service manages LDAP server profile objects in Strata Cl
 
 ## Class Overview
 
-The `LdapServerProfile` class provides CRUD operations for LDAP server profile objects. It is accessed through the `client.ldap_server_profile` attribute on an initialized `ScmClient` instance.
+The `LdapServerProfile` class provides CRUD operations for LDAP server profile objects. It is accessed through the `client.ldap_server_profile` attribute on an initialized `Scm` instance.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

@@ -117,10 +117,10 @@ The `SyslogServerProfileResponseModel` extends the base model and includes the I
 ### Creating a Basic Syslog Server Profile with UDP Transport
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

@@ -32,9 +32,9 @@ The `AgentVersions` class inherits from `BaseObject` and offers methods for list
 ### Basic Configuration
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

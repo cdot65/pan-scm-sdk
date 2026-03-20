@@ -4,12 +4,12 @@ The `HIPProfile` service manages Host Information Profile (HIP) profiles in Stra
 
 ## Class Overview
 
-The `HIPProfile` class provides CRUD operations for HIP profile objects. It is accessed through the `client.hip_profile` attribute on an initialized `ScmClient` instance.
+The `HIPProfile` class provides CRUD operations for HIP profile objects. It is accessed through the `client.hip_profile` attribute on an initialized `Scm` instance.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -101,9 +101,9 @@ client.hip_profile.delete("123e4567-e89b-12d3-a456-426655440000")
 Define HIP profiles using boolean match expressions referencing HIP objects.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -155,7 +155,7 @@ for profile in filtered:
 ## Error Handling
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
@@ -164,7 +164,7 @@ from scm.exceptions import (
     ReferenceNotZeroError
 )
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

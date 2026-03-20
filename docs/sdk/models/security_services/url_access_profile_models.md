@@ -172,10 +172,10 @@ profile = URLAccessProfileCreateModel(
 ### Creating a Basic Profile
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -198,10 +198,10 @@ print(f"Created profile: {response.name}")
 ### Creating a Profile with Credential Enforcement
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -233,10 +233,10 @@ print(f"Created profile with credential enforcement: {response.name}")
 ### Creating a Profile with Logging and Inline Categorization
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -268,10 +268,10 @@ print(f"Safe search enforcement: {response.safe_search_enforcement}")
 ### Updating a Profile
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

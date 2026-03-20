@@ -4,12 +4,12 @@ The `AutoTagActions` service manages automated tag assignment configurations in 
 
 ## Class Overview
 
-The `AutoTagActions` class provides CRUD operations for auto tag action configurations. It is accessed through the `client.auto_tag_actions` attribute on an initialized `ScmClient` instance.
+The `AutoTagActions` class provides CRUD operations for auto tag action configurations. It is accessed through the `client.auto_tag_actions` attribute on an initialized `Scm` instance.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -99,9 +99,9 @@ client.auto_tag_actions.delete("123456789")
 Automatically tag hosts that exhibit signs of infection for quarantine.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -180,10 +180,10 @@ client.security_rule.create({
 ## Error Handling
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.exceptions import InvalidObjectError, ObjectNotPresentError
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

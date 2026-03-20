@@ -201,10 +201,10 @@ except ValueError as e:
 ### Creating a Basic Decryption Profile
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -229,10 +229,10 @@ print(f"Created profile: {response.name}")
 ### Creating a Profile with Forward Proxy Settings
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -261,10 +261,10 @@ print(f"Created forward proxy profile: {response.name}")
 ### Updating a Decryption Profile
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

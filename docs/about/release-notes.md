@@ -163,7 +163,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 
 ### Added & Fixed
 - **TLS Certificate Verification Control:**
-  - Added `verify_ssl` parameter to `Scm` and `ScmClient` constructors allowing users to bypass SSL/TLS certificate verification when needed
+  - Added `verify_ssl` parameter to `Scm` and `Scm` constructors allowing users to bypass SSL/TLS certificate verification when needed
   - Enhanced warning messages when TLS verification is disabled to alert users of security implications
   - Extended OAuth2Client to respect the verification setting
   - Proper propagation of verification setting to all HTTP requests
@@ -514,7 +514,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 
 ### Fixed
 
-- **Custom Token URL Support**: Fixed issue where `token_url` parameter defined in `AuthRequestModel` wasn't exposed through the `Scm` and `ScmClient` constructors. Users can now specify custom OAuth token endpoints when initializing the client.
+- **Custom Token URL Support**: Fixed issue where `token_url` parameter defined in `AuthRequestModel` wasn't exposed through the `Scm` and `Scm` constructors. Users can now specify custom OAuth token endpoints when initializing the client.
 - **Documentation Updates**: Added comprehensive documentation for the `token_url` parameter
 
 ## Version 0.3.15
@@ -534,7 +534,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 ### Added
 
 - **Unified Client Interface**: New attribute-based access pattern for services (e.g., `client.address.create()` instead of creating separate service instances)
-- **ScmClient Class**: Added as an alias for the Scm class with identical functionality but more descriptive name
+- **Scm Class**: Added as an alias for the Scm class with identical functionality but more descriptive name
 - **Comprehensive Tests**: Added test suite for the unified client functionality
 - **Enhanced Documentation**: Updated documentation to showcase both traditional and unified client patterns
 

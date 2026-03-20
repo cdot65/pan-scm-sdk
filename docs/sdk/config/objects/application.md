@@ -4,12 +4,12 @@ The `Application` service manages custom application definitions in Strata Cloud
 
 ## Class Overview
 
-The `Application` class provides CRUD operations for custom application objects. It is accessed through the `client.application` attribute on an initialized `ScmClient` instance.
+The `Application` class provides CRUD operations for custom application objects. It is accessed through the `client.application` attribute on an initialized `Scm` instance.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -117,9 +117,9 @@ client.application.delete("123e4567-e89b-12d3-a456-426655440000")
 Create an application with full security characteristics.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -168,7 +168,7 @@ filtered = client.application.list(
 ## Error Handling
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
@@ -177,7 +177,7 @@ from scm.exceptions import (
     ReferenceNotZeroError
 )
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

@@ -64,10 +64,10 @@ Here's an example of the data structure for a network location:
 The model is used automatically when retrieving network locations using the SDK:
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize the client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
