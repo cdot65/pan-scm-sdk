@@ -168,6 +168,22 @@ class TestAddressUpdateModel:
         error_msg = str(exc_info.value)
         assert "1 validation error for AddressUpdateModel\nid\n  Field required" in error_msg
 
+    def test_address_update_model_rejects_none_id(self):
+        """Test that AddressUpdateModel rejects id=None."""
+        data = AddressUpdateModelFactory.build_valid()
+        data["id"] = None
+        with pytest.raises(ValidationError) as exc_info:
+            AddressUpdateModel(**data)
+        assert "id" in str(exc_info.value)
+
+    def test_address_update_model_requires_id(self):
+        """Test that AddressUpdateModel requires id field (not optional)."""
+        data = AddressUpdateModelFactory.build_valid()
+        del data["id"]
+        with pytest.raises(ValidationError) as exc_info:
+            AddressUpdateModel(**data)
+        assert "id\n  Field required" in str(exc_info.value)
+
     def test_address_update_model_valid(self):
         """Test validation with valid data in update model."""
         data = AddressUpdateModelFactory.build_valid()

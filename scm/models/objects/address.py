@@ -224,15 +224,15 @@ class AddressUpdateModel(AddressBaseModel):
     This class defines the structure and validation rules for an AddressUpdateModel object.
     """
 
-    id: Optional[UUID] = Field(
-        ...,  # This makes it optional
+    id: UUID = Field(
+        ...,
         description="The UUID of the address object",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
 
 
 class AddressResponseModel(AddressBaseModel):
-    """Represents the creation of a new Address object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the response representation of an Address object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an AddressResponseModel object,
     it inherits all fields from the AddressBaseModel class, adds its own attribute for the
