@@ -12,7 +12,7 @@ import argparse
 
 from dotenv import load_dotenv
 
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.models.deployment import (
     BandwidthAllocationCreateModel,
     BandwidthAllocationUpdateModel,
@@ -33,7 +33,7 @@ def setup_logging(level: str = "INFO") -> None:
     )
 
 
-def setup_client() -> ScmClient:
+def setup_client() -> Scm:
     """Set up the SCM client using environment variables."""
     # Load environment variables from .env file
     load_dotenv()
@@ -49,7 +49,7 @@ def setup_client() -> ScmClient:
         )
 
     # Initialize the client
-    return ScmClient(
+    return Scm(
         client_id=client_id,
         client_secret=client_secret,
         tsg_id=tsg_id,
@@ -57,7 +57,7 @@ def setup_client() -> ScmClient:
     )
 
 
-def create_bandwidth_allocation(client: ScmClient, args: argparse.Namespace) -> None:
+def create_bandwidth_allocation(client: Scm, args: argparse.Namespace) -> None:
     """Create a new bandwidth allocation."""
     # Prepare QoS settings if enabled
     qos = None
@@ -96,7 +96,7 @@ def create_bandwidth_allocation(client: ScmClient, args: argparse.Namespace) -> 
         sys.exit(1)
 
 
-def list_bandwidth_allocations(client: ScmClient, args: argparse.Namespace) -> None:
+def list_bandwidth_allocations(client: Scm, args: argparse.Namespace) -> None:
     """List bandwidth allocations with optional filtering."""
     filters = {}
 
@@ -124,7 +124,7 @@ def list_bandwidth_allocations(client: ScmClient, args: argparse.Namespace) -> N
         sys.exit(1)
 
 
-def update_bandwidth_allocation(client: ScmClient, args: argparse.Namespace) -> None:
+def update_bandwidth_allocation(client: Scm, args: argparse.Namespace) -> None:
     """Update an existing bandwidth allocation."""
     # Get current allocation
     try:
@@ -192,7 +192,7 @@ def update_bandwidth_allocation(client: ScmClient, args: argparse.Namespace) -> 
         sys.exit(1)
 
 
-def delete_bandwidth_allocation(client: ScmClient, args: argparse.Namespace) -> None:
+def delete_bandwidth_allocation(client: Scm, args: argparse.Namespace) -> None:
     """Delete a bandwidth allocation."""
     try:
         # Get current allocation to verify it exists

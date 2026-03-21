@@ -173,10 +173,10 @@ For consistency, use these templates for common documentation patterns:
 ### Code Example Template
 ```markdown
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
    client_id="your_client_id",
    client_secret="your_client_secret",
    tsg_id="your_tsg_id"
@@ -200,14 +200,14 @@ print(f"Operation result: {result.id}")
 ### Error Handling Template
 ```markdown
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.exceptions import (
    ExceptionType1,
    ExceptionType2
 )
 
 # Initialize client
-client = ScmClient(
+client = Scm(
    client_id="your_client_id",
    client_secret="your_client_secret",
    tsg_id="your_tsg_id"

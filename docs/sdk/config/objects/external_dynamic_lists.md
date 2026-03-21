@@ -4,12 +4,12 @@ The `ExternalDynamicLists` service manages External Dynamic Lists (EDLs) in Stra
 
 ## Class Overview
 
-The `ExternalDynamicLists` class provides CRUD operations for EDL objects. It is accessed through the `client.external_dynamic_list` attribute on an initialized `ScmClient` instance.
+The `ExternalDynamicLists` class provides CRUD operations for EDL objects. It is accessed through the `client.external_dynamic_list` attribute on an initialized `Scm` instance.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -116,9 +116,9 @@ client.external_dynamic_list.delete("123e4567-e89b-12d3-a456-426655440000")
 Set up IP and domain-based EDLs for threat intelligence feeds.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -172,7 +172,7 @@ for edl in filtered:
 ## Error Handling
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
@@ -181,7 +181,7 @@ from scm.exceptions import (
     ReferenceNotZeroError
 )
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

@@ -4,12 +4,12 @@ The `RadiusServerProfile` service manages RADIUS server profile objects in Strat
 
 ## Class Overview
 
-The `RadiusServerProfile` class provides CRUD operations for RADIUS server profile objects. It is accessed through the `client.radius_server_profile` attribute on an initialized `ScmClient` instance.
+The `RadiusServerProfile` class provides CRUD operations for RADIUS server profile objects. It is accessed through the `client.radius_server_profile` attribute on an initialized `Scm` instance.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

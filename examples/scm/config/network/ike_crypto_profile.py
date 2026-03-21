@@ -54,7 +54,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.config.network import IKECryptoProfile
 from scm.models.network import (
     HashAlgorithm,
@@ -161,7 +161,7 @@ def initialize_client():
     3. Initialize the SCM client with appropriate credentials
 
     Returns:
-        ScmClient: An authenticated SCM client instance ready for API calls
+        Scm: An authenticated SCM client instance ready for API calls
 
     Raises:
         AuthenticationError: If authentication fails due to invalid credentials
@@ -218,7 +218,7 @@ def initialize_client():
     log_operation_start("Creating SCM client")
 
     # Create the client
-    client = ScmClient(
+    client = Scm(
         client_id=client_id,
         client_secret=client_secret,
         tsg_id=tsg_id,

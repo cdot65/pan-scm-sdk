@@ -22,10 +22,10 @@ Before using the SDK, you need to authenticate with Strata Cloud Manager using y
 **Example:**
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize the SCM client with your credentials
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",
@@ -47,10 +47,10 @@ The SDK provides two ways to interact with Strata Cloud Manager: the unified cli
 Starting with version 0.3.14, you can access all service objects directly through the client instance. This approach is more intuitive and streamlined:
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize the client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",

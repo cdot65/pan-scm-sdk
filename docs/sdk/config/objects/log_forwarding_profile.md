@@ -4,12 +4,12 @@ The `LogForwardingProfile` service manages log forwarding profile configurations
 
 ## Class Overview
 
-The `LogForwardingProfile` class provides CRUD operations for log forwarding profile objects. It is accessed through the `client.log_forwarding_profile` attribute on an initialized `ScmClient` instance.
+The `LogForwardingProfile` class provides CRUD operations for log forwarding profile objects. It is accessed through the `client.log_forwarding_profile` attribute on an initialized `Scm` instance.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -139,9 +139,9 @@ client.log_forwarding_profile.delete("123e4567-e89b-12d3-a456-426655440000")
 Forward different log types to appropriate destinations.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -203,10 +203,10 @@ filtered = client.log_forwarding_profile.list(
 ## Error Handling
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

@@ -4,12 +4,12 @@ The `HIPObject` service manages Host Information Profile (HIP) objects in Strata
 
 ## Class Overview
 
-The `HIPObject` class provides CRUD operations for HIP objects. It is accessed through the `client.hip_object` attribute on an initialized `ScmClient` instance.
+The `HIPObject` class provides CRUD operations for HIP objects. It is accessed through the `client.hip_object` attribute on an initialized `Scm` instance.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -114,9 +114,9 @@ client.hip_object.delete("123e4567-e89b-12d3-a456-426655440000")
 Create HIP objects for different security posture checks.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -175,7 +175,7 @@ for hip in filtered:
 ## Error Handling
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
@@ -184,7 +184,7 @@ from scm.exceptions import (
     ReferenceNotZeroError
 )
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

@@ -4,12 +4,12 @@ The `ServiceGroup` service manages service group objects in Strata Cloud Manager
 
 ## Class Overview
 
-The `ServiceGroup` class provides CRUD operations for service group objects. It is accessed through the `client.service_group` attribute on an initialized `ScmClient` instance.
+The `ServiceGroup` class provides CRUD operations for service group objects. It is accessed through the `client.service_group` attribute on an initialized `Scm` instance.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -99,9 +99,9 @@ client.service_group.delete("123e4567-e89b-12d3-a456-426655440000")
 Group related services for simplified policy management.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -145,7 +145,7 @@ for group in filtered:
 ## Error Handling
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
@@ -154,7 +154,7 @@ from scm.exceptions import (
     ReferenceNotZeroError
 )
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

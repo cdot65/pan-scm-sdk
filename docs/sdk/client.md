@@ -426,16 +426,16 @@ status = client.get_job_status(result.job_id)
 print(f"Status: {status.data[0].status_str}")
 ```
 
-## ScmClient Alias
+## Scm Alias
 
-Starting with version 0.3.14, the SDK also provides an `ScmClient` class as an alias for `Scm`. This class offers the exact
+Starting with version 0.3.14, the SDK also provides an `Scm` class as an alias for `Scm`. This class offers the exact
 same functionality but with a more explicit name that better describes its purpose:
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-# Use ScmClient instead of Scm with OAuth2 client credentials (identical functionality)
-client = ScmClient(
+# Use Scm instead of Scm with OAuth2 client credentials (identical functionality)
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",
@@ -443,8 +443,8 @@ client = ScmClient(
     # token_url="https://custom.auth.server.com/oauth2/token"
 )
 
-# OR use ScmClient with bearer token authentication
-bearer_client = ScmClient(
+# OR use Scm with bearer token authentication
+bearer_client = Scm(
     access_token="your_bearer_token"
 )
 ```

@@ -5,10 +5,10 @@ The `IPsecTunnel` class manages IPsec tunnel objects in Palo Alto Networks' Stra
 ## Class Overview
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
    client_id="your_client_id",
    client_secret="your_client_secret",
    tsg_id="your_tsg_id"
@@ -165,10 +165,10 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 **Example:**
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
    client_id="your_client_id",
    client_secret="your_client_secret",
    tsg_id="your_tsg_id"
@@ -201,10 +201,10 @@ print(f"Retrieved tunnel: {tunnel_by_id.name}")
 ### Create an IPsec Tunnel
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
    client_id="your_client_id",
    client_secret="your_client_secret",
    tsg_id="your_tsg_id"
@@ -340,7 +340,7 @@ for job in recent_jobs.data:
 ## Error Handling
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.exceptions import (
    InvalidObjectError,
    MissingQueryParameterError,
@@ -350,7 +350,7 @@ from scm.exceptions import (
 )
 
 # Initialize client
-client = ScmClient(
+client = Scm(
    client_id="your_client_id",
    client_secret="your_client_secret",
    tsg_id="your_tsg_id"

@@ -13,7 +13,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # SDK imports
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.exceptions import (
     APIError,
     AuthenticationError,
@@ -61,7 +61,7 @@ def initialize_client(client_id, client_secret, tsg_id, log_level):
     """Initialize the SCM client."""
     print("Initializing SCM client...")
     try:
-        client = ScmClient(
+        client = Scm(
             client_id=client_id,
             client_secret=client_secret,
             tsg_id=tsg_id,

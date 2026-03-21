@@ -155,11 +155,11 @@ except ValueError as e:
 ### Creating a Commit Request
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.models.operations import CandidatePushModel
 
 # Initialize client
-client = ScmClient(
+client = Scm(
    client_id="your_client_id",
    client_secret="your_client_secret",
    tsg_id="your_tsg_id"
@@ -192,11 +192,11 @@ print(f"Commit job started with ID: {response.job_id}")
 ### Handling the Response
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.models.operations import CandidatePushResponseModel
 
 # Initialize client
-client = ScmClient(
+client = Scm(
    client_id="your_client_id",
    client_secret="your_client_secret",
    tsg_id="your_tsg_id"
@@ -226,11 +226,11 @@ else:
 ### Commit with Unified Client
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 import time
 
 # Initialize client
-client = ScmClient(
+client = Scm(
    client_id="your_client_id",
    client_secret="your_client_secret",
    tsg_id="your_tsg_id"

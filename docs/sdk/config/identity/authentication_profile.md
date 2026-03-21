@@ -4,12 +4,12 @@ The `AuthenticationProfile` service manages authentication profile objects in St
 
 ## Class Overview
 
-The `AuthenticationProfile` class provides CRUD operations for authentication profile objects. It is accessed through the `client.authentication_profile` attribute on an initialized `ScmClient` instance.
+The `AuthenticationProfile` class provides CRUD operations for authentication profile objects. It is accessed through the `client.authentication_profile` attribute on an initialized `Scm` instance.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

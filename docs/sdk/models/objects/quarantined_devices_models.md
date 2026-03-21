@@ -56,10 +56,10 @@ The `QuarantinedDevicesListParamsModel` defines parameters for filtering list op
 ### Creating a Quarantined Device
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

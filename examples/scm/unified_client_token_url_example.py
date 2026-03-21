@@ -1,9 +1,9 @@
-"""Example showing how to initialize the ScmClient with a custom token URL."""
+"""Example showing how to initialize the Scm with a custom token URL."""
 
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Create client with custom token URL
-client = ScmClient(
+client = Scm(
     client_id="your-client-id",
     client_secret="your-client-secret",
     tsg_id="your-tsg-id",

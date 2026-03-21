@@ -4,12 +4,12 @@ The `DynamicUserGroup` service manages dynamic user group objects in Strata Clou
 
 ## Class Overview
 
-The `DynamicUserGroup` class provides CRUD operations for dynamic user group objects. It is accessed through the `client.dynamic_user_group` attribute on an initialized `ScmClient` instance.
+The `DynamicUserGroup` class provides CRUD operations for dynamic user group objects. It is accessed through the `client.dynamic_user_group` attribute on an initialized `Scm` instance.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -106,9 +106,9 @@ client.dynamic_user_group.delete("123e4567-e89b-12d3-a456-426655440000")
 Create dynamic groups for different organizational roles.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -153,7 +153,7 @@ for dug in filtered:
 ## Error Handling
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
@@ -161,7 +161,7 @@ from scm.exceptions import (
     ObjectNotPresentError
 )
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

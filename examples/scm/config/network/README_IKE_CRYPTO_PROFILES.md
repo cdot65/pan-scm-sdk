@@ -78,10 +78,10 @@ Specify one of the following:
 ### Creating an IKE Crypto Profile
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.config.network import IKECryptoProfile
 
-client = ScmClient(
+client = Scm(
     client_id="your-client-id",
     client_secret="your-client-secret",
     tsg_id="your-tsg-id"

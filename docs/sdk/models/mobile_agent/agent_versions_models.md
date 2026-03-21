@@ -34,10 +34,10 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 ### Listing Agent Versions
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -54,11 +54,11 @@ for version in versions:
 ### Fetching a Specific Version
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.exceptions import InvalidObjectError
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -87,11 +87,11 @@ print(f"Found {len(prefix_versions)} versions starting with '5.3'")
 ## Error Handling
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 
 # Initialize client
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"

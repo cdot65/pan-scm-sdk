@@ -3,9 +3,9 @@
 Service classes provide CRUD operations for managing Strata Cloud Manager configurations. Each service maps to a resource type and is accessed through the unified client.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",

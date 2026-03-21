@@ -4,12 +4,12 @@ The `ApplicationFilters` service manages application filter definitions in Strat
 
 ## Class Overview
 
-The `ApplicationFilters` class provides CRUD operations for application filter objects. It is accessed through the `client.application_filter` attribute on an initialized `ScmClient` instance.
+The `ApplicationFilters` class provides CRUD operations for application filter objects. It is accessed through the `client.application_filter` attribute on an initialized `Scm` instance.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -119,9 +119,9 @@ client.application_filter.delete("123e4567-e89b-12d3-a456-426655440000")
 Define filters targeting applications with specific security characteristics.
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -172,7 +172,7 @@ for f in combined:
 ## Error Handling
 
 ```python
-from scm.client import ScmClient
+from scm.client import Scm
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
@@ -181,7 +181,7 @@ from scm.exceptions import (
     ReferenceNotZeroError
 )
 
-client = ScmClient(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
