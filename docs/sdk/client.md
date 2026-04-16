@@ -24,7 +24,8 @@ class Scm:
             token_url: str = "https://auth.apps.paloaltonetworks.com/am/oauth2/access_token",
             log_level: str = "ERROR",
             access_token: Optional[str] = None,
-            verify_ssl: bool = True
+            verify_ssl: bool = True,
+            region: str = "americas"
     )
 ```
 
@@ -38,6 +39,7 @@ class Scm:
 | `session`      | requests.Session | HTTP session for making requests                        |
 | `logger`       | Logger           | Logger instance for SDK logging                         |
 | `verify_ssl`   | bool             | Whether TLS certificate verification is enabled (default: True) |
+| `region`       | str              | Default region for APIs requiring X-PANW-Region header (default: "americas") |
 
 ## Authentication Methods
 
@@ -226,6 +228,15 @@ The unified client provides access to all service objects in the SDK through att
 
 - `client.agent_version` - GlobalProtect agent version information
 - `client.auth_setting` - Authentication settings for mobile agents
+
+**Operations**
+
+- `client.local_config` - Device configuration version history and file downloads
+- `client.device_operations` - Asynchronous device operation job dispatch and monitoring
+
+**Incidents**
+
+- `client.incidents` - Unified incident search and detail retrieval
 
 **Setup**
 
