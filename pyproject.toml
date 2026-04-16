@@ -10,6 +10,7 @@ homepage = "https://github.com/cdot65/pan-scm-sdk"
 repository = "https://github.com/cdot65/pan-scm-sdk"
 documentation = "https://cdot65.github.io/pan-scm-sdk/"
 packages = [{ include = "scm" }]
+include = ["scm/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
