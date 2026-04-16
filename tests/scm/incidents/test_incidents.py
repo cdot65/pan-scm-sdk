@@ -16,6 +16,7 @@ class TestIncidents:
 
     @pytest.fixture
     def mock_client(self):
+        """Create a mock API client."""
         client = MagicMock()
         client.get = MagicMock()
         client.post = MagicMock()
@@ -26,25 +27,30 @@ class TestIncidents:
 
     @pytest.fixture
     def incidents_service(self, mock_client):
+        """Create an Incidents service instance with mock client."""
         return Incidents(mock_client)
 
     def test_get_headers(self, incidents_service):
+        """Test that _get_headers returns region and tenant headers."""
         headers = incidents_service._get_headers()
         assert headers["X-PANW-Region"] == "americas"
         assert headers["prisma-tenant"] == "test-tsg-123"
 
     def test_get_headers_no_oauth(self, incidents_service):
+        """Test that _get_headers omits tenant header when oauth_client is None."""
         incidents_service.api_client.oauth_client = None
         headers = incidents_service._get_headers()
         assert headers["X-PANW-Region"] == "americas"
         assert "prisma-tenant" not in headers
 
     def test_get_headers_custom_region(self, incidents_service):
+        """Test that _get_headers uses the configured region."""
         incidents_service.api_client.region = "europe"
         headers = incidents_service._get_headers()
         assert headers["X-PANW-Region"] == "europe"
 
     def test_search_basic(self, incidents_service, mock_client):
+        """Test that search returns a parsed IncidentSearchResponseModel."""
         mock_client.post.return_value = {
             "header": {
                 "createdAt": "2026-03-12T19:38:43Z",
@@ -69,6 +75,7 @@ class TestIncidents:
         assert result.data[0].incident_id == "inc-123"
 
     def test_search_with_filters(self, incidents_service, mock_client):
+        """Test that search builds correct filter rules from keyword args."""
         mock_client.post.return_value = {
             "header": {"createdAt": "2026-03-12T19:38:43Z", "dataCount": 0, "requestId": "r2"},
             "data": [],
@@ -89,6 +96,7 @@ class TestIncidents:
         assert product_rule["values"] == ["Prisma Access", "NGFW"]
 
     def test_search_with_raw_filter_rules(self, incidents_service, mock_client):
+        """Test that search passes raw filter_rules directly."""
         mock_client.post.return_value = {
             "header": {"createdAt": "2026-03-12T19:38:43Z", "dataCount": 0, "requestId": "r3"},
             "data": [],
@@ -102,6 +110,7 @@ class TestIncidents:
         assert rules[0]["property"] == "release_state"
 
     def test_search_pagination(self, incidents_service, mock_client):
+        """Test that search sends pagination parameters correctly."""
         mock_client.post.return_value = {
             "header": {"createdAt": "2026-03-12T19:38:43Z", "dataCount": 0, "requestId": "r4"},
             "data": [],
@@ -113,6 +122,7 @@ class TestIncidents:
         assert payload["pagination"]["page_number"] == 3
 
     def test_search_order_by(self, incidents_service, mock_client):
+        """Test that search includes order_by in pagination."""
         mock_client.post.return_value = {
             "header": {"createdAt": "2026-03-12T19:38:43Z", "dataCount": 0, "requestId": "r5"},
             "data": [],
@@ -123,6 +133,7 @@ class TestIncidents:
         assert payload["pagination"]["order_by"] == [{"property": "updated_time", "order": "desc"}]
 
     def test_get_details(self, incidents_service, mock_client):
+        """Test that get_details returns a parsed IncidentDetailModel."""
         mock_client.get.return_value = {
             "incident_id": "inc-456",
             "title": "Detailed incident",
@@ -145,6 +156,7 @@ class TestIncidents:
         assert len(result.alerts) == 1
 
     def test_search_defaults(self, incidents_service, mock_client):
+        """Test that search uses default pagination when no params given."""
         mock_client.post.return_value = {
             "header": {"createdAt": "2026-03-12T19:38:43Z", "dataCount": 0, "requestId": "r6"},
             "data": [],

@@ -13,6 +13,7 @@ class TestLocalConfig:
 
     @pytest.fixture
     def mock_client(self):
+        """Create a mock API client."""
         client = MagicMock()
         client.get = MagicMock()
         client.post = MagicMock()
@@ -20,9 +21,11 @@ class TestLocalConfig:
 
     @pytest.fixture
     def local_config_service(self, mock_client):
+        """Create a LocalConfig service instance with mock client."""
         return LocalConfig(mock_client)
 
     def test_list_versions(self, local_config_service, mock_client):
+        """Test that list_versions returns parsed LocalConfigVersionModel list."""
         mock_client.get.return_value = [
             {
                 "id": 1,
@@ -52,6 +55,7 @@ class TestLocalConfig:
         assert versions[1].local_version == "0.9.0"
 
     def test_list_versions_empty(self, local_config_service, mock_client):
+        """Test that list_versions returns empty list when no versions exist."""
         mock_client.get.return_value = []
 
         versions = local_config_service.list_versions(device="007951000123456")
@@ -59,6 +63,7 @@ class TestLocalConfig:
         assert versions == []
 
     def test_download(self, local_config_service, mock_client):
+        """Test that download returns raw bytes content."""
         mock_response = Mock()
         mock_response.content = b"<config>xml content</config>"
         mock_client.get.return_value = mock_response

@@ -84,42 +84,49 @@ class DeviceOperations(ServiceBase):
         self, devices: List[str], sync: bool = False,
         poll_interval: int = 10, timeout: int = 300,
     ) -> Union[JobCreatedModel, DeviceJobStatusModel]:
+        """Retrieve route table from device(s)."""
         return self._dispatch_job("jobs/route-table", devices, sync, poll_interval, timeout)
 
     def fib_table(
         self, devices: List[str], sync: bool = False,
         poll_interval: int = 10, timeout: int = 300,
     ) -> Union[JobCreatedModel, DeviceJobStatusModel]:
+        """Retrieve FIB table from device(s)."""
         return self._dispatch_job("jobs/fib-table", devices, sync, poll_interval, timeout)
 
     def dns_proxy(
         self, devices: List[str], sync: bool = False,
         poll_interval: int = 10, timeout: int = 300,
     ) -> Union[JobCreatedModel, DeviceJobStatusModel]:
+        """Retrieve DNS proxy configuration from device(s)."""
         return self._dispatch_job("jobs/dns-proxy", devices, sync, poll_interval, timeout)
 
     def device_interfaces(
         self, devices: List[str], sync: bool = False,
         poll_interval: int = 10, timeout: int = 300,
     ) -> Union[JobCreatedModel, DeviceJobStatusModel]:
+        """Retrieve network interfaces from device(s)."""
         return self._dispatch_job("jobs/device-interfaces", devices, sync, poll_interval, timeout)
 
     def device_rules(
         self, devices: List[str], sync: bool = False,
         poll_interval: int = 10, timeout: int = 300,
     ) -> Union[JobCreatedModel, DeviceJobStatusModel]:
+        """Retrieve security rules from device(s)."""
         return self._dispatch_job("jobs/device-rules", devices, sync, poll_interval, timeout)
 
     def bgp_policy_export(
         self, devices: List[str], sync: bool = False,
         poll_interval: int = 10, timeout: int = 300,
     ) -> Union[JobCreatedModel, DeviceJobStatusModel]:
+        """Retrieve BGP policy export from device(s)."""
         return self._dispatch_job("jobs/bgp-policy-export", devices, sync, poll_interval, timeout)
 
     def logging_service_status(
         self, devices: List[str], sync: bool = False,
         poll_interval: int = 10, timeout: int = 300,
     ) -> Union[JobCreatedModel, DeviceJobStatusModel]:
+        """Retrieve logging service forwarding status from device(s)."""
         return self._dispatch_job(
             "jobs/logging-service-forwarding-status", devices, sync, poll_interval, timeout
         )

@@ -229,6 +229,7 @@ class JobTimeoutError(APIError):
     """Raised when a device operations job does not complete within the timeout period."""
 
     def __init__(self, job_id: str, last_state: str, timeout: int, **kwargs):
+        """Initialize JobTimeoutError with job details."""
         self.job_id = job_id
         self.last_state = last_state
         self.timeout = timeout

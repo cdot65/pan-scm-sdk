@@ -1,1 +1,1 @@
-"""Tests for operations services."""
+"""Tests for scm.operations."""

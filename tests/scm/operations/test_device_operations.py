@@ -2,8 +2,8 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from scm.exceptions import JobTimeoutError
 from scm.models.operations.device_operations import (
@@ -18,6 +18,7 @@ class TestDeviceOperations:
 
     @pytest.fixture
     def mock_client(self):
+        """Create a mock API client."""
         client = MagicMock()
         client.get = MagicMock()
         client.post = MagicMock()
@@ -25,9 +26,11 @@ class TestDeviceOperations:
 
     @pytest.fixture
     def device_ops(self, mock_client):
+        """Create a DeviceOperations service instance with mock client."""
         return DeviceOperations(mock_client)
 
     def test_route_table_async(self, device_ops, mock_client):
+        """Test that route_table dispatches async job correctly."""
         mock_client.post.return_value = {"job_id": "test-job-123"}
         result = device_ops.route_table(devices=["007951000123456"])
         mock_client.post.assert_called_once_with(
@@ -38,6 +41,7 @@ class TestDeviceOperations:
         assert result.job_id == "test-job-123"
 
     def test_fib_table_async(self, device_ops, mock_client):
+        """Test that fib_table dispatches async job correctly."""
         mock_client.post.return_value = {"job_id": "test-job-456"}
         result = device_ops.fib_table(devices=["007951000123456"])
         mock_client.post.assert_called_once_with(
@@ -47,6 +51,7 @@ class TestDeviceOperations:
         assert isinstance(result, JobCreatedModel)
 
     def test_dns_proxy_async(self, device_ops, mock_client):
+        """Test that dns_proxy dispatches async job correctly."""
         mock_client.post.return_value = {"job_id": "test-job-789"}
         result = device_ops.dns_proxy(devices=["007951000123456"])
         mock_client.post.assert_called_once_with(
@@ -56,6 +61,7 @@ class TestDeviceOperations:
         assert isinstance(result, JobCreatedModel)
 
     def test_device_interfaces_async(self, device_ops, mock_client):
+        """Test that device_interfaces dispatches async job correctly."""
         mock_client.post.return_value = {"job_id": "test-job-abc"}
         result = device_ops.device_interfaces(devices=["007951000123456"])
         mock_client.post.assert_called_once_with(
@@ -65,6 +71,7 @@ class TestDeviceOperations:
         assert isinstance(result, JobCreatedModel)
 
     def test_device_rules_async(self, device_ops, mock_client):
+        """Test that device_rules dispatches async job correctly."""
         mock_client.post.return_value = {"job_id": "test-job-def"}
         result = device_ops.device_rules(devices=["007951000123456"])
         mock_client.post.assert_called_once_with(
@@ -74,6 +81,7 @@ class TestDeviceOperations:
         assert isinstance(result, JobCreatedModel)
 
     def test_bgp_policy_export_async(self, device_ops, mock_client):
+        """Test that bgp_policy_export dispatches async job correctly."""
         mock_client.post.return_value = {"job_id": "test-job-ghi"}
         result = device_ops.bgp_policy_export(devices=["007951000123456"])
         mock_client.post.assert_called_once_with(
@@ -83,6 +91,7 @@ class TestDeviceOperations:
         assert isinstance(result, JobCreatedModel)
 
     def test_logging_service_status_async(self, device_ops, mock_client):
+        """Test that logging_service_status dispatches async job correctly."""
         mock_client.post.return_value = {"job_id": "test-job-jkl"}
         result = device_ops.logging_service_status(devices=["007951000123456"])
         mock_client.post.assert_called_once_with(
@@ -92,6 +101,7 @@ class TestDeviceOperations:
         assert isinstance(result, JobCreatedModel)
 
     def test_multiple_devices(self, device_ops, mock_client):
+        """Test that multiple devices are sent in the request payload."""
         mock_client.post.return_value = {"job_id": "test-job-multi"}
         devices = ["007951000123456", "007951000123457", "007951000123458"]
         result = device_ops.route_table(devices=devices)
@@ -100,19 +110,23 @@ class TestDeviceOperations:
         assert isinstance(result, JobCreatedModel)
 
     def test_invalid_devices_rejected(self, device_ops):
+        """Test that an empty devices list raises ValidationError."""
         with pytest.raises(ValidationError):
             device_ops.route_table(devices=[])
 
     def test_too_many_devices_rejected(self, device_ops):
+        """Test that more than five devices raises ValidationError."""
         devices = [f"00795100012345{i}" for i in range(6)]
         with pytest.raises(ValidationError):
             device_ops.route_table(devices=devices)
 
     def test_invalid_serial_rejected(self, device_ops):
+        """Test that an invalid serial format raises ValidationError."""
         with pytest.raises(ValidationError):
             device_ops.route_table(devices=["invalid"])
 
     def test_get_job_status(self, device_ops, mock_client):
+        """Test that get_job_status returns parsed DeviceJobStatusModel."""
         mock_client.get.return_value = {
             "jobId": "test-job-123",
             "progress": 100,
@@ -134,6 +148,7 @@ class TestDeviceOperations:
 
     @patch("scm.operations.device_operations.time.sleep")
     def test_sync_mode_polls_until_complete(self, mock_sleep, device_ops, mock_client):
+        """Test that sync mode polls until job state is complete."""
         mock_client.post.return_value = {"job_id": "test-job-sync"}
         mock_client.get.side_effect = [
             {
@@ -160,6 +175,7 @@ class TestDeviceOperations:
     @patch("scm.operations.device_operations.time.sleep")
     @patch("scm.operations.device_operations.time.time")
     def test_sync_mode_timeout(self, mock_time, mock_sleep, device_ops, mock_client):
+        """Test that sync mode raises JobTimeoutError on timeout."""
         mock_client.post.return_value = {"job_id": "test-job-timeout"}
         mock_time.side_effect = [0, 0, 301]
         mock_client.get.return_value = {
@@ -174,6 +190,7 @@ class TestDeviceOperations:
 
     @patch("scm.operations.device_operations.time.sleep")
     def test_sync_mode_failed_job(self, mock_sleep, device_ops, mock_client):
+        """Test that sync mode returns failed status without raising."""
         mock_client.post.return_value = {"job_id": "test-job-fail"}
         mock_client.get.return_value = {
             "jobId": "test-job-fail", "progress": 100, "state": "failed",

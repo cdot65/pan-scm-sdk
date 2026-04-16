@@ -18,6 +18,7 @@ class DeviceOperationsRequestModel(BaseModel):
     @field_validator("devices")
     @classmethod
     def validate_serial_numbers(cls, v: List[str]) -> List[str]:
+        """Validate that each serial number matches the expected 14-15 digit format."""
         import re
         pattern = re.compile(r"^\d{14,15}$")
         for serial in v:
