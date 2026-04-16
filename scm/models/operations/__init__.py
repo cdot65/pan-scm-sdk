@@ -9,6 +9,7 @@ from .jobs import (
     JobStatusData,
     JobStatusResponse,
 )
+from .local_config import LocalConfigVersionModel
 
 __all__ = [
     "CandidatePushRequestModel",
@@ -18,4 +19,5 @@ __all__ = [
     "JobStatusResponse",
     "JobListItem",
     "JobListResponse",
+    "LocalConfigVersionModel",
 ]
