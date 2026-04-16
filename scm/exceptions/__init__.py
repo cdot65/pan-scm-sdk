@@ -225,6 +225,20 @@ class SessionTimeoutError(GatewayTimeoutError):
     """Raised when the session times out (Code '4': Session Timeout)."""
 
 
+class JobTimeoutError(APIError):
+    """Raised when a device operations job does not complete within the timeout period."""
+
+    def __init__(self, job_id: str, last_state: str, timeout: int, **kwargs):
+        """Initialize JobTimeoutError with job details."""
+        self.job_id = job_id
+        self.last_state = last_state
+        self.timeout = timeout
+        super().__init__(
+            message=f"Job {job_id} did not complete within {timeout} seconds (last state: {last_state})",
+            **kwargs,
+        )
+
+
 class ErrorHandler:
     """Handles mapping of API error responses to appropriate exceptions."""
 

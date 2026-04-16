@@ -53,6 +53,7 @@ class Scm:
             When provided, client_id, client_secret, and tsg_id are not required.
             Token refresh is the caller's responsibility when using this mode.
         verify_ssl: Whether to verify TLS certificates for all requests (default: True). Set to False to bypass TLS verification (insecure!).
+        region: Default region for APIs requiring X-PANW-Region header (default: "americas")
 
     """
 
@@ -67,10 +68,12 @@ class Scm:
         log_level: str = "ERROR",
         access_token: Optional[str] = None,
         verify_ssl: bool = True,
+        region: str = "americas",
     ):
         """Initialize the ScmClient with the provided client_id, client_secret, tsg_id, API URLs, log level, access token, and TLS verification flag."""
         self.api_base_url = api_base_url
         self.verify_ssl = verify_ssl
+        self.default_region = region
         self.oauth_client = None
 
         # Map string log level to numeric level
@@ -163,8 +166,10 @@ class Scm:
             method: HTTP method to be used for the request (e.g., 'GET', 'POST').
             endpoint: The API endpoint to which the request is made.
             **kwargs: Additional arguments to be passed to the request (e.g., headers, params, data).
+                Pass raw_response=True to receive the raw requests.Response object instead of parsed JSON.
 
         """
+        raw_response = kwargs.pop("raw_response", False)
         url = f"{self.api_base_url}{endpoint}"
         self.logger.debug(f"Making {method} request to {url} with params {kwargs}")
 
@@ -178,6 +183,9 @@ class Scm:
                 **kwargs,
             )
             response.raise_for_status()
+
+            if raw_response:
+                return response
 
             if response.content and response.content.strip():
                 return response.json()
@@ -790,6 +798,20 @@ class Scm:
             "pbf_rule": (
                 "scm.config.network.pbf_rule",
                 "PbfRule",
+            ),
+            # Operations Services (v0.13.0)
+            "local_config": (
+                "scm.operations.local_config",
+                "LocalConfig",
+            ),
+            "device_operations": (
+                "scm.operations.device_operations",
+                "DeviceOperations",
+            ),
+            # Incidents Services (v0.13.0)
+            "incidents": (
+                "scm.incidents.incidents",
+                "Incidents",
             ),
         }
 

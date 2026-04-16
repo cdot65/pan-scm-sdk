@@ -132,6 +132,31 @@ All inherit from `GatewayTimeoutError`:
 
 - `SessionTimeoutError`: Session timeout (Code '4')
 
+#### JobTimeoutError
+
+Raised when a device operations job does not complete within the timeout period during synchronous polling.
+
+**Attributes:**
+
+- `job_id`: The ID of the timed-out job
+- `last_state`: The last known state of the job
+- `timeout`: The timeout value in seconds that was exceeded
+
+```python
+from scm.exceptions import JobTimeoutError
+
+try:
+    result = client.device_operations.route_table(
+        devices=["007951000123456"],
+        sync=True,
+        timeout=60
+    )
+except JobTimeoutError as e:
+    print(f"Job {e.job_id} timed out after {e.timeout}s (state: {e.last_state})")
+    # Resume polling manually
+    status = client.device_operations.get_job_status(e.job_id)
+```
+
 ## Error Handler
 
 The `ErrorHandler` class provides centralized error handling functionality for the API.

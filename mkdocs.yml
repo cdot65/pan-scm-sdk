@@ -211,6 +211,13 @@ nav:
       - Insights:
           - Overview: sdk/insights/index.md
           - Alerts: sdk/insights/alerts.md
+      - Operations:
+          - Overview: sdk/operations/index.md
+          - Local Config: sdk/operations/local_config.md
+          - Device Operations: sdk/operations/device_operations.md
+      - Incidents:
+          - Overview: sdk/incidents/index.md
+          - Incidents: sdk/incidents/incidents.md
       - Exceptions: sdk/exceptions.md
   - Data Models:
       - Overview: sdk/models/index.md
@@ -284,6 +291,11 @@ nav:
           - Overview: sdk/models/operations/index.md
           - Candidate Push: sdk/models/operations/candidate_push.md
           - Jobs: sdk/models/operations/jobs.md
+          - Local Config: sdk/models/operations/local_config_models.md
+          - Device Operations: sdk/models/operations/device_operations_models.md
+      - Incidents:
+          - Overview: sdk/models/incidents/index.md
+          - Incidents: sdk/models/incidents/incidents_models.md
       - Security Services:
           - Overview: sdk/models/security_services/index.md
           - Anti-Spyware Profiles: sdk/models/security_services/anti_spyware_profile_models.md

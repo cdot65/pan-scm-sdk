@@ -309,6 +309,21 @@ class TestClientRequest(TestClientBase):
         mock_response.json.assert_called_once()
         assert result == {"key": "value"}
 
+    def test_request_raw_response(self):
+        """Test that raw_response=True returns the Response object directly."""
+        mock_session = self.session
+
+        mock_response = MagicMock()
+        mock_response.raise_for_status.return_value = None
+        mock_response.content = b"<xml>binary data</xml>"
+        mock_session.request.return_value = mock_response
+
+        result = self.client.request("GET", "/test-endpoint", raw_response=True)
+
+        mock_response.raise_for_status.assert_called_once()
+        mock_response.json.assert_not_called()
+        assert result is mock_response
+
     # def test_request_http_error_no_content(self):
     #     """Test handling of HTTP errors with no content."""
     #     mock_session = self.session

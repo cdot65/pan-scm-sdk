@@ -77,3 +77,11 @@ for job in job_list.data:
 ### Candidate Push
 
 - [Candidate Push Models](candidate_push.md) - Configuration commit models
+
+### Local Config
+
+- [Local Config Models](local_config_models.md) - Device configuration version models
+
+### Device Operations
+
+- [Device Operations Models](device_operations_models.md) - Device job dispatch and status models

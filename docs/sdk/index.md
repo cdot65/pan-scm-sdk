@@ -35,6 +35,8 @@ client.address.delete(address_id)
 - **[Security Services](config/security_services/index.md)** - Security profiles and rules
 - **[Setup](config/setup/index.md)** - Organizational containers (folders, snippets, devices)
 - **[Insights](insights/index.md)** - Prisma Access Insights alerts
+- **[Operations](operations/index.md)** - Device operations, configuration versions, and async job dispatch
+- **[Incidents](incidents/index.md)** - Unified incident search and analysis
 
 ## Related Documentation
 
