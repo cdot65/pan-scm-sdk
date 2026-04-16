@@ -2,6 +2,25 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.13.0
+
+**Released:** April 2026
+
+### Added
+
+- **Operations API Support**: New `ServiceBase` class for non-CRUD services, enabling device operations and configuration management
+    - **LocalConfig Service** (`client.local_config`): List device configuration versions and download configuration files as XML
+    - **DeviceOperations Service** (`client.device_operations`): Dispatch and monitor asynchronous device jobs for route tables, FIB tables, DNS proxy, network interfaces, device rules, BGP policy export, and logging service status. Supports both async (fire-and-forget) and sync (poll-to-completion) modes
+- **Incidents API Support**: Unified Incident Framework integration for security incident management
+    - **Incidents Service** (`client.incidents`): Search incidents with filtering by status, severity, and product. Retrieve detailed incident information including alerts and remediation steps
+- **Client Enhancements**:
+    - `region` parameter on `Scm` client for APIs requiring `X-PANW-Region` header (default: `"americas"`)
+    - `raw_response` support in `Scm.request()` for binary file downloads
+- **JobTimeoutError Exception**: Raised when synchronous job polling exceeds timeout, includes `job_id` and `last_state` for manual recovery
+- Pydantic models for all new services (local config versions, device job dispatch/status, incident search/detail/alerts)
+- 63 new tests across 7 test files
+- Comprehensive MkDocs documentation for all new services and models
+
 ## Version 0.6.0
 
 **Released:** February 17, 2026
