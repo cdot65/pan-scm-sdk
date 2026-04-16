@@ -24,6 +24,10 @@ class TestLocalConfig:
         """Create a LocalConfig service instance with mock client."""
         return LocalConfig(mock_client)
 
+    def test_get_headers_returns_empty(self, local_config_service):
+        """Test that base _get_headers returns empty dict."""
+        assert local_config_service._get_headers() == {}
+
     def test_list_versions(self, local_config_service, mock_client):
         """Test that list_versions returns parsed LocalConfigVersionModel list."""
         mock_client.get.return_value = [
