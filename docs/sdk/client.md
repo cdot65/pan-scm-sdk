@@ -39,7 +39,7 @@ class Scm:
 | `session`      | requests.Session | HTTP session for making requests                        |
 | `logger`       | Logger           | Logger instance for SDK logging                         |
 | `verify_ssl`   | bool             | Whether TLS certificate verification is enabled (default: True) |
-| `region`       | str              | Default region for APIs requiring X-PANW-Region header (default: "americas") |
+| `default_region` | str            | Default region for APIs requiring X-PANW-Region header (default: "americas") |
 
 ## Authentication Methods
 

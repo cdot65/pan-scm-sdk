@@ -20,7 +20,7 @@ class TestIncidents:
         client = MagicMock()
         client.get = MagicMock()
         client.post = MagicMock()
-        client.region = "americas"
+        client.default_region = "americas"
         client.oauth_client = MagicMock()
         client.oauth_client.auth_request.tsg_id = "test-tsg-123"
         return client
@@ -45,7 +45,7 @@ class TestIncidents:
 
     def test_get_headers_custom_region(self, incidents_service):
         """Test that _get_headers uses the configured region."""
-        incidents_service.api_client.region = "europe"
+        incidents_service.api_client.default_region = "europe"
         headers = incidents_service._get_headers()
         assert headers["X-PANW-Region"] == "europe"
 

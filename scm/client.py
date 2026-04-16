@@ -73,7 +73,7 @@ class Scm:
         """Initialize the ScmClient with the provided client_id, client_secret, tsg_id, API URLs, log level, access token, and TLS verification flag."""
         self.api_base_url = api_base_url
         self.verify_ssl = verify_ssl
-        self.region = region
+        self.default_region = region
         self.oauth_client = None
 
         # Map string log level to numeric level

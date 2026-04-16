@@ -15,7 +15,7 @@ class Incidents(ServiceBase):
     BASE_ENDPOINT = "/incidents/v1"
 
     def _get_headers(self) -> Dict[str, str]:
-        headers = {"X-PANW-Region": self.api_client.region}
+        headers = {"X-PANW-Region": self.api_client.default_region}
         if self.api_client.oauth_client:
             tsg_id = self.api_client.oauth_client.auth_request.tsg_id
             if tsg_id:
