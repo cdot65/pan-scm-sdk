@@ -37,6 +37,8 @@ The `DeviceResponseModel` uses `extra="allow"` to accommodate new API fields.
 | `device_only` | `bool` | No       | None    | True if device-only entry          |
 | `is_connected` | `bool` | No       | None    | Connection status                  |
 | `description` | `str` | No       | None    | Device description                 |
+| `labels` | `List[str]` | No       | None    | Labels assigned to the device      |
+| `snippets` | `List[str]` | No       | None    | Snippets associated with the device |
 
 ### DeviceCreateModel
 
@@ -44,11 +46,16 @@ Inherits all fields from `DeviceBaseModel` without additional fields.
 
 ### DeviceUpdateModel
 
-Extends `DeviceBaseModel` by adding:
+Request body for `PUT /config/setup/v1/devices/{id}`. This is a standalone model — it does **not** inherit from `DeviceBaseModel`. The upstream `devices-put` schema only accepts the five writable fields listed below; `serial_number`, `hostname`, `is_connected`, `family`, `model`, `name`, and `type` are read-only and rejected by the update model.
 
-| Attribute | Type | Required | Default | Description                              |
-|-----------|------|----------|---------|------------------------------------------|
-| `id` | `str` | Yes      | None    | Unique device identifier (serial number) |
+| Attribute      | Type        | Required | Default | Description                              |
+|----------------|-------------|----------|---------|------------------------------------------|
+| `id`           | `str`       | Yes      | —       | Unique device identifier (carried in URL, not payload) |
+| `display_name` | `str`       | No       | None    | Display name for the device              |
+| `folder`       | `str`       | No       | None    | Folder containing the device             |
+| `description`  | `str`       | No       | None    | Device description                       |
+| `labels`       | `List[str]` | No       | None    | Labels to assign to the device           |
+| `snippets`     | `List[str]` | No       | None    | Snippets to associate with the device    |
 
 ### DeviceResponseModel
 

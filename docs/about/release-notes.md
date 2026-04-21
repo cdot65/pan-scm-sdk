@@ -2,6 +2,19 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.14.0
+
+**Released:** April 2026
+
+### Added
+
+- **Device Update Support**: `client.device.update()` now wraps `PUT /config/setup/v1/devices/{id}`, letting you attach/detach labels and snippets, move a device into a different folder, or update its `display_name` / `description`. Request body matches the upstream `devices-put` schema exactly.
+- `labels` and `snippets` are now first-class fields on `DeviceBaseModel` / `DeviceResponseModel` (previously accessible only via `extra="allow"` pass-through).
+
+### Changed
+
+- **`DeviceUpdateModel`** is now a standalone model with exactly the six fields the API accepts on PUT: `id`, `display_name`, `folder`, `description`, `labels`, `snippets`. Fields that the API treats as read-only (e.g. `serial_number`, `hostname`, `is_connected`) are no longer accepted by the update model and will raise a validation error. This is a minor breaking change for anyone who was constructing `DeviceUpdateModel` with those fields — but since `Device.update()` did not exist prior to this release, no live code path should be affected.
+
 ## Version 0.13.0
 
 **Released:** April 2026

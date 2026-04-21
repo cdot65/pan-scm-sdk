@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-04-21
+
+### Added
+- **Device updates**: `scm.device.update()` wraps `PUT /config/setup/v1/devices/{id}`, enabling label/snippet attachment, folder moves, and display-name/description edits on enrolled devices. Request body follows the upstream `devices-put` schema exactly.
+- `labels` and `snippets` fields surfaced on `DeviceBaseModel` (and therefore `DeviceResponseModel`), replacing the prior `extra="allow"` pass-through.
+
+### Changed
+- **`DeviceUpdateModel`** rewritten as a standalone model matching the `devices-put` schema: accepts only `id`, `display_name`, `folder`, `description`, `labels`, `snippets`. Previously inherited `DeviceBaseModel`, which exposed read-only fields (`serial_number`, `hostname`, `is_connected`, `family`, `model`, etc.) that the API does not accept on PUT. Callers that were populating the unused update model will need to drop those read-only fields.
+
 ## [0.12.0] - 2026-02-24
 
 ### Added

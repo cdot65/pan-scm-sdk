@@ -128,6 +128,72 @@ class TestDeviceResponseModel:
         assert hasattr(model, "__pydantic_extra__")
 
 
+class TestDeviceBaseModelLabelsAndSnippets:
+    """Labels and snippets are writable metadata per the devices-put schema."""
+
+    def test_labels_accepted_on_base(self):
+        """DeviceBaseModel accepts a labels list."""
+        model = DeviceBaseModel.model_validate({"name": "d", "labels": ["prod", "east"]})
+        assert model.labels == ["prod", "east"]
+
+    def test_snippets_accepted_on_base(self):
+        """DeviceBaseModel accepts a snippets list."""
+        model = DeviceBaseModel.model_validate({"name": "d", "snippets": ["s1", "s2"]})
+        assert model.snippets == ["s1", "s2"]
+
+    def test_labels_default_none(self):
+        """Labels default to None when omitted."""
+        model = DeviceBaseModel.model_validate({"name": "d"})
+        assert model.labels is None
+        assert model.snippets is None
+
+
+class TestDeviceUpdateModel:
+    """DeviceUpdateModel must match the devices-put OpenAPI schema exactly."""
+
+    def test_minimal_valid_payload(self):
+        """Id alone is a valid payload (all writable fields are optional)."""
+        model = DeviceUpdateModel.model_validate({"id": "abc-123"})
+        assert model.id == "abc-123"
+
+    def test_all_writable_fields(self):
+        """Accept all five writable fields plus id."""
+        data = {
+            "id": "abc-123",
+            "display_name": "edge-1",
+            "folder": "Prod",
+            "description": "Edge firewall",
+            "labels": ["prod", "east"],
+            "snippets": ["baseline"],
+        }
+        model = DeviceUpdateModel.model_validate(data)
+        assert model.labels == ["prod", "east"]
+        assert model.snippets == ["baseline"]
+        assert model.folder == "Prod"
+
+    def test_id_required(self):
+        """Omitting id is a validation error."""
+        with pytest.raises(ValidationError):
+            DeviceUpdateModel.model_validate({"folder": "Prod"})
+
+    @pytest.mark.parametrize(
+        "field",
+        ["serial_number", "hostname", "family", "model", "is_connected", "name", "type"],
+    )
+    def test_non_writable_fields_rejected(self, field):
+        """Fields not in devices-put must be rejected by the update model."""
+        data = {"id": "abc-123", field: "whatever"}
+        with pytest.raises(ValidationError) as exc_info:
+            DeviceUpdateModel.model_validate(data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_payload_excludes_unset(self):
+        """model_dump(exclude_unset=True) omits fields not provided."""
+        model = DeviceUpdateModel.model_validate({"id": "abc", "labels": ["x"]})
+        payload = model.model_dump(exclude_unset=True)
+        assert payload == {"id": "abc", "labels": ["x"]}
+
+
 class TestDeviceListResponseModel:
     """Tests for device list response model validation."""
 
