@@ -1,35 +1,38 @@
 # Device Configuration Object
 
-Provides read-only access to device resources for listing, filtering, and retrieving devices in Palo Alto Networks Strata Cloud Manager.
+Provides access to device resources in Palo Alto Networks Strata Cloud Manager. Devices enroll out-of-band, so the SDK does not expose create or delete — but it does expose `update()` to modify the five writable fields defined by the upstream `devices-put` schema (`display_name`, `folder`, `description`, `labels`, `snippets`).
 
 ## Class Overview
 
-The `Device` class provides methods for listing, filtering, and retrieving device resources. This is a read-only resource supporting get, fetch, and list operations.
+The `Device` class supports listing, filtering, retrieving, and updating device resources.
 
 ### Methods
 
-| Method    | Description                  | Parameters         | Return Type                 |
-|-----------|------------------------------|--------------------|-----------------------------|
-| `get()`   | Retrieves a device by ID    | `device_id: str`   | `DeviceResponseModel`       |
-| `fetch()` | Gets device by name         | `name: str`        | `DeviceResponseModel`       |
-| `list()`  | Lists devices with filtering | `**filters`        | `List[DeviceResponseModel]` |
+| Method     | Description                   | Parameters                 | Return Type                 |
+|------------|-------------------------------|----------------------------|-----------------------------|
+| `get()`    | Retrieves a device by ID      | `device_id: str`           | `DeviceResponseModel`       |
+| `fetch()`  | Gets device by name           | `name: str`                | `DeviceResponseModel`       |
+| `list()`   | Lists devices with filtering  | `**filters`                | `List[DeviceResponseModel]` |
+| `update()` | Updates a device's metadata   | `device: DeviceUpdateModel` | `DeviceResponseModel`       |
 
 ### Model Attributes
 
-| Attribute       | Type | Required | Default | Description                       |
-|-----------------|------|----------|---------|-----------------------------------|
-| `name`          | str  | No       | None    | Device name                       |
-| `id`            | str  | Yes*     | None    | Unique device identifier          |
-| `display_name`  | str  | No       | None    | Display name for the device       |
-| `serial_number` | str  | No       | None    | Device serial number              |
-| `family`        | str  | No       | None    | Device family (e.g., 'vm')        |
-| `model`         | str  | No       | None    | Device model (e.g., 'PA-VM')      |
-| `folder`        | str  | No       | None    | Folder name containing the device |
-| `hostname`      | str  | No       | None    | Device hostname                   |
-| `type`          | str  | No       | None    | Device type (e.g., 'on-prem')     |
-| `device_only`   | bool | No       | None    | True if device-only entry         |
-| `is_connected`  | bool | No       | None    | Connection status                 |
-| `description`   | str  | No       | None    | Device description                |
+| Attribute       | Type       | Required | Default | Description                       |
+|-----------------|------------|----------|---------|-----------------------------------|
+| `name`          | str        | No       | None    | Device name                       |
+| `id`            | str        | Yes*     | None    | Unique device identifier          |
+| `display_name`  | str        | No       | None    | Display name for the device       |
+| `serial_number` | str        | No       | None    | Device serial number              |
+| `family`        | str        | No       | None    | Device family (e.g., 'vm')        |
+| `model`         | str        | No       | None    | Device model (e.g., 'PA-VM')      |
+| `folder`        | str        | No       | None    | Folder name containing the device |
+| `hostname`      | str        | No       | None    | Device hostname                   |
+| `type`          | str        | No       | None    | Device type (e.g., 'on-prem')     |
+| `device_only`   | bool       | No       | None    | True if device-only entry         |
+| `is_connected`  | bool       | No       | None    | Connection status                 |
+| `description`   | str        | No       | None    | Device description                |
+| `labels`        | List[str]  | No       | None    | Labels assigned to the device     |
+| `snippets`      | List[str]  | No       | None    | Snippets associated with the device |
 
 \* Only required for response models
 
@@ -128,6 +131,34 @@ print(f"Device: {device.name}")
 print(f"Model: {device.model}")
 print(f"Software Version: {device.software_version}")
 ```
+
+### Update a Device
+
+The upstream `PUT /config/setup/v1/devices/{id}` endpoint accepts only five writable fields: `display_name`, `folder`, `description`, `labels`, and `snippets`. Pass a `DeviceUpdateModel` with the device's `id` plus any subset of those fields.
+
+```python
+from scm.models.setup.device import DeviceUpdateModel
+
+# Attach labels to a device
+updated = client.device.update(
+    DeviceUpdateModel(
+        id="001122334455",
+        labels=["production", "datacenter-1"],
+    )
+)
+
+# Move a device into a different folder and rename it
+updated = client.device.update(
+    DeviceUpdateModel(
+        id="001122334455",
+        folder="Prod",
+        display_name="edge-fw-1",
+        description="Edge firewall, east region",
+    )
+)
+```
+
+Fields not listed in `DeviceUpdateModel` (e.g. `serial_number`, `hostname`, `is_connected`) are not accepted by the API and will raise a validation error at the SDK layer.
 
 ## Error Handling
 
