@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 # Local SDK imports
 from scm.config import BaseObject
 from scm.exceptions import APIError, InvalidObjectError, ObjectNotPresentError
-from scm.models.setup.device import DeviceResponseModel
+from scm.models.setup.device import DeviceResponseModel, DeviceUpdateModel
 
 
 class Device(BaseObject):
@@ -160,6 +160,40 @@ class Device(BaseObject):
             if device.name == name:
                 return device
         return None
+
+    def update(
+        self,
+        device: DeviceUpdateModel,
+    ) -> DeviceResponseModel:
+        """Update an existing device via PUT /config/setup/v1/devices/{id}.
+
+        Only the fields defined in DeviceUpdateModel (display_name, folder,
+        description, labels, snippets) are accepted by the upstream API.
+
+        Args:
+            device: A DeviceUpdateModel with the id of the device to update
+                plus any subset of the writable fields.
+
+        Returns:
+            DeviceResponseModel: The device as returned by the API after update.
+
+        Raises:
+            ObjectNotPresentError: If no device exists with the given id.
+            APIError: If the API request fails for any other reason.
+
+        """
+        payload = device.model_dump(exclude_unset=True)
+        object_id = payload.pop("id")
+        endpoint = f"{self.ENDPOINT}/{object_id}"
+        try:
+            response = self.api_client.put(endpoint, json=payload)
+        except APIError as e:
+            if getattr(e, "http_status_code", None) == 404:
+                raise ObjectNotPresentError(f"Device with ID {object_id} not found")
+            raise
+        if isinstance(response, list) and response:
+            return DeviceResponseModel.model_validate(response[0])
+        return DeviceResponseModel.model_validate(response)
 
     @staticmethod
     def _apply_filters(

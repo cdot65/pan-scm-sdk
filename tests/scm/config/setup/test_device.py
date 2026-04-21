@@ -530,3 +530,78 @@ class TestDeviceListServerSideFilters(TestDeviceBase):
         mock_scm_client.get.return_value = {"data": []}
         device_service.list(model="PA-VM")
         assert mock_scm_client.get.call_args[1]["params"]["model"] == "PA-VM"
+
+
+class TestDeviceUpdate(TestDeviceBase):
+    """Tests for Device.update — wraps PUT /config/setup/v1/devices/{id}."""
+
+    def _update_model(self, **kwargs):
+        """Build a DeviceUpdateModel with id plus any overrides."""
+        from scm.models.setup.device import DeviceUpdateModel
+
+        data = {"id": "abc-123"}
+        data.update(kwargs)
+        return DeviceUpdateModel.model_validate(data)
+
+    def test_update_puts_to_correct_url(self, device_service, mock_scm_client):
+        """PUT targets /config/setup/v1/devices/{id}."""
+        mock_scm_client.put.return_value = {"id": "abc-123"}
+        device_service.update(self._update_model(labels=["prod"]))
+        assert mock_scm_client.put.call_args[0][0] == "/config/setup/v1/devices/abc-123"
+
+    def test_update_payload_excludes_id_and_unset(self, device_service, mock_scm_client):
+        """Payload excludes id (in URL) and any field the caller didn't set."""
+        mock_scm_client.put.return_value = {"id": "abc-123"}
+        device_service.update(self._update_model(labels=["prod", "east"]))
+        payload = mock_scm_client.put.call_args[1]["json"]
+        assert "id" not in payload
+        assert payload == {"labels": ["prod", "east"]}
+
+    def test_update_attaches_labels_and_snippets(self, device_service, mock_scm_client):
+        """Attach multiple writable fields at once."""
+        mock_scm_client.put.return_value = {
+            "id": "abc-123",
+            "labels": ["prod"],
+            "snippets": ["baseline"],
+            "folder": "Prod",
+        }
+        result = device_service.update(
+            self._update_model(
+                labels=["prod"],
+                snippets=["baseline"],
+                folder="Prod",
+                display_name="edge-1",
+                description="Edge firewall",
+            )
+        )
+        payload = mock_scm_client.put.call_args[1]["json"]
+        assert payload == {
+            "labels": ["prod"],
+            "snippets": ["baseline"],
+            "folder": "Prod",
+            "display_name": "edge-1",
+            "description": "Edge firewall",
+        }
+        assert result.id == "abc-123"
+        assert result.labels == ["prod"]
+        assert result.snippets == ["baseline"]
+
+    def test_update_returns_response_model(self, device_service, mock_scm_client):
+        """Response is revalidated into a DeviceResponseModel."""
+        mock_scm_client.put.return_value = {"id": "abc-123", "name": "edge-1"}
+        result = device_service.update(self._update_model(folder="Prod"))
+        assert isinstance(result, DeviceResponseModel)
+        assert result.id == "abc-123"
+        assert result.name == "edge-1"
+
+    def test_update_404_raises_object_not_present(self, device_service, mock_scm_client):
+        """A 404 from the API becomes ObjectNotPresentError."""
+        mock_scm_client.put.side_effect = APIError("not found", http_status_code=404)
+        with pytest.raises(ObjectNotPresentError):
+            device_service.update(self._update_model(folder="Prod"))
+
+    def test_update_other_errors_propagate(self, device_service, mock_scm_client):
+        """Non-404 API errors propagate unchanged."""
+        mock_scm_client.put.side_effect = APIError("boom", http_status_code=500)
+        with pytest.raises(APIError):
+            device_service.update(self._update_model(folder="Prod"))

@@ -77,6 +77,8 @@ class DeviceBaseModel(BaseModel):
         None, alias="isConnected", description="Connection status."
     )
     description: Optional[str] = Field(None, description="Device description.")
+    labels: Optional[List[str]] = Field(None, description="Labels assigned to the device.")
+    snippets: Optional[List[str]] = Field(None, description="Snippets associated with the device.")
 
 
 class DeviceCreateModel(DeviceBaseModel):
@@ -88,15 +90,26 @@ class DeviceCreateModel(DeviceBaseModel):
     pass
 
 
-class DeviceUpdateModel(DeviceBaseModel):
-    """Model for updating existing Device resources.
+class DeviceUpdateModel(BaseModel):
+    """Request body for PUT /config/setup/v1/devices/{id}.
 
-    Attributes:
-        id: The unique identifier of the device to update.
-
+    Matches the upstream `devices-put` schema exactly: only the writable fields
+    plus `id` (which is carried in the URL, not the payload).
     """
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     id: str = Field(..., description="Unique device identifier (serial number).")
+    display_name: Optional[str] = Field(
+        None, alias="displayName", description="Display name for the device."
+    )
+    folder: Optional[str] = Field(None, description="Folder containing the device.")
+    description: Optional[str] = Field(None, description="Device description.")
+    labels: Optional[List[str]] = Field(None, description="Labels assigned to the device.")
+    snippets: Optional[List[str]] = Field(None, description="Snippets associated with the device.")
 
 
 class DeviceResponseModel(DeviceBaseModel):
