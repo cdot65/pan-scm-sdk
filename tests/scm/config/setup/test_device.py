@@ -605,3 +605,11 @@ class TestDeviceUpdate(TestDeviceBase):
         mock_scm_client.put.side_effect = APIError("boom", http_status_code=500)
         with pytest.raises(APIError):
             device_service.update(self._update_model(folder="Prod"))
+
+    def test_update_unwraps_list_response(self, device_service, mock_scm_client):
+        """If the API returns a single-element list (matching get() behavior), unwrap it."""
+        mock_scm_client.put.return_value = [{"id": "abc-123", "name": "edge-1"}]
+        result = device_service.update(self._update_model(folder="Prod"))
+        assert isinstance(result, DeviceResponseModel)
+        assert result.id == "abc-123"
+        assert result.name == "edge-1"
