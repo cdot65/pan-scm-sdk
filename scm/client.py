@@ -483,6 +483,10 @@ class Scm:
                 "scm.insights.alerts",
                 "Alerts",
             ),
+            "agent_profile": (
+                "scm.config.mobile_agent.agent_profiles",
+                "AgentProfiles",
+            ),
             "agent_version": (
                 "scm.config.mobile_agent.agent_versions",
                 "AgentVersions",
