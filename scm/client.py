@@ -559,6 +559,14 @@ class Scm:
                 "scm.config.setup.folder",
                 "Folder",
             ),
+            "forwarding_profile": (
+                "scm.config.mobile_agent.forwarding_profiles",
+                "ForwardingProfiles",
+            ),
+            "forwarding_profile_destination": (
+                "scm.config.mobile_agent.forwarding_profile_destinations",
+                "ForwardingProfileDestinations",
+            ),
             "global_settings": (
                 "scm.config.mobile_agent.global_settings",
                 "GlobalSettings",

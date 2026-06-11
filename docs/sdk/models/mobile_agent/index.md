@@ -21,6 +21,8 @@ Key model patterns:
 - [Authentication Settings Models](auth_settings_models.md) - Models for GlobalProtect authentication rules
 - [Agent Version Models](agent_versions_models.md) - Models for GlobalProtect agent version information
 - [Application Settings (Agent Profiles) Models](agent_profiles_models.md) - Models for GlobalProtect agent profiles (App Settings in the SCM UI)
+- [Forwarding Profile Models](forwarding_profiles_models.md) - Models for GlobalProtect traffic forwarding profiles
+- [Forwarding Profile Destination Models](forwarding_profile_destinations_models.md) - Models for forwarding profile destinations
 - [Global Settings Models](global_settings_models.md) - Models for the GlobalProtect global settings singleton
 - [Infrastructure Settings Models](infrastructure_settings_models.md) - Models for GlobalProtect infrastructure settings
 - [Tunnel Profiles Models](tunnel_profiles_models.md) - Models for GlobalProtect tunnel settings

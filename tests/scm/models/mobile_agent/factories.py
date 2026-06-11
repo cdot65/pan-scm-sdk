@@ -21,6 +21,22 @@ from scm.models.mobile_agent.auth_settings import (
     MovePosition,
     OperatingSystem,
 )
+from scm.models.mobile_agent.forwarding_profile_destinations import (
+    DestinationFqdnEntry,
+    DestinationIpEntry,
+    ForwardingProfileDestinationCreateModel,
+    ForwardingProfileDestinationResponseModel,
+    ForwardingProfileDestinationUpdateModel,
+)
+from scm.models.mobile_agent.forwarding_profiles import (
+    DefinitionMethod,
+    ForwardingProfileCreateModel,
+    ForwardingProfileResponseModel,
+    ForwardingProfileUpdateModel,
+    ForwardingRuleBasic,
+    ForwardingRuleZtna,
+    ZtnaTrafficType,
+)
 from scm.models.mobile_agent.global_settings import (
     GlobalSettingsResponseModel,
     GlobalSettingsUpdateModel,
@@ -710,3 +726,199 @@ class AgentProfilesResponseModelFactory(Factory):
     name = Faker("pystr", min_chars=5, max_chars=30)
     folder = "Mobile Users"
     os = factory.LazyFunction(lambda: [fake.random_element(list(AgentProfileOperatingSystem))])
+
+
+class ForwardingRuleBasicFactory(Factory):
+    """Factory for ForwardingRuleBasic."""
+
+    class Meta:
+        """Meta class for ForwardingRuleBasicFactory."""
+
+        model = ForwardingRuleBasic
+
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    enabled = Faker("pybool")
+    user_locations = "Any"
+    destinations = "Any"
+    connectivity = "direct"
+
+
+class ForwardingRuleZtnaFactory(Factory):
+    """Factory for ForwardingRuleZtna."""
+
+    class Meta:
+        """Meta class for ForwardingRuleZtnaFactory."""
+
+        model = ForwardingRuleZtna
+
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    traffic_type = factory.fuzzy.FuzzyChoice(list(ZtnaTrafficType))
+    enabled = Faker("pybool")
+    user_locations = "Any"
+    source_applications = "Any"
+    destinations = "Any"
+    connectivity = "direct"
+
+
+class ForwardingProfileCreateModelFactory(Factory):
+    """Factory for ForwardingProfileCreateModel."""
+
+    class Meta:
+        """Meta class for ForwardingProfileCreateModelFactory."""
+
+        model = ForwardingProfileCreateModel
+
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    description = Faker("sentence")
+    definition_method = DefinitionMethod.RULES
+
+    @classmethod
+    def build_valid(cls):
+        """Build valid data for ForwardingProfileCreateModel."""
+        return {
+            "name": fake.pystr(min_chars=5, max_chars=30),
+            "description": fake.sentence(),
+            "definition_method": "rules",
+            "type": {
+                "ztna_agent": {
+                    "forwarding_rules": [
+                        {
+                            "name": fake.pystr(min_chars=5, max_chars=30),
+                            "traffic_type": "dns",
+                        }
+                    ],
+                }
+            },
+        }
+
+    @classmethod
+    def build_invalid_name(cls):
+        """Build data with invalid name for ForwardingProfileCreateModel."""
+        data = cls.build_valid()
+        data["name"] = "invalid@name"
+        return data
+
+
+class ForwardingProfileUpdateModelFactory(Factory):
+    """Factory for ForwardingProfileUpdateModel."""
+
+    class Meta:
+        """Meta class for ForwardingProfileUpdateModelFactory."""
+
+        model = ForwardingProfileUpdateModel
+
+    id = factory.LazyFunction(lambda: fake.uuid4())
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    description = Faker("sentence")
+    definition_method = DefinitionMethod.RULES
+
+    @classmethod
+    def build_valid(cls):
+        """Build valid data for ForwardingProfileUpdateModel."""
+        return {
+            "id": fake.uuid4(),
+            "name": fake.pystr(min_chars=5, max_chars=30),
+            "description": fake.sentence(),
+        }
+
+
+class ForwardingProfileResponseModelFactory(Factory):
+    """Factory for ForwardingProfileResponseModel."""
+
+    class Meta:
+        """Meta class for ForwardingProfileResponseModelFactory."""
+
+        model = ForwardingProfileResponseModel
+
+    id = factory.LazyFunction(lambda: fake.uuid4())
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    description = Faker("sentence")
+    definition_method = DefinitionMethod.RULES
+
+
+class DestinationFqdnEntryFactory(Factory):
+    """Factory for DestinationFqdnEntry."""
+
+    class Meta:
+        """Meta class for DestinationFqdnEntryFactory."""
+
+        model = DestinationFqdnEntry
+
+    name = factory.LazyFunction(lambda: f"{fake.pystr(min_chars=3, max_chars=10)}.example.com")
+    port = factory.LazyFunction(lambda: fake.random_int(min=1, max=65535))
+
+
+class DestinationIpEntryFactory(Factory):
+    """Factory for DestinationIpEntry."""
+
+    class Meta:
+        """Meta class for DestinationIpEntryFactory."""
+
+        model = DestinationIpEntry
+
+    name = factory.LazyFunction(lambda: fake.ipv4())
+    port = factory.LazyFunction(lambda: fake.random_int(min=1, max=65535))
+
+
+class ForwardingProfileDestinationCreateModelFactory(Factory):
+    """Factory for ForwardingProfileDestinationCreateModel."""
+
+    class Meta:
+        """Meta class for ForwardingProfileDestinationCreateModelFactory."""
+
+        model = ForwardingProfileDestinationCreateModel
+
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    description = Faker("sentence")
+
+    @classmethod
+    def build_valid(cls):
+        """Build valid data for ForwardingProfileDestinationCreateModel."""
+        return {
+            "name": fake.pystr(min_chars=5, max_chars=30),
+            "description": fake.sentence(),
+            "fqdn": [{"name": "*.example.com", "port": 443}],
+            "ip_addresses": [{"name": "10.0.0.0/8"}],
+        }
+
+    @classmethod
+    def build_invalid_name(cls):
+        """Build data with invalid name for ForwardingProfileDestinationCreateModel."""
+        data = cls.build_valid()
+        data["name"] = "invalid@name"
+        return data
+
+
+class ForwardingProfileDestinationUpdateModelFactory(Factory):
+    """Factory for ForwardingProfileDestinationUpdateModel."""
+
+    class Meta:
+        """Meta class for ForwardingProfileDestinationUpdateModelFactory."""
+
+        model = ForwardingProfileDestinationUpdateModel
+
+    id = factory.LazyFunction(lambda: fake.uuid4())
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    description = Faker("sentence")
+
+    @classmethod
+    def build_valid(cls):
+        """Build valid data for ForwardingProfileDestinationUpdateModel."""
+        return {
+            "id": fake.uuid4(),
+            "name": fake.pystr(min_chars=5, max_chars=30),
+            "description": fake.sentence(),
+        }
+
+
+class ForwardingProfileDestinationResponseModelFactory(Factory):
+    """Factory for ForwardingProfileDestinationResponseModel."""
+
+    class Meta:
+        """Meta class for ForwardingProfileDestinationResponseModelFactory."""
+
+        model = ForwardingProfileDestinationResponseModel
+
+    id = factory.LazyFunction(lambda: fake.uuid4())
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    description = Faker("sentence")
