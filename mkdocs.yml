@@ -126,6 +126,8 @@ nav:
           - Overview: sdk/config/mobile_agent/index.md
           - Authentication Settings: sdk/config/mobile_agent/auth_settings.md
           - Agent Versions: sdk/config/mobile_agent/agent_versions.md
+          - Global Settings: sdk/config/mobile_agent/global_settings.md
+          - Infrastructure Settings: sdk/config/mobile_agent/infrastructure_settings.md
       - Network:
           - Overview: sdk/config/network/index.md
           - Aggregate Interfaces: sdk/config/network/aggregate_interface.md
@@ -233,6 +235,8 @@ nav:
           - Overview: sdk/models/mobile_agent/index.md
           - Authentication Settings: sdk/models/mobile_agent/auth_settings_models.md
           - Agent Versions: sdk/models/mobile_agent/agent_versions_models.md
+          - Global Settings: sdk/models/mobile_agent/global_settings_models.md
+          - Infrastructure Settings: sdk/models/mobile_agent/infrastructure_settings_models.md
       - Network:
           - Overview: sdk/models/network/index.md
           - Aggregate Interfaces: sdk/models/network/aggregate_interface_models.md

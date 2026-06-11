@@ -8,10 +8,12 @@ This section covers the Mobile Agent configuration objects provided by the Palo 
 
 ## Available Modules
 
-| Module                                       | Description                                               |
-|----------------------------------------------|-----------------------------------------------------------|
-| [Authentication Settings](auth_settings.md)  | Manage GlobalProtect authentication settings by OS        |
-| [Agent Versions](agent_versions.md)          | List and retrieve available GlobalProtect agent versions  |
+| Module                                                 | Description                                                        |
+|--------------------------------------------------------|--------------------------------------------------------------------|
+| [Authentication Settings](auth_settings.md)            | Manage GlobalProtect authentication settings by OS                 |
+| [Agent Versions](agent_versions.md)                    | List and retrieve available GlobalProtect agent versions           |
+| [Global Settings](global_settings.md)                  | Manage the GlobalProtect global settings singleton                 |
+| [Infrastructure Settings](infrastructure_settings.md)  | Manage GlobalProtect infrastructure (DNS, IP pools, portal, WINS)  |
 
 ## Related Documentation
 

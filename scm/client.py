@@ -555,6 +555,10 @@ class Scm:
                 "scm.config.setup.folder",
                 "Folder",
             ),
+            "global_settings": (
+                "scm.config.mobile_agent.global_settings",
+                "GlobalSettings",
+            ),
             "hip_object": (
                 "scm.config.objects.hip_object",
                 "HIPObject",
@@ -578,6 +582,10 @@ class Scm:
             "ike_gateway": (
                 "scm.config.network.ike_gateway",
                 "IKEGateway",
+            ),
+            "infrastructure_settings": (
+                "scm.config.mobile_agent.infrastructure_settings",
+                "InfrastructureSettings",
             ),
             "interface_management_profile": (
                 "scm.config.network.interface_management_profile",

@@ -20,6 +20,8 @@ Key model patterns:
 
 - [Authentication Settings Models](auth_settings_models.md) - Models for GlobalProtect authentication rules
 - [Agent Version Models](agent_versions_models.md) - Models for GlobalProtect agent version information
+- [Global Settings Models](global_settings_models.md) - Models for the GlobalProtect global settings singleton
+- [Infrastructure Settings Models](infrastructure_settings_models.md) - Models for GlobalProtect infrastructure settings
 
 ## Usage Examples
 
