@@ -78,6 +78,15 @@ class TestGlobalSettings:
         error = excinfo.value
         assert "Response is not a dictionary" in str(error.details)
 
+    def test_get_with_invalid_field_type(self, global_settings, mock_api_client):
+        """Test get method when the response fails model validation."""
+        mock_api_client.get.return_value = {"agent_version": {"bad": "type"}}
+
+        with pytest.raises(InvalidObjectError) as excinfo:
+            global_settings.get()
+        error = excinfo.value
+        assert "Invalid response format" in str(error.message)
+
     def test_update(self, global_settings, mock_api_client):
         """Test update method for the global settings singleton."""
         test_data = {
