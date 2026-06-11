@@ -14,6 +14,22 @@ from scm.models.mobile_agent.auth_settings import (
     MovePosition,
     OperatingSystem,
 )
+from scm.models.mobile_agent.global_settings import (
+    GlobalSettingsResponseModel,
+    GlobalSettingsUpdateModel,
+    ManualGateway,
+    ManualGatewayRegion,
+)
+from scm.models.mobile_agent.infrastructure_settings import (
+    DefaultDomain,
+    DnsServerEntry,
+    InfrastructureSettingsCreateModel,
+    InfrastructureSettingsResponseModel,
+    InfrastructureSettingsUpdateModel,
+    IpPool,
+    PortalHostname,
+    PublicDnsServer,
+)
 
 # Create a single faker instance
 fake = FakerGenerator()
@@ -245,3 +261,158 @@ class AuthSettingsMoveModelFactory(Factory):
             "where": MovePosition.TOP,
             "destination": fake.pystr(min_chars=5, max_chars=30),
         }
+
+
+def _build_infrastructure_settings_data():
+    """Build a valid infrastructure settings data dictionary."""
+    return {
+        "name": fake.pystr(min_chars=5, max_chars=30),
+        "dns_servers": [
+            {
+                "name": fake.pystr(min_chars=5, max_chars=30),
+                "dns_suffix": [fake.domain_name()],
+                "primary_public_dns": {"dns_server": fake.ipv4()},
+                "secondary_public_dns": {"dns_server": fake.ipv4()},
+            }
+        ],
+        "ip_pools": [
+            {
+                "name": fake.pystr(min_chars=5, max_chars=30),
+                "ip_pool": ["10.10.0.0/16"],
+            }
+        ],
+        "portal_hostname": {
+            "default_domain": {"hostname": fake.domain_word()},
+        },
+    }
+
+
+class InfrastructureSettingsCreateModelFactory(Factory):
+    """Factory for InfrastructureSettingsCreateModel."""
+
+    class Meta:
+        """Meta class for InfrastructureSettingsCreateModelFactory."""
+
+        model = InfrastructureSettingsCreateModel
+
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    dns_servers = factory.LazyFunction(
+        lambda: [DnsServerEntry(primary_public_dns=PublicDnsServer(dns_server=fake.ipv4()))]
+    )
+    ip_pools = factory.LazyFunction(lambda: [IpPool(name="pool-1", ip_pool=["10.10.0.0/16"])])
+    portal_hostname = factory.LazyFunction(
+        lambda: PortalHostname(default_domain=DefaultDomain(hostname=fake.domain_word()))
+    )
+
+    @classmethod
+    def build_valid(cls):
+        """Build valid data for InfrastructureSettingsCreateModel."""
+        return _build_infrastructure_settings_data()
+
+    @classmethod
+    def build_missing_required(cls):
+        """Build data with missing required fields for InfrastructureSettingsCreateModel."""
+        data = _build_infrastructure_settings_data()
+        del data["dns_servers"]
+        return data
+
+
+class InfrastructureSettingsUpdateModelFactory(Factory):
+    """Factory for InfrastructureSettingsUpdateModel."""
+
+    class Meta:
+        """Meta class for InfrastructureSettingsUpdateModelFactory."""
+
+        model = InfrastructureSettingsUpdateModel
+
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    dns_servers = factory.LazyFunction(
+        lambda: [DnsServerEntry(primary_public_dns=PublicDnsServer(dns_server=fake.ipv4()))]
+    )
+    ip_pools = factory.LazyFunction(lambda: [IpPool(name="pool-1", ip_pool=["10.10.0.0/16"])])
+    portal_hostname = factory.LazyFunction(
+        lambda: PortalHostname(default_domain=DefaultDomain(hostname=fake.domain_word()))
+    )
+
+    @classmethod
+    def build_valid(cls):
+        """Build valid data for InfrastructureSettingsUpdateModel."""
+        return _build_infrastructure_settings_data()
+
+
+class InfrastructureSettingsResponseModelFactory(Factory):
+    """Factory for InfrastructureSettingsResponseModel."""
+
+    class Meta:
+        """Meta class for InfrastructureSettingsResponseModelFactory."""
+
+        model = InfrastructureSettingsResponseModel
+
+    id = factory.LazyFunction(lambda: fake.uuid4())
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    dns_servers = factory.LazyFunction(
+        lambda: [DnsServerEntry(primary_public_dns=PublicDnsServer(dns_server=fake.ipv4()))]
+    )
+    ip_pools = factory.LazyFunction(lambda: [IpPool(name="pool-1", ip_pool=["10.10.0.0/16"])])
+    portal_hostname = factory.LazyFunction(
+        lambda: PortalHostname(default_domain=DefaultDomain(hostname=fake.domain_word()))
+    )
+
+    @classmethod
+    def build_valid(cls):
+        """Build valid data for InfrastructureSettingsResponseModel."""
+        data = _build_infrastructure_settings_data()
+        data["id"] = fake.uuid4()
+        return data
+
+
+class GlobalSettingsUpdateModelFactory(Factory):
+    """Factory for GlobalSettingsUpdateModel."""
+
+    class Meta:
+        """Meta class for GlobalSettingsUpdateModelFactory."""
+
+        model = GlobalSettingsUpdateModel
+
+    agent_version = factory.LazyFunction(
+        lambda: f"{fake.random_int(min=5, max=6)}.{fake.random_int(min=0, max=9)}.{fake.random_int(min=0, max=9)}"
+    )
+    manual_gateway = factory.LazyFunction(
+        lambda: ManualGateway(
+            region=[
+                ManualGatewayRegion(
+                    name=fake.pystr(min_chars=5, max_chars=20),
+                    locations=[fake.pystr(min_chars=5, max_chars=20)],
+                )
+            ]
+        )
+    )
+
+    @classmethod
+    def build_valid(cls):
+        """Build valid data for GlobalSettingsUpdateModel."""
+        return {
+            "agent_version": "6.2.1",
+            "manual_gateway": {
+                "region": [
+                    {
+                        "name": "americas",
+                        "locations": ["us-east-1"],
+                    }
+                ]
+            },
+        }
+
+
+class GlobalSettingsResponseModelFactory(Factory):
+    """Factory for GlobalSettingsResponseModel."""
+
+    class Meta:
+        """Meta class for GlobalSettingsResponseModelFactory."""
+
+        model = GlobalSettingsResponseModel
+
+    agent_version = factory.LazyFunction(
+        lambda: f"{fake.random_int(min=5, max=6)}.{fake.random_int(min=0, max=9)}.{fake.random_int(min=0, max=9)}"
+    )
+    manual_gateway = None
