@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-06-11
+
+### Added
+
+- **GlobalProtect Infrastructure Settings**: New `scm.infrastructure_settings` service. Endpoint: `/config/mobile-agent/v1/infrastructure-settings`. Folder+name addressed CRUD (no `/{id}` paths) scoped to the Mobile Users folder.
+- **GlobalProtect Global Settings**: New `scm.global_settings` service. Endpoint: `/config/mobile-agent/v1/global-settings`. Singleton resource with `get()` and `update()` only.
+- **GlobalProtect Agent Profiles (Application Settings)**: New `scm.agent_profile` service. Endpoint: `/config/mobile-agent/v1/agent-profiles`. Folder+name addressed CRUD with paginated list; full nested app-settings model (connect method, tunnel MTU, and related structures).
+- **GlobalProtect Tunnel Profiles (Tunnel Settings)**: New `scm.tunnel_profile` service. Endpoint: `/config/mobile-agent/v1/tunnel-profiles`. Folder+name addressed CRUD with paginated list.
+- **GlobalProtect Forwarding Profiles**: New `scm.forwarding_profile` service. Endpoint: `/config/mobile-agent/v1/forwarding-profiles`. UUID-based CRUD with oneOf profile types (PAC file, GlobalProtect proxy, ZTNA agent) plus basic/ZTNA forwarding and block rules.
+- **GlobalProtect Forwarding Profile Destinations**: New `scm.forwarding_profile_destination` service. Endpoint: `/config/mobile-agent/v1/forwarding-profile-destinations`. UUID-based CRUD with FQDN and IP destination entries.
+- **GlobalProtect Forwarding Profile Source Applications**: New `scm.forwarding_profile_source_application` service. Endpoint: `/config/mobile-agent/v1/forwarding-profile-source-applications`. UUID-based CRUD.
+- **GlobalProtect Forwarding Profile User Locations**: New `scm.forwarding_profile_user_location` service. Endpoint: `/config/mobile-agent/v1/forwarding-profile-user-locations`. UUID-based CRUD.
+- **GlobalProtect Forwarding Profile Regional and Custom Proxies**: New `scm.forwarding_profile_regional_and_custom_proxy` service. Endpoint: `/config/mobile-agent/v1/forwarding-profile-regional-and-custom-proxies`. UUID-based CRUD.
+- ~430 new tests across mobile_agent services and models; docs pages for every new service and model set.
+
+### Changed
+
+- **Authentication Settings spec alignment** (non-breaking): `move()` now targets the spec path `/{name}:move` and its model accepts an optional `folder`; `create()` sends `folder` as a query parameter; `list()`/`fetch()` gain a `name` filter and pagination. Existing id-based `get()`/`update()`/`delete()` are unchanged (tracked for live-API verification in [#360](https://github.com/cdot65/pan-scm-sdk/issues/360)).
+
 ## [0.14.0] - 2026-04-21
 
 ### Added

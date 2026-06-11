@@ -2,6 +2,28 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.15.0
+
+**Released:** June 2026
+
+### Added
+
+- **GlobalProtect (Mobile Agent) coverage** — nine new services on the unified client, all under `/config/mobile-agent/v1`:
+    - **Infrastructure Settings** (`client.infrastructure_settings`): folder+name addressed CRUD for GlobalProtect infrastructure settings in the Mobile Users folder
+    - **Global Settings** (`client.global_settings`): singleton `get()`/`update()` for tenant-wide GlobalProtect settings
+    - **Agent Profiles / Application Settings** (`client.agent_profile`): CRUD for GlobalProtect app settings profiles, including connect method and tunnel MTU configuration
+    - **Tunnel Profiles / Tunnel Settings** (`client.tunnel_profile`): CRUD for GlobalProtect tunnel settings
+    - **Forwarding Profiles** (`client.forwarding_profile`): UUID-based CRUD with PAC file, GlobalProtect proxy, and ZTNA agent profile types plus forwarding/block rules
+    - **Forwarding Profile Destinations** (`client.forwarding_profile_destination`): FQDN and IP destination entries
+    - **Forwarding Profile Source Applications** (`client.forwarding_profile_source_application`)
+    - **Forwarding Profile User Locations** (`client.forwarding_profile_user_location`)
+    - **Forwarding Profile Regional and Custom Proxies** (`client.forwarding_profile_regional_and_custom_proxy`)
+- ~430 new tests; documentation pages for every new service and model set
+
+### Changed
+
+- **Authentication Settings** aligned with the feb-v1 mobile-agent spec (non-breaking): `move()` uses `/{name}:move`, `create()` sends `folder` as a query parameter, `list()`/`fetch()` support name filtering and pagination. Id-based `get()`/`update()`/`delete()` unchanged ([#360](https://github.com/cdot65/pan-scm-sdk/issues/360) tracks live-API verification).
+
 ## Version 0.14.0
 
 **Released:** April 2026
