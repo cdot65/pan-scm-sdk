@@ -105,11 +105,14 @@ class TestAuthSettings:
         assert isinstance(result, AuthSettingsResponseModel)
         assert result.name == "test-auth-settings"
 
-        # Verify the API client was called correctly
+        # Verify the API client was called correctly: folder is sent as a
+        # query parameter per the spec, not in the request body
         mock_api_client.post.assert_called_once()
         call_args = mock_api_client.post.call_args
         assert call_args[0][0] == auth_settings.ENDPOINT
+        assert call_args[1]["params"] == {"folder": "Mobile Users"}
         assert "json" in call_args[1]
+        assert "folder" not in call_args[1]["json"]
 
     def test_get(self, auth_settings, mock_api_client):
         """Test get method for fetching auth settings by ID."""
@@ -173,11 +176,33 @@ class TestAuthSettings:
         # Call the method
         auth_settings.move(test_move_data)
 
-        # Verify the API client was called correctly
+        # Verify the API client was called correctly: the object is addressed
+        # by name in the path ({name}:move) with folder as a query parameter
         mock_api_client.post.assert_called_once()
         call_args = mock_api_client.post.call_args
-        assert call_args[0][0] == f"{auth_settings.ENDPOINT}/move"
+        assert call_args[0][0] == f"{auth_settings.ENDPOINT}/test-auth-settings:move"
+        assert call_args[1]["params"] == {"folder": "Mobile Users"}
         assert "json" in call_args[1]
+        # destination is unset for top/bottom moves and must not be sent
+        assert "destination" not in call_args[1]["json"]
+
+    def test_move_with_folder(self, auth_settings, mock_api_client):
+        """Test move method with an explicit folder in the move data."""
+        test_move_data = {
+            "name": "test-auth-settings",
+            "where": "before",
+            "destination": "other-settings",
+            "folder": "Mobile Users",
+        }
+
+        auth_settings.move(test_move_data)
+
+        mock_api_client.post.assert_called_once()
+        call_args = mock_api_client.post.call_args
+        assert call_args[0][0] == f"{auth_settings.ENDPOINT}/test-auth-settings:move"
+        assert call_args[1]["params"] == {"folder": "Mobile Users"}
+        assert call_args[1]["json"]["destination"] == "other-settings"
+        assert call_args[1]["json"]["folder"] == "Mobile Users"
 
     def test_list_with_invalid_folder(self, auth_settings):
         """Test list method with invalid folder."""
@@ -219,7 +244,7 @@ class TestAuthSettings:
         mock_api_client.get.assert_called_once()
         call_args = mock_api_client.get.call_args
         assert call_args[0][0] == auth_settings.ENDPOINT
-        assert call_args[1]["params"] == {"folder": "Mobile Users"}
+        assert call_args[1]["params"]["folder"] == "Mobile Users"
 
     def test_list_with_dict_response(self, auth_settings, mock_api_client):
         """Test list method with dictionary response format."""
@@ -256,7 +281,53 @@ class TestAuthSettings:
         mock_api_client.get.assert_called_once()
         call_args = mock_api_client.get.call_args
         assert call_args[0][0] == auth_settings.ENDPOINT
-        assert call_args[1]["params"] == {"folder": "Mobile Users"}
+        assert call_args[1]["params"]["folder"] == "Mobile Users"
+
+    def test_list_with_name_filter(self, auth_settings, mock_api_client):
+        """Test list method passes the server-side name filter."""
+        mock_api_client.get.return_value = {"data": []}
+
+        auth_settings.list(name="auth-settings-1")
+
+        call_args = mock_api_client.get.call_args
+        assert call_args[1]["params"]["name"] == "auth-settings-1"
+
+    def test_list_pagination(self, auth_settings, mock_api_client):
+        """Test list method paginates through multiple pages."""
+        auth_settings._max_limit = 2
+        page_one = {
+            "data": [
+                {
+                    "name": "auth-settings-1",
+                    "authentication_profile": "profile-1",
+                    "folder": "Mobile Users",
+                },
+                {
+                    "name": "auth-settings-2",
+                    "authentication_profile": "profile-2",
+                    "folder": "Mobile Users",
+                },
+            ]
+        }
+        page_two = {
+            "data": [
+                {
+                    "name": "auth-settings-3",
+                    "authentication_profile": "profile-3",
+                    "folder": "Mobile Users",
+                },
+            ]
+        }
+        mock_api_client.get.side_effect = [page_one, page_two]
+
+        result = auth_settings.list()
+
+        assert len(result) == 3
+        assert mock_api_client.get.call_count == 2
+        first_call_params = mock_api_client.get.call_args_list[0][1]["params"]
+        second_call_params = mock_api_client.get.call_args_list[1][1]["params"]
+        assert first_call_params["offset"] == 0
+        assert second_call_params["offset"] == 2
 
     def test_list_with_invalid_response(self, auth_settings, mock_api_client):
         """Test list method with invalid response structure."""
@@ -316,11 +387,12 @@ class TestAuthSettings:
         assert isinstance(result, AuthSettingsResponseModel)
         assert result.name == test_name
 
-        # Verify the API client was called correctly
+        # Verify the API client was called correctly with the server-side name filter
         mock_api_client.get.assert_called_once()
         call_args = mock_api_client.get.call_args
         assert call_args[0][0] == auth_settings.ENDPOINT
-        assert call_args[1]["params"] == {"folder": "Mobile Users"}
+        assert call_args[1]["params"]["folder"] == "Mobile Users"
+        assert call_args[1]["params"]["name"] == test_name
 
     def test_fetch_with_multiple_matching_settings(self, auth_settings, mock_api_client):
         """Test fetch method when multiple matching settings are found."""
@@ -350,11 +422,12 @@ class TestAuthSettings:
         assert result.name == test_name
         assert result.authentication_profile == "profile-1"  # Should return the first match
 
-        # Verify the API client was called correctly
+        # Verify the API client was called correctly with the server-side name filter
         mock_api_client.get.assert_called_once()
         call_args = mock_api_client.get.call_args
         assert call_args[0][0] == auth_settings.ENDPOINT
-        assert call_args[1]["params"] == {"folder": "Mobile Users"}
+        assert call_args[1]["params"]["folder"] == "Mobile Users"
+        assert call_args[1]["params"]["name"] == test_name
 
     def test_delete(self, auth_settings, mock_api_client):
         """Test delete method for removing auth settings."""

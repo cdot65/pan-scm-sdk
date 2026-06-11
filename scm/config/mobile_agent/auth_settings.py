@@ -138,9 +138,13 @@ class AuthSettings(BaseObject):
             by_alias=True,
         )
 
+        # The API expects the folder as a query parameter, not in the request body
+        folder = payload.pop("folder")
+
         # Send the updated object to the remote API as JSON
         response: Dict[str, Any] = self.api_client.post(
             self.ENDPOINT,
+            params={"folder": folder},
             json=payload,
         )
 
@@ -215,24 +219,28 @@ class AuthSettings(BaseObject):
         move_model = AuthSettingsMoveModel(**move_data)
 
         # Convert to dict for API request
-        payload = move_model.model_dump(by_alias=True)
+        payload = move_model.model_dump(by_alias=True, exclude_none=True)
 
-        # Send the move request to the remote API as JSON
-        endpoint = f"{self.ENDPOINT}/move"
+        # The API addresses the object by name in the path and folder as a query parameter
+        folder = move_model.folder or "Mobile Users"
+        endpoint = f"{self.ENDPOINT}/{move_model.name}:move"
         self.api_client.post(
             endpoint,
+            params={"folder": folder},
             json=payload,
         )
 
     def list(
         self,
         folder: str = "Mobile Users",
+        name: Optional[str] = None,
         **filters,
     ) -> List[AuthSettingsResponseModel]:
         """List GlobalProtect Authentication Settings objects with optional filtering.
 
         Args:
             folder: Folder name (defaults to "Mobile Users" as it's the only valid value)
+            name: Optional name to filter results by (server-side filter)
             **filters: Additional filters (not currently used but included for future expansion)
 
         Returns:
@@ -250,34 +258,47 @@ class AuthSettings(BaseObject):
                 details={"error": "Invalid folder value"},
             )
 
-        container_parameters = {"folder": folder}
+        container_parameters: Dict[str, Any] = {"folder": folder}
+        if name is not None:
+            container_parameters["name"] = name
+
+        limit = self._max_limit
+        offset = 0
+        all_objects: List[AuthSettingsResponseModel] = []
 
         try:
-            # Request all authentication settings
-            response = self.api_client.get(
-                self.ENDPOINT,
-                params=container_parameters,
-            )
+            while True:
+                request_params = {**container_parameters, "limit": limit, "offset": offset}
+                response = self.api_client.get(
+                    self.ENDPOINT,
+                    params=request_params,
+                )
 
-            # Handle direct list response
-            if isinstance(response, list):
-                return [AuthSettingsResponseModel(**item) for item in response]
+                # Handle direct list response
+                if isinstance(response, list):
+                    data_items = response
+                elif (
+                    isinstance(response, dict)
+                    and "data" in response
+                    and isinstance(response["data"], list)
+                ):
+                    data_items = response["data"]
+                else:
+                    # Handle unexpected response format
+                    raise InvalidObjectError(
+                        message="Invalid response format: expected list or dictionary with 'data' field",
+                        error_code="E003",
+                        http_status_code=500,
+                        details={"error": "Response has invalid structure"},
+                    )
 
-            # Handle dict response with data array
-            if (
-                isinstance(response, dict)
-                and "data" in response
-                and isinstance(response["data"], list)
-            ):
-                return [AuthSettingsResponseModel(**item) for item in response["data"]]
+                all_objects.extend(AuthSettingsResponseModel(**item) for item in data_items)
 
-            # Handle unexpected response format
-            raise InvalidObjectError(
-                message="Invalid response format: expected list or dictionary with 'data' field",
-                error_code="E003",
-                http_status_code=500,
-                details={"error": "Response has invalid structure"},
-            )
+                if len(data_items) < limit:
+                    break
+                offset += limit
+
+            return all_objects
         except Exception as e:
             self.logger.error(f"Error listing authentication settings: {str(e)}")
             raise
@@ -320,8 +341,8 @@ class AuthSettings(BaseObject):
                 details={"error": "Invalid folder value"},
             )
 
-        # Get all authentication settings and filter by name
-        all_settings = self.list(folder=folder)
+        # Filter server-side by name, then match exactly
+        all_settings = self.list(folder=folder, name=name)
         matching_settings = [setting for setting in all_settings if setting.name == name]
 
         if not matching_settings:

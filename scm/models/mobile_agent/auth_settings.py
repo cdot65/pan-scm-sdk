@@ -204,6 +204,8 @@ class AuthSettingsMoveModel(BaseModel):
         where (MovePosition): The position to move to (before, after, top, bottom).
         destination (Optional[str]): The name of the destination authentication settings
                                      (required for before/after).
+        folder (Optional[str]): The folder in which the resource is defined
+                                (must be 'Mobile Users').
 
     Error:
         ValueError: Raised when destination is not provided for 'before' or 'after' positions.
@@ -228,6 +230,22 @@ class AuthSettingsMoveModel(BaseModel):
         None,
         description="The name of the destination authentication settings (required for before/after)",
     )
+    folder: Optional[str] = Field(
+        None,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        max_length=64,
+        description="The folder in which the resource is defined",
+        examples=["Mobile Users"],
+    )
+
+    @field_validator("folder")
+    def validate_folder(cls, v):  # noqa
+        """Validate that folder is 'Mobile Users' if provided."""
+        if v is not None and v != "Mobile Users":
+            raise ValueError(
+                "Folder must be 'Mobile Users' for GlobalProtect Authentication Settings"
+            )
+        return v
 
     @model_validator(mode="after")
     def validate_destination_required(self) -> "AuthSettingsMoveModel":

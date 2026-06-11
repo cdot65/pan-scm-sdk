@@ -395,6 +395,33 @@ class TestAuthSettingsMoveModel:
             AuthSettingsMoveModel(**data)
         assert "where\n  Input should be" in str(exc_info.value)
 
+    def test_move_model_with_valid_folder(self):
+        """Test that the optional folder field accepts 'Mobile Users'."""
+        model = AuthSettingsMoveModel(
+            name="test-settings",
+            where=MovePosition.TOP,
+            folder="Mobile Users",
+        )
+        assert model.folder == "Mobile Users"
+
+    def test_move_model_without_folder(self):
+        """Test that the folder field defaults to None."""
+        model = AuthSettingsMoveModel(
+            name="test-settings",
+            where=MovePosition.TOP,
+        )
+        assert model.folder is None
+
+    def test_move_model_with_invalid_folder(self):
+        """Test validation when folder is not 'Mobile Users'."""
+        with pytest.raises(ValueError) as exc_info:
+            AuthSettingsMoveModel(
+                name="test-settings",
+                where=MovePosition.TOP,
+                folder="Shared",
+            )
+        assert "Folder must be 'Mobile Users'" in str(exc_info.value)
+
 
 class TestExtraFieldsForbidden:
     """Test that extra fields are rejected by all models."""
