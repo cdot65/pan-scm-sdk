@@ -23,6 +23,9 @@ Key model patterns:
 - [Application Settings (Agent Profiles) Models](agent_profiles_models.md) - Models for GlobalProtect agent profiles (App Settings in the SCM UI)
 - [Forwarding Profile Models](forwarding_profiles_models.md) - Models for GlobalProtect traffic forwarding profiles
 - [Forwarding Profile Destination Models](forwarding_profile_destinations_models.md) - Models for forwarding profile destinations
+- [Forwarding Profile Source Application Models](forwarding_profile_source_applications_models.md) - Models for forwarding profile source applications
+- [Forwarding Profile User Location Models](forwarding_profile_user_locations_models.md) - Models for forwarding profile user locations
+- [Forwarding Profile Regional and Custom Proxy Models](forwarding_profile_regional_and_custom_proxies_models.md) - Models for forwarding profile regional and custom proxies
 - [Global Settings Models](global_settings_models.md) - Models for the GlobalProtect global settings singleton
 - [Infrastructure Settings Models](infrastructure_settings_models.md) - Models for GlobalProtect infrastructure settings
 - [Tunnel Profiles Models](tunnel_profiles_models.md) - Models for GlobalProtect tunnel settings

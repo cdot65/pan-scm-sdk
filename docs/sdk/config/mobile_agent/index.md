@@ -15,6 +15,9 @@ This section covers the Mobile Agent configuration objects provided by the Palo 
 | [Application Settings (Agent Profiles)](agent_profiles.md) | Manage GlobalProtect agent profiles (App Settings in the SCM UI) |
 | [Forwarding Profiles](forwarding_profiles.md)          | Manage GlobalProtect traffic forwarding profiles                   |
 | [Forwarding Profile Destinations](forwarding_profile_destinations.md) | Manage destinations referenced by forwarding profile rules |
+| [Forwarding Profile Source Applications](forwarding_profile_source_applications.md) | Manage source applications for forwarding profiles |
+| [Forwarding Profile User Locations](forwarding_profile_user_locations.md) | Manage user locations for forwarding profiles |
+| [Forwarding Profile Regional and Custom Proxies](forwarding_profile_regional_and_custom_proxies.md) | Manage regional and custom proxies for forwarding profiles |
 | [Global Settings](global_settings.md)                  | Manage the GlobalProtect global settings singleton                 |
 | [Infrastructure Settings](infrastructure_settings.md)  | Manage GlobalProtect infrastructure (DNS, IP pools, portal, WINS)  |
 | [Tunnel Profiles](tunnel_profiles.md)                  | Manage GlobalProtect tunnel settings (split tunneling)             |

@@ -567,6 +567,18 @@ class Scm:
                 "scm.config.mobile_agent.forwarding_profile_destinations",
                 "ForwardingProfileDestinations",
             ),
+            "forwarding_profile_regional_and_custom_proxy": (
+                "scm.config.mobile_agent.forwarding_profile_regional_and_custom_proxies",
+                "ForwardingProfileRegionalAndCustomProxies",
+            ),
+            "forwarding_profile_source_application": (
+                "scm.config.mobile_agent.forwarding_profile_source_applications",
+                "ForwardingProfileSourceApplications",
+            ),
+            "forwarding_profile_user_location": (
+                "scm.config.mobile_agent.forwarding_profile_user_locations",
+                "ForwardingProfileUserLocations",
+            ),
             "global_settings": (
                 "scm.config.mobile_agent.global_settings",
                 "GlobalSettings",

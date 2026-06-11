@@ -7,6 +7,15 @@ from scm.config.mobile_agent.auth_settings import AuthSettings
 from scm.config.mobile_agent.forwarding_profile_destinations import (
     ForwardingProfileDestinations,
 )
+from scm.config.mobile_agent.forwarding_profile_regional_and_custom_proxies import (
+    ForwardingProfileRegionalAndCustomProxies,
+)
+from scm.config.mobile_agent.forwarding_profile_source_applications import (
+    ForwardingProfileSourceApplications,
+)
+from scm.config.mobile_agent.forwarding_profile_user_locations import (
+    ForwardingProfileUserLocations,
+)
 from scm.config.mobile_agent.forwarding_profiles import ForwardingProfiles
 from scm.config.mobile_agent.global_settings import GlobalSettings
 from scm.config.mobile_agent.infrastructure_settings import InfrastructureSettings
@@ -17,6 +26,9 @@ __all__ = [
     "AgentVersions",
     "AuthSettings",
     "ForwardingProfileDestinations",
+    "ForwardingProfileRegionalAndCustomProxies",
+    "ForwardingProfileSourceApplications",
+    "ForwardingProfileUserLocations",
     "ForwardingProfiles",
     "GlobalSettings",
     "InfrastructureSettings",

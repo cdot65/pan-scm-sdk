@@ -922,3 +922,205 @@ class ForwardingProfileDestinationResponseModelFactory(Factory):
     id = factory.LazyFunction(lambda: fake.uuid4())
     name = Faker("pystr", min_chars=5, max_chars=30)
     description = Faker("sentence")
+
+
+# -------------------- Forwarding Profile sub-resource factories --------------------
+
+from scm.models.mobile_agent.forwarding_profile_regional_and_custom_proxies import (  # noqa: E402
+    ForwardingProfileRegionalAndCustomProxyCreateModel,
+    ForwardingProfileRegionalAndCustomProxyResponseModel,
+    ForwardingProfileRegionalAndCustomProxyUpdateModel,
+    RegionalProxyConnectivityName,
+    RegionalProxyConnectivityPreference,
+    RegionalProxyServer,
+    RegionalProxyType,
+)
+from scm.models.mobile_agent.forwarding_profile_source_applications import (  # noqa: E402
+    ForwardingProfileSourceApplicationCreateModel,
+    ForwardingProfileSourceApplicationResponseModel,
+    ForwardingProfileSourceApplicationUpdateModel,
+)
+from scm.models.mobile_agent.forwarding_profile_user_locations import (  # noqa: E402
+    ForwardingProfileUserLocationCreateModel,
+    ForwardingProfileUserLocationResponseModel,
+    ForwardingProfileUserLocationUpdateModel,
+    UserLocationChoice,
+    UserLocationIpEntry,
+)
+
+
+class ForwardingProfileSourceApplicationCreateModelFactory(Factory):
+    """Factory for ForwardingProfileSourceApplicationCreateModel."""
+
+    class Meta:
+        """Meta class for ForwardingProfileSourceApplicationCreateModelFactory."""
+
+        model = ForwardingProfileSourceApplicationCreateModel
+
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    description = Faker("sentence")
+    applications = factory.LazyFunction(
+        lambda: [fake.pystr(min_chars=5, max_chars=20) for _ in range(fake.random_int(min=1, max=4))]
+    )
+
+    @classmethod
+    def build_valid(cls):
+        """Build valid data for ForwardingProfileSourceApplicationCreateModel."""
+        model = cls.build()
+        return {
+            "name": model.name,
+            "description": model.description,
+            "applications": model.applications,
+        }
+
+    @classmethod
+    def build_invalid_name(cls):
+        """Build data with invalid name for ForwardingProfileSourceApplicationCreateModel."""
+        data = cls.build_valid()
+        data["name"] = "invalid name!"
+        return data
+
+
+class ForwardingProfileSourceApplicationUpdateModelFactory(Factory):
+    """Factory for ForwardingProfileSourceApplicationUpdateModel."""
+
+    class Meta:
+        """Meta class for ForwardingProfileSourceApplicationUpdateModelFactory."""
+
+        model = ForwardingProfileSourceApplicationUpdateModel
+
+    id = Faker("uuid4")
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    applications = factory.LazyFunction(lambda: [fake.pystr(min_chars=5, max_chars=20)])
+
+
+class ForwardingProfileSourceApplicationResponseModelFactory(Factory):
+    """Factory for ForwardingProfileSourceApplicationResponseModel."""
+
+    class Meta:
+        """Meta class for ForwardingProfileSourceApplicationResponseModelFactory."""
+
+        model = ForwardingProfileSourceApplicationResponseModel
+
+    id = Faker("uuid4")
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    description = Faker("sentence")
+    applications = factory.LazyFunction(lambda: [fake.pystr(min_chars=5, max_chars=20)])
+
+
+class ForwardingProfileUserLocationCreateModelFactory(Factory):
+    """Factory for ForwardingProfileUserLocationCreateModel."""
+
+    class Meta:
+        """Meta class for ForwardingProfileUserLocationCreateModelFactory."""
+
+        model = ForwardingProfileUserLocationCreateModel
+
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    description = Faker("sentence")
+    choice = factory.LazyFunction(
+        lambda: UserLocationChoice(ip_addresses=[UserLocationIpEntry(name="10.0.0.0/8")])
+    )
+
+    @classmethod
+    def build_valid(cls):
+        """Build valid data for ForwardingProfileUserLocationCreateModel."""
+        model = cls.build()
+        return {
+            "name": model.name,
+            "description": model.description,
+            "choice": model.choice.model_dump(exclude_unset=True),
+        }
+
+
+class ForwardingProfileUserLocationUpdateModelFactory(Factory):
+    """Factory for ForwardingProfileUserLocationUpdateModel."""
+
+    class Meta:
+        """Meta class for ForwardingProfileUserLocationUpdateModelFactory."""
+
+        model = ForwardingProfileUserLocationUpdateModel
+
+    id = Faker("uuid4")
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    choice = factory.LazyFunction(
+        lambda: UserLocationChoice(ip_addresses=[UserLocationIpEntry(name="10.0.0.0/8")])
+    )
+
+
+class ForwardingProfileUserLocationResponseModelFactory(Factory):
+    """Factory for ForwardingProfileUserLocationResponseModel."""
+
+    class Meta:
+        """Meta class for ForwardingProfileUserLocationResponseModelFactory."""
+
+        model = ForwardingProfileUserLocationResponseModel
+
+    id = Faker("uuid4")
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    description = Faker("sentence")
+    choice = factory.LazyFunction(
+        lambda: UserLocationChoice(ip_addresses=[UserLocationIpEntry(name="10.0.0.0/8")])
+    )
+
+
+class ForwardingProfileRegionalAndCustomProxyCreateModelFactory(Factory):
+    """Factory for ForwardingProfileRegionalAndCustomProxyCreateModel."""
+
+    class Meta:
+        """Meta class for ForwardingProfileRegionalAndCustomProxyCreateModelFactory."""
+
+        model = ForwardingProfileRegionalAndCustomProxyCreateModel
+
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    type = factory.fuzzy.FuzzyChoice(list(RegionalProxyType))
+    description = Faker("sentence")
+    proxy_1 = factory.LazyFunction(
+        lambda: RegionalProxyServer(fqdn="proxy1.example.com", port=8080)
+    )
+    connectivity_preference = factory.LazyFunction(
+        lambda: [
+            RegionalProxyConnectivityPreference(
+                name=RegionalProxyConnectivityName.TUNNEL, enabled=True
+            )
+        ]
+    )
+
+    @classmethod
+    def build_valid(cls):
+        """Build valid data for ForwardingProfileRegionalAndCustomProxyCreateModel."""
+        model = cls.build()
+        return {
+            "name": model.name,
+            "type": model.type,
+            "description": model.description,
+            "proxy_1": model.proxy_1.model_dump(exclude_unset=True),
+            "connectivity_preference": [
+                pref.model_dump(exclude_unset=True) for pref in model.connectivity_preference
+            ],
+        }
+
+
+class ForwardingProfileRegionalAndCustomProxyUpdateModelFactory(Factory):
+    """Factory for ForwardingProfileRegionalAndCustomProxyUpdateModel."""
+
+    class Meta:
+        """Meta class for ForwardingProfileRegionalAndCustomProxyUpdateModelFactory."""
+
+        model = ForwardingProfileRegionalAndCustomProxyUpdateModel
+
+    id = Faker("uuid4")
+    name = Faker("pystr", min_chars=5, max_chars=30)
+
+
+class ForwardingProfileRegionalAndCustomProxyResponseModelFactory(Factory):
+    """Factory for ForwardingProfileRegionalAndCustomProxyResponseModel."""
+
+    class Meta:
+        """Meta class for ForwardingProfileRegionalAndCustomProxyResponseModelFactory."""
+
+        model = ForwardingProfileRegionalAndCustomProxyResponseModel
+
+    id = Faker("uuid4")
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    type = factory.fuzzy.FuzzyChoice(list(RegionalProxyType))

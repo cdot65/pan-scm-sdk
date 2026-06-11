@@ -129,6 +129,9 @@ nav:
           - Application Settings (Agent Profiles): sdk/config/mobile_agent/agent_profiles.md
           - Forwarding Profiles: sdk/config/mobile_agent/forwarding_profiles.md
           - Forwarding Profile Destinations: sdk/config/mobile_agent/forwarding_profile_destinations.md
+          - Forwarding Profile Source Applications: sdk/config/mobile_agent/forwarding_profile_source_applications.md
+          - Forwarding Profile User Locations: sdk/config/mobile_agent/forwarding_profile_user_locations.md
+          - Forwarding Profile Regional and Custom Proxies: sdk/config/mobile_agent/forwarding_profile_regional_and_custom_proxies.md
           - Global Settings: sdk/config/mobile_agent/global_settings.md
           - Infrastructure Settings: sdk/config/mobile_agent/infrastructure_settings.md
           - Tunnel Profiles: sdk/config/mobile_agent/tunnel_profiles.md
@@ -242,6 +245,9 @@ nav:
           - Application Settings (Agent Profiles): sdk/models/mobile_agent/agent_profiles_models.md
           - Forwarding Profiles: sdk/models/mobile_agent/forwarding_profiles_models.md
           - Forwarding Profile Destinations: sdk/models/mobile_agent/forwarding_profile_destinations_models.md
+          - Forwarding Profile Source Applications: sdk/models/mobile_agent/forwarding_profile_source_applications_models.md
+          - Forwarding Profile User Locations: sdk/models/mobile_agent/forwarding_profile_user_locations_models.md
+          - Forwarding Profile Regional and Custom Proxies: sdk/models/mobile_agent/forwarding_profile_regional_and_custom_proxies_models.md
           - Global Settings: sdk/models/mobile_agent/global_settings_models.md
           - Infrastructure Settings: sdk/models/mobile_agent/infrastructure_settings_models.md
           - Tunnel Profiles: sdk/models/mobile_agent/tunnel_profiles_models.md
