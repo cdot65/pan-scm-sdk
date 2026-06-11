@@ -39,6 +39,20 @@ from .infrastructure_settings import (
     UserGroup,
     WinsServerEntry,
 )
+from .tunnel_profiles import (
+    AcceptCookie,
+    AuthenticationOverride,
+    CookieLifetime,
+    SourceAddress,
+    SplitTunneling,
+    SplitTunnelingDomainEntry,
+    SplitTunnelingDomains,
+    TunnelOperatingSystem,
+    TunnelProfileBaseModel,
+    TunnelProfileCreateModel,
+    TunnelProfileResponseModel,
+    TunnelProfileUpdateModel,
+)
 
 __all__ = [
     "OperatingSystem",
@@ -73,4 +87,16 @@ __all__ = [
     "UdpQueryRetries",
     "UserGroup",
     "WinsServerEntry",
+    "AcceptCookie",
+    "AuthenticationOverride",
+    "CookieLifetime",
+    "SourceAddress",
+    "SplitTunneling",
+    "SplitTunnelingDomainEntry",
+    "SplitTunnelingDomains",
+    "TunnelOperatingSystem",
+    "TunnelProfileBaseModel",
+    "TunnelProfileCreateModel",
+    "TunnelProfileUpdateModel",
+    "TunnelProfileResponseModel",
 ]

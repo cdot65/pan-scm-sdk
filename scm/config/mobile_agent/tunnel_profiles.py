@@ -1,9 +1,10 @@
-"""Mobile Agent Auth Settings configuration service for Strata Cloud Manager SDK.
+"""Mobile Agent Tunnel Profiles configuration service for Strata Cloud Manager SDK.
 
-Provides service class for managing mobile agent authentication settings via the SCM API.
+Provides service class for managing GlobalProtect tunnel settings (tunnel profiles)
+via the SCM API.
 """
 
-# scm/config/mobile_agent/auth_settings.py
+# scm/config/mobile_agent/tunnel_profiles.py
 
 # Standard library imports
 import logging
@@ -13,15 +14,19 @@ from typing import Any, Dict, List, Optional
 from scm.config import BaseObject
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.mobile_agent import (
-    AuthSettingsCreateModel,
-    AuthSettingsMoveModel,
-    AuthSettingsResponseModel,
-    AuthSettingsUpdateModel,
+    TunnelProfileCreateModel,
+    TunnelProfileResponseModel,
+    TunnelProfileUpdateModel,
 )
 
 
-class AuthSettings(BaseObject):
-    """Manages GlobalProtect Authentication Settings in Palo Alto Networks' Strata Cloud Manager.
+class TunnelProfiles(BaseObject):
+    """Manages GlobalProtect Tunnel Profiles in Palo Alto Networks' Strata Cloud Manager.
+
+    Tunnel profiles are addressed by name within the 'Mobile Users' folder. The API
+    exposes no ID-based endpoints for this resource: create and update operations
+    send the folder as a query parameter, and delete operations address the profile
+    by name and folder query parameters.
 
     Args:
         api_client: The API client instance
@@ -30,7 +35,7 @@ class AuthSettings(BaseObject):
 
     """
 
-    ENDPOINT = "/config/mobile-agent/v1/authentication-settings"
+    ENDPOINT = "/config/mobile-agent/v1/tunnel-profiles"
     DEFAULT_MAX_LIMIT = 2500
     ABSOLUTE_MAX_LIMIT = 5000  # Maximum allowed by the API
 
@@ -39,7 +44,7 @@ class AuthSettings(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
-        """Initialize the AuthSettings service with the given API client.
+        """Initialize the TunnelProfiles service with the given API client.
 
         Args:
             api_client: The API client instance.
@@ -116,30 +121,53 @@ class AuthSettings(BaseObject):
 
         return limit_int
 
+    @staticmethod
+    def _validate_folder(folder: str) -> None:
+        """Validate that the folder is 'Mobile Users'.
+
+        Args:
+            folder: The folder value to validate
+
+        Raises:
+            InvalidObjectError: If the folder is not 'Mobile Users'
+
+        """
+        if folder != "Mobile Users":
+            raise InvalidObjectError(
+                message="Folder must be 'Mobile Users' for GlobalProtect Tunnel Profiles",
+                error_code="E003",
+                http_status_code=400,
+                details={"error": "Invalid folder value"},
+            )
+
     def create(
         self,
         data: Dict[str, Any],
-    ) -> AuthSettingsResponseModel:
-        """Create a new GlobalProtect Authentication Settings object.
+        folder: str = "Mobile Users",
+    ) -> TunnelProfileResponseModel:
+        """Create a new GlobalProtect Tunnel Profile object.
 
         Args:
-            data: Dictionary containing the authentication settings configuration
+            data: Dictionary containing the tunnel profile configuration
+            folder: The folder in which the resource is defined (must be "Mobile Users")
 
         Returns:
-            AuthSettingsResponseModel
+            TunnelProfileResponseModel
+
+        Raises:
+            InvalidObjectError: If the provided data or folder is invalid.
 
         """
+        self._validate_folder(folder)
+
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
-        auth_settings = AuthSettingsCreateModel(**data)
+        tunnel_profile = TunnelProfileCreateModel(**data)
 
         # Convert back to a Python dictionary, removing any unset fields and using aliases
-        payload = auth_settings.model_dump(
+        payload = tunnel_profile.model_dump(
             exclude_unset=True,
             by_alias=True,
         )
-
-        # The API expects the folder as a query parameter, not in the request body
-        folder = payload.pop("folder")
 
         # Send the updated object to the remote API as JSON
         response: Dict[str, Any] = self.api_client.post(
@@ -149,94 +177,57 @@ class AuthSettings(BaseObject):
         )
 
         # Return the API response as a new Pydantic object
-        return AuthSettingsResponseModel(**response)
-
-    def get(
-        self,
-        object_id: str,
-    ) -> AuthSettingsResponseModel:
-        """Get a GlobalProtect Authentication Settings object by ID.
-
-        Args:
-            object_id: The ID of the authentication settings to retrieve
-
-        Returns:
-            AuthSettingsResponseModel
-
-        """
-        endpoint = f"{self.ENDPOINT}/{object_id}"
-        response: Dict[str, Any] = self.api_client.get(endpoint)
-        return AuthSettingsResponseModel(**response)
+        return TunnelProfileResponseModel(**response)
 
     def update(
         self,
-        object_id: str,
         data: Dict[str, Any],
-    ) -> AuthSettingsResponseModel:
-        """Update an existing GlobalProtect Authentication Settings object.
+        folder: str = "Mobile Users",
+    ) -> TunnelProfileResponseModel:
+        """Update an existing GlobalProtect Tunnel Profile object.
+
+        The API addresses tunnel profiles by the name in the request body and the
+        folder query parameter; there is no ID-based update endpoint.
 
         Args:
-            object_id: The ID of the object to update
-            data: Dictionary containing the update configuration
+            data: Dictionary containing the update configuration (must include 'name')
+            folder: The folder in which the resource is defined (must be "Mobile Users")
 
         Returns:
-            AuthSettingsResponseModel
+            TunnelProfileResponseModel
+
+        Raises:
+            InvalidObjectError: If the provided data or folder is invalid.
 
         """
+        self._validate_folder(folder)
+
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
-        auth_settings = AuthSettingsUpdateModel(**data)
+        tunnel_profile = TunnelProfileUpdateModel(**data)
 
         # Convert back to a Python dictionary, removing any unset fields and using aliases
-        payload = auth_settings.model_dump(
+        payload = tunnel_profile.model_dump(
             exclude_unset=True,
             by_alias=True,
         )
 
         # Send the updated object to the remote API as JSON
-        endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.put(
-            endpoint,
+            self.ENDPOINT,
+            params={"folder": folder},
             json=payload,
         )
 
         # Return the API response as a new Pydantic model
-        return AuthSettingsResponseModel(**response)
-
-    def move(
-        self,
-        move_data: Dict[str, Any],
-    ) -> None:
-        """Move a GlobalProtect Authentication Settings object to a different position.
-
-        Args:
-            move_data: Dictionary containing the move configuration
-
-        Returns:
-            None
-
-        """
-        # Validate and create move model
-        move_model = AuthSettingsMoveModel(**move_data)
-
-        # Convert to dict for API request
-        payload = move_model.model_dump(by_alias=True, exclude_none=True)
-
-        # The API addresses the object by name in the path and folder as a query parameter
-        folder = move_model.folder or "Mobile Users"
-        endpoint = f"{self.ENDPOINT}/{move_model.name}:move"
-        self.api_client.post(
-            endpoint,
-            params={"folder": folder},
-            json=payload,
-        )
+        return TunnelProfileResponseModel(**response)
 
     def list(
         self,
         folder: str = "Mobile Users",
         name: Optional[str] = None,
         **filters,
-    ) -> List[AuthSettingsResponseModel]:
-        """List GlobalProtect Authentication Settings objects with optional filtering.
+    ) -> List[TunnelProfileResponseModel]:
+        """List GlobalProtect Tunnel Profile objects with optional filtering.
 
         Args:
             folder: Folder name (defaults to "Mobile Users" as it's the only valid value)
@@ -244,31 +235,25 @@ class AuthSettings(BaseObject):
             **filters: Additional filters (not currently used but included for future expansion)
 
         Returns:
-            List[AuthSettingsResponseModel]: A list of authentication settings objects
+            List[TunnelProfileResponseModel]: A list of tunnel profile objects
 
         Raises:
             InvalidObjectError: If the provided data or response format is invalid.
 
         """
-        if folder != "Mobile Users":
-            raise InvalidObjectError(
-                message="Folder must be 'Mobile Users' for GlobalProtect Authentication Settings",
-                error_code="E003",
-                http_status_code=400,
-                details={"error": "Invalid folder value"},
-            )
+        self._validate_folder(folder)
 
-        container_parameters: Dict[str, Any] = {"folder": folder}
+        params: Dict[str, Any] = {"folder": folder}
         if name is not None:
-            container_parameters["name"] = name
+            params["name"] = name
 
         limit = self._max_limit
         offset = 0
-        all_objects: List[AuthSettingsResponseModel] = []
+        all_objects: List[TunnelProfileResponseModel] = []
 
         try:
             while True:
-                request_params = {**container_parameters, "limit": limit, "offset": offset}
+                request_params = {**params, "limit": limit, "offset": offset}
                 response = self.api_client.get(
                     self.ENDPOINT,
                     params=request_params,
@@ -284,7 +269,6 @@ class AuthSettings(BaseObject):
                 ):
                     data_items = response["data"]
                 else:
-                    # Handle unexpected response format
                     raise InvalidObjectError(
                         message="Invalid response format: expected list or dictionary with 'data' field",
                         error_code="E003",
@@ -292,7 +276,7 @@ class AuthSettings(BaseObject):
                         details={"error": "Response has invalid structure"},
                     )
 
-                all_objects.extend(AuthSettingsResponseModel(**item) for item in data_items)
+                all_objects.extend(TunnelProfileResponseModel(**item) for item in data_items)
 
                 if len(data_items) < limit:
                     break
@@ -300,22 +284,22 @@ class AuthSettings(BaseObject):
 
             return all_objects
         except Exception as e:
-            self.logger.error(f"Error listing authentication settings: {str(e)}")
+            self.logger.error(f"Error listing tunnel profiles: {str(e)}")
             raise
 
     def fetch(
         self,
         name: str,
         folder: str = "Mobile Users",
-    ) -> AuthSettingsResponseModel:
-        """Fetch a single GlobalProtect Authentication Settings by name.
+    ) -> TunnelProfileResponseModel:
+        """Fetch a single GlobalProtect Tunnel Profile by name.
 
         Args:
-            name: The name of the authentication settings to fetch
+            name: The name of the tunnel profile to fetch
             folder: The folder in which the resource is defined (must be "Mobile Users")
 
         Returns:
-            AuthSettingsResponseModel: The fetched authentication settings object
+            TunnelProfileResponseModel: The fetched tunnel profile object
 
         Raises:
             MissingQueryParameterError: If a required query parameter is missing or empty.
@@ -333,42 +317,60 @@ class AuthSettings(BaseObject):
                 },
             )
 
-        if folder != "Mobile Users":
-            raise InvalidObjectError(
-                message="Folder must be 'Mobile Users' for GlobalProtect Authentication Settings",
-                error_code="E003",
-                http_status_code=400,
-                details={"error": "Invalid folder value"},
-            )
+        self._validate_folder(folder)
 
         # Filter server-side by name, then match exactly
-        all_settings = self.list(folder=folder, name=name)
-        matching_settings = [setting for setting in all_settings if setting.name == name]
+        all_profiles = self.list(folder=folder, name=name)
+        matching_profiles = [profile for profile in all_profiles if profile.name == name]
 
-        if not matching_settings:
+        if not matching_profiles:
             raise InvalidObjectError(
-                message=f"Authentication settings '{name}' not found",
+                message=f"Tunnel profile '{name}' not found",
                 error_code="E002",
                 http_status_code=404,
-                details={"error": "No matching authentication settings found"},
+                details={"error": "No matching tunnel profile found"},
             )
 
-        if len(matching_settings) > 1:
+        if len(matching_profiles) > 1:
             self.logger.warning(
-                f"Multiple authentication settings found for '{name}'. Using the first one."
+                f"Multiple tunnel profiles found for '{name}'. Using the first one."
             )
 
-        return matching_settings[0]
+        return matching_profiles[0]
 
     def delete(
         self,
-        object_id: str,
+        name: str,
+        folder: str = "Mobile Users",
     ) -> None:
-        """Delete a GlobalProtect Authentication Settings object.
+        """Delete a GlobalProtect Tunnel Profile object.
+
+        The API addresses tunnel profiles by name and folder query parameters;
+        there is no ID-based delete endpoint.
 
         Args:
-            object_id: The ID of the object to delete
+            name: The name of the tunnel profile to delete
+            folder: The folder in which the resource is defined (must be "Mobile Users")
+
+        Raises:
+            MissingQueryParameterError: If a required query parameter is missing or empty.
+            InvalidObjectError: If the provided folder is invalid.
 
         """
-        endpoint = f"{self.ENDPOINT}/{object_id}"
-        self.api_client.delete(endpoint)
+        if not name:
+            raise MissingQueryParameterError(
+                message="Field 'name' cannot be empty",
+                error_code="E003",
+                http_status_code=400,
+                details={
+                    "field": "name",
+                    "error": '"name" is not allowed to be empty',
+                },
+            )
+
+        self._validate_folder(folder)
+
+        self.api_client.delete(
+            self.ENDPOINT,
+            params={"name": name, "folder": folder},
+        )

@@ -740,6 +740,10 @@ class Scm:
                 "scm.config.network.tunnel_interface",
                 "TunnelInterface",
             ),
+            "tunnel_profile": (
+                "scm.config.mobile_agent.tunnel_profiles",
+                "TunnelProfiles",
+            ),
             "vlan_interface": (
                 "scm.config.network.vlan_interface",
                 "VlanInterface",

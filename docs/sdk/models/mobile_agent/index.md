@@ -22,6 +22,7 @@ Key model patterns:
 - [Agent Version Models](agent_versions_models.md) - Models for GlobalProtect agent version information
 - [Global Settings Models](global_settings_models.md) - Models for the GlobalProtect global settings singleton
 - [Infrastructure Settings Models](infrastructure_settings_models.md) - Models for GlobalProtect infrastructure settings
+- [Tunnel Profiles Models](tunnel_profiles_models.md) - Models for GlobalProtect tunnel settings
 
 ## Usage Examples
 
