@@ -1,6 +1,17 @@
 """scm.models.mobile_agent: Mobile Agent models."""
 # scm/models/deployment/__init__.py
 
+from .agent_profiles import (
+    AgentProfileOperatingSystem,
+    AgentProfilesBaseModel,
+    AgentProfilesCreateModel,
+    AgentProfilesResponseModel,
+    AgentProfilesUpdateModel,
+    ConnectMethodValue,
+    GatewayPriority,
+    SaveUserCredentials,
+    ThirdPartyVpnClient,
+)
 from .agent_versions import AgentVersionsModel
 from .auth_settings import (
     AuthSettingsBaseModel,
@@ -55,6 +66,15 @@ from .tunnel_profiles import (
 )
 
 __all__ = [
+    "AgentProfileOperatingSystem",
+    "AgentProfilesBaseModel",
+    "AgentProfilesCreateModel",
+    "AgentProfilesUpdateModel",
+    "AgentProfilesResponseModel",
+    "ConnectMethodValue",
+    "GatewayPriority",
+    "SaveUserCredentials",
+    "ThirdPartyVpnClient",
     "OperatingSystem",
     "AuthSettingsBaseModel",
     "AuthSettingsCreateModel",

@@ -4,6 +4,13 @@ from factory import Factory, Faker  # type: ignore
 import factory.fuzzy  # type: ignore
 from faker import Faker as FakerGenerator
 
+from scm.models.mobile_agent.agent_profiles import (
+    AgentProfileOperatingSystem,
+    AgentProfilesBaseModel,
+    AgentProfilesCreateModel,
+    AgentProfilesResponseModel,
+    AgentProfilesUpdateModel,
+)
 from scm.models.mobile_agent.agent_versions import AgentVersionModel, AgentVersionsModel
 from scm.models.mobile_agent.auth_settings import (
     AuthSettingsBaseModel,
@@ -545,3 +552,161 @@ class TunnelProfileResponseModelFactory(Factory):
     os = factory.LazyFunction(lambda: [TunnelOperatingSystem.WINDOWS])
     retrieve_framed_ip_address = Faker("pybool")
     folder = "Mobile Users"
+
+
+class AgentProfilesBaseModelFactory(Factory):
+    """Factory for AgentProfilesBaseModel."""
+
+    class Meta:
+        """Meta class for AgentProfilesBaseModelFactory."""
+
+        model = AgentProfilesBaseModel
+
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    folder = "Mobile Users"
+    os = factory.LazyFunction(lambda: [fake.random_element(list(AgentProfileOperatingSystem))])
+    source_user = factory.LazyFunction(lambda: [fake.user_name()])
+
+
+class AgentProfilesCreateModelFactory(Factory):
+    """Factory for AgentProfilesCreateModel."""
+
+    class Meta:
+        """Meta class for AgentProfilesCreateModelFactory."""
+
+        model = AgentProfilesCreateModel
+
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    folder = "Mobile Users"
+    os = factory.LazyFunction(lambda: [fake.random_element(list(AgentProfileOperatingSystem))])
+    source_user = factory.LazyFunction(lambda: [fake.user_name()])
+
+    @classmethod
+    def build_valid(cls):
+        """Build valid data for AgentProfilesCreateModel."""
+        model = cls.build()
+        return {
+            "name": model.name,
+            "folder": model.folder,
+            "os": model.os,
+            "source_user": model.source_user,
+        }
+
+    @classmethod
+    def build_valid_nested(cls):
+        """Build valid data with nested structures for AgentProfilesCreateModel."""
+        data = cls.build_valid()
+        data.update(
+            {
+                "agent_ui": {
+                    "agent_user_override_timeout": 30,
+                    "max_agent_user_overrides": 5,
+                    "passcode": "secret-passcode",
+                    "welcome_page": {"page": "factory-default"},
+                },
+                "authentication_override": {
+                    "accept_cookie": {"cookie_lifetime": {"lifetime_in_hours": 24}},
+                    "generate_cookie": True,
+                },
+                "gateways": {
+                    "external": {
+                        "list": [
+                            {
+                                "name": "gw-external",
+                                "choice": {"fqdn": "gw.example.com"},
+                                "manual": True,
+                                "priority_rule": [{"name": "rule-1", "priority": "1"}],
+                            }
+                        ]
+                    },
+                    "internal": {
+                        "list": [
+                            {
+                                "name": "gw-internal",
+                                "choice": {"ip": {"ipv4": "10.0.0.1"}},
+                                "source_ip": ["10.0.0.0/8"],
+                            }
+                        ]
+                    },
+                },
+                "gp_app_config": {
+                    "config": [
+                        {"name": "connect-method", "value": ["user-logon"]},
+                        {"name": "tunnel-mtu", "value": [1400]},
+                    ]
+                },
+                "hip_collection": {
+                    "collect_hip_data": True,
+                    "max_wait_time": 20,
+                    "custom_checks": {
+                        "windows": {"process_list": ["winproc.exe"]},
+                        "mac_os": {"plist": [{"name": "com.example.plist", "key": ["k1"]}]},
+                        "linux": {"process_list": ["linuxproc"]},
+                    },
+                },
+                "internal_host_detection": {
+                    "hostname": "internal.example.com",
+                    "ip_address": "10.1.1.1",
+                },
+                "save_user_credentials": "1",
+                "third_party_vpn_clients": ["PAN Virtual Ethernet Adapter"],
+            }
+        )
+        return data
+
+    @classmethod
+    def build_invalid_folder(cls):
+        """Build data with invalid folder for AgentProfilesCreateModel."""
+        data = cls.build_valid()
+        data["folder"] = "Invalid Folder"
+        return data
+
+    @classmethod
+    def build_missing_folder(cls):
+        """Build data with missing folder for AgentProfilesCreateModel."""
+        data = cls.build_valid()
+        del data["folder"]
+        return data
+
+
+class AgentProfilesUpdateModelFactory(Factory):
+    """Factory for AgentProfilesUpdateModel."""
+
+    class Meta:
+        """Meta class for AgentProfilesUpdateModelFactory."""
+
+        model = AgentProfilesUpdateModel
+
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    folder = "Mobile Users"
+    os = factory.LazyFunction(lambda: [fake.random_element(list(AgentProfileOperatingSystem))])
+
+    @classmethod
+    def build_valid(cls):
+        """Build valid data for AgentProfilesUpdateModel."""
+        model = cls.build()
+        return {
+            "name": model.name,
+            "folder": model.folder,
+            "os": model.os,
+        }
+
+    @classmethod
+    def build_missing_folder(cls):
+        """Build data with missing folder for AgentProfilesUpdateModel."""
+        data = cls.build_valid()
+        del data["folder"]
+        return data
+
+
+class AgentProfilesResponseModelFactory(Factory):
+    """Factory for AgentProfilesResponseModel."""
+
+    class Meta:
+        """Meta class for AgentProfilesResponseModelFactory."""
+
+        model = AgentProfilesResponseModel
+
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    folder = "Mobile Users"
+    os = factory.LazyFunction(lambda: [fake.random_element(list(AgentProfileOperatingSystem))])
