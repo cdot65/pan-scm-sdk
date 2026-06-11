@@ -30,6 +30,13 @@ from scm.models.mobile_agent.infrastructure_settings import (
     PortalHostname,
     PublicDnsServer,
 )
+from scm.models.mobile_agent.tunnel_profiles import (
+    TunnelOperatingSystem,
+    TunnelProfileBaseModel,
+    TunnelProfileCreateModel,
+    TunnelProfileResponseModel,
+    TunnelProfileUpdateModel,
+)
 
 # Create a single faker instance
 fake = FakerGenerator()
@@ -416,3 +423,125 @@ class GlobalSettingsResponseModelFactory(Factory):
         lambda: f"{fake.random_int(min=5, max=6)}.{fake.random_int(min=0, max=9)}.{fake.random_int(min=0, max=9)}"
     )
     manual_gateway = None
+
+
+class TunnelProfileBaseModelFactory(Factory):
+    """Factory for TunnelProfileBaseModel."""
+
+    class Meta:
+        """Meta class for TunnelProfileBaseModelFactory."""
+
+        model = TunnelProfileBaseModel
+
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    no_direct_access_to_local_network = Faker("pybool")
+    os = factory.LazyFunction(lambda: [TunnelOperatingSystem.WINDOWS, TunnelOperatingSystem.MAC])
+    retrieve_framed_ip_address = Faker("pybool")
+    source_user = factory.LazyFunction(lambda: [fake.user_name() for _ in range(2)])
+
+
+class TunnelProfileCreateModelFactory(Factory):
+    """Factory for TunnelProfileCreateModel."""
+
+    class Meta:
+        """Meta class for TunnelProfileCreateModelFactory."""
+
+        model = TunnelProfileCreateModel
+
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    no_direct_access_to_local_network = Faker("pybool")
+    os = factory.LazyFunction(lambda: [TunnelOperatingSystem.WINDOWS])
+    retrieve_framed_ip_address = Faker("pybool")
+
+    @classmethod
+    def build_valid(cls):
+        """Build valid data for TunnelProfileCreateModel."""
+        return {
+            "name": fake.pystr(min_chars=5, max_chars=30),
+            "no_direct_access_to_local_network": fake.pybool(),
+            "os": [TunnelOperatingSystem.WINDOWS],
+            "retrieve_framed_ip_address": fake.pybool(),
+        }
+
+    @classmethod
+    def build_valid_full(cls):
+        """Build valid data with all nested structures for TunnelProfileCreateModel."""
+        return {
+            "name": fake.pystr(min_chars=5, max_chars=30),
+            "authentication_override": {
+                "accept_cookie": {
+                    "cookie_lifetime": {"lifetime_in_hours": 24},
+                    "cookie_encrypt_decrypt_cert": "test-cert",
+                    "generate_cookie": True,
+                }
+            },
+            "no_direct_access_to_local_network": True,
+            "os": [TunnelOperatingSystem.WINDOWS, TunnelOperatingSystem.IOS],
+            "retrieve_framed_ip_address": False,
+            "source_address": {
+                "ip_address": ["10.0.0.0/24"],
+                "region": ["US"],
+            },
+            "source_user": ["user1", "user2"],
+            "split_tunneling": {
+                "access_route": ["10.1.0.0/16"],
+                "exclude_access_route": ["10.2.0.0/16"],
+                "exclude_applications": ["app1"],
+                "exclude_domains": {"list": [{"name": "example.com", "ports": [443]}]},
+                "include_applications": ["app2"],
+                "include_domains": {"list": [{"name": "internal.example.com", "ports": [80, 443]}]},
+            },
+        }
+
+    @classmethod
+    def build_invalid_name(cls):
+        """Build data with invalid (too long) name for TunnelProfileCreateModel."""
+        data = cls.build_valid()
+        data["name"] = "x" * 32  # exceeds 31 char max
+        return data
+
+    @classmethod
+    def build_invalid_os(cls):
+        """Build data with invalid os value for TunnelProfileCreateModel."""
+        data = cls.build_valid()
+        data["os"] = ["InvalidOS"]
+        return data
+
+
+class TunnelProfileUpdateModelFactory(Factory):
+    """Factory for TunnelProfileUpdateModel."""
+
+    class Meta:
+        """Meta class for TunnelProfileUpdateModelFactory."""
+
+        model = TunnelProfileUpdateModel
+
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    no_direct_access_to_local_network = Faker("pybool")
+    os = factory.LazyFunction(lambda: [TunnelOperatingSystem.LINUX])
+    retrieve_framed_ip_address = Faker("pybool")
+
+    @classmethod
+    def build_valid(cls):
+        """Build valid data for TunnelProfileUpdateModel."""
+        return {
+            "name": fake.pystr(min_chars=5, max_chars=30),
+            "no_direct_access_to_local_network": fake.pybool(),
+            "os": [TunnelOperatingSystem.LINUX],
+            "retrieve_framed_ip_address": fake.pybool(),
+        }
+
+
+class TunnelProfileResponseModelFactory(Factory):
+    """Factory for TunnelProfileResponseModel."""
+
+    class Meta:
+        """Meta class for TunnelProfileResponseModelFactory."""
+
+        model = TunnelProfileResponseModel
+
+    name = Faker("pystr", min_chars=5, max_chars=30)
+    no_direct_access_to_local_network = Faker("pybool")
+    os = factory.LazyFunction(lambda: [TunnelOperatingSystem.WINDOWS])
+    retrieve_framed_ip_address = Faker("pybool")
+    folder = "Mobile Users"
