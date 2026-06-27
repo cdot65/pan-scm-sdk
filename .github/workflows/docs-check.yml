@@ -1,0 +1,29 @@
+name: Docs build check
+
+# Validates the Docusaurus site builds (strict: onBrokenLinks=throw) on PRs that
+# touch the docs. Deployment is handled separately by deploy-docs.yml on main.
+
+on:
+  pull_request:
+    paths:
+      - 'docs-site/**'
+      - '.github/workflows/docs-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs-site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: docs-site/package-lock.json
+      - run: npm ci
+      - run: npm run build

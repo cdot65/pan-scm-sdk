@@ -1,4 +1,4 @@
-.PHONY: setup lint format test clean install-hooks docs docs-serve docs-stop isort flake8 mypy quality quality-basic lint-format test-cov update-hooks pre-commit-all test-api test-local test-cov-local test-api-local test-file quality-local
+.PHONY: setup lint format test clean install-hooks docs docs-serve isort flake8 mypy quality quality-basic lint-format test-cov update-hooks pre-commit-all test-api test-local test-cov-local test-api-local test-file quality-local
 
 # Default goal
 .DEFAULT_GOAL := help
@@ -108,20 +108,13 @@ update-hooks:
 pre-commit-all:
 	$(DC_RUN) poetry run pre-commit run --all-files
 
-# Build documentation
+# Build documentation (Docusaurus, in docs-site/)
 docs:
-	$(DC_RUN) poetry run mkdocs build --strict --no-directory-urls
+	cd docs-site && npm ci && npm run build
 
-# Serve documentation locally
+# Serve documentation locally with live reload (Docusaurus dev server)
 docs-serve:
-	docker compose up -d docs
-	@echo "Documentation server started. Access at http://localhost:8000/pan-scm-sdk/"
-	@echo "To stop the server, run: make docs-stop"
-
-# Stop documentation server
-docs-stop:
-	docker compose stop docs
-	@echo "Documentation server stopped."
+	cd docs-site && npm install && npm start
 
 help:
 	@echo "Available commands:"
@@ -147,10 +140,9 @@ help:
 	@echo "  test-file       - Run specific test (usage: make test-file FILE=path/to/test.py)"
 	@echo "  quality-local   - Run all code quality checks"
 	@echo ""
-	@echo "Documentation:"
-	@echo "  docs            - Build documentation site"
-	@echo "  docs-serve      - Serve docs at http://localhost:8000/pan-scm-sdk/"
-	@echo "  docs-stop       - Stop the documentation server"
+	@echo "Documentation (Docusaurus, in docs-site/):"
+	@echo "  docs            - Build the documentation site"
+	@echo "  docs-serve      - Serve docs with live reload at http://localhost:3000/pan-scm-sdk/"
 	@echo ""
 	@echo "Maintenance:"
 	@echo "  clean           - Clean cache directories"

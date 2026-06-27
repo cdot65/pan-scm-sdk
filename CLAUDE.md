@@ -18,7 +18,7 @@ make quality        # Full quality: isort + ruff fix + format + lint + flake8 + 
 make quality-basic  # Skip mypy
 make lint           # ruff check
 make mypy           # Type checking
-make docs-serve     # Serve docs at localhost:8000/pan-scm-sdk/
+make docs-serve     # Serve Docusaurus docs (docs-site/) at localhost:3000/pan-scm-sdk/
 ```
 
 Run single test: `poetry run pytest tests/scm/config/objects/test_address.py -v`

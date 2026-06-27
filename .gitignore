@@ -140,8 +140,10 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
-# mkdocs documentation
-/site
+# Docusaurus build output (docs-site/.gitignore also covers these)
+/docs-site/build
+/docs-site/.docusaurus
+/docs-site/node_modules
 
 # mypy
 .mypy_cache/

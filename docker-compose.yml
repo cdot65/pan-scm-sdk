@@ -11,16 +11,3 @@ services:
       - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     tty: true
     command: sleep infinity
-
-  docs:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
-    volumes:
-      - .:/app
-    working_dir: /app
-    ports:
-      - "8888:8000"
-    environment:
-      - POETRY_VIRTUALENVS_CREATE=false
-    command: poetry run mkdocs serve -a 0.0.0.0:8888
