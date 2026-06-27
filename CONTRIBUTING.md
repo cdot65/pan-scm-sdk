@@ -76,7 +76,7 @@ Always use `model.model_dump(exclude_unset=True)` for API payloads.
 2. **Models**: Create `scm/models/{category}/{resource}.py`
 3. **Client**: Register in `scm/client.py`
 4. **Tests**: Add `tests/scm/config/{category}/test_{resource}.py`
-5. **Docs**: Add `docs/sdk/config/{category}/{resource}.md`
+5. **Docs**: Add `docs-site/docs/sdk/config/{category}/{resource}.md`
 
 ## Testing
 
@@ -94,7 +94,7 @@ poetry run pytest tests/path/test_file.py -v      # Single file
 
 ## Documentation
 
-Documentation lives in `docs/sdk/`:
+Documentation is a Docusaurus site under `docs-site/docs/sdk/`:
 
 - `config/{category}/{resource}.md` - Service usage
 - `models/{category}/{resource}_models.md` - Model reference
@@ -106,7 +106,7 @@ Key patterns:
 
 Serve docs locally:
 ```bash
-make docs-serve  # http://localhost:8000/pan-scm-sdk/
+make docs-serve  # http://localhost:3000/pan-scm-sdk/
 ```
 
 ## Project Structure

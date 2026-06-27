@@ -1,11 +1,11 @@
 # Update Documentation Command
 
-Update MkDocs documentation pages by comparing against source code to identify gaps and inconsistencies.
+Update Docusaurus documentation pages by comparing against source code to identify gaps and inconsistencies.
 
 ## Arguments
 
-- `$1` - MkDocs page for SDK configuration class (e.g., `docs/sdk/config/objects/address.md`)
-- `$2` - MkDocs page for Pydantic data model (e.g., `docs/sdk/models/objects/address_models.md`)
+- `$1` - Docs page for SDK configuration class (e.g., `docs-site/docs/sdk/config/objects/address.md`)
+- `$2` - Docs page for Pydantic data model (e.g., `docs-site/docs/sdk/models/objects/address_models.md`)
 - `$3` - SDK configuration class file (e.g., `scm/config/objects/address.py`)
 - `$4` - Pydantic data model file (e.g., `scm/models/objects/address.py`)
 

@@ -1,0 +1,30 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* Brand palette: Material "deep purple" to match the former MkDocs theme. */
+:root {
+  --ifm-color-primary: #673ab7;
+  --ifm-color-primary-dark: #5d34a5;
+  --ifm-color-primary-darker: #58319c;
+  --ifm-color-primary-darkest: #492981;
+  --ifm-color-primary-light: #7445c4;
+  --ifm-color-primary-lighter: #7d50c8;
+  --ifm-color-primary-lightest: #9670d2;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* For readability concerns, choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #b39ddb;
+  --ifm-color-primary-dark: #9f81d0;
+  --ifm-color-primary-darker: #9573ca;
+  --ifm-color-primary-darkest: #7549b6;
+  --ifm-color-primary-light: #c7b9e6;
+  --ifm-color-primary-lighter: #d1c5eb;
+  --ifm-color-primary-lightest: #efeaf8;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
