@@ -2,6 +2,14 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.15.1
+
+**Released:** June 2026
+
+### Changed
+
+- **Documentation & repository maintenance** (no functional SDK changes): migrated the contributor and policy docs (Contributing, Code of Conduct, Security, Support, SDK Service Styling Guide, Pydantic Models Guide) into the Docusaurus site under `docs-site/docs/about/`; folded the root `CHANGELOG.md` into these release notes; refreshed the project `README` branding with the new `pan-scm-sdk` wordmark; and removed stale repository cruft.
+
 ## Version 0.15.0
 
 **Released:** June 2026
@@ -934,6 +942,11 @@ For more detailed information on each release, visit the [GitHub repository](htt
 The entries below follow the [Keep a Changelog](https://keepachangelog.com/) format and track engineering-level changes (migrated from the former root `CHANGELOG.md`).
 
 ## [Unreleased]
+
+## [0.15.1] - 2026-06-28
+
+### Changed
+- Documentation & repository maintenance only (no functional SDK changes): migrated contributor/policy docs into the Docusaurus site, folded the root `CHANGELOG.md` into the release notes, refreshed the `README` branding, and removed stale repository cruft.
 
 ## [0.15.0] - 2026-06-11
 
