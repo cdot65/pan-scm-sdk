@@ -145,6 +145,13 @@ venv.bak/
 /docs-site/.docusaurus
 /docs-site/node_modules
 
+# OpenAPI spec dumps (not part of the SDK; regenerated externally)
+/openapi/
+*.openapi.yaml
+
+# Test report artifacts
+junit.xml
+
 # mypy
 .mypy_cache/
 .dmypy.json
