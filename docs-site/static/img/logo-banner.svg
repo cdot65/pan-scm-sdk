@@ -1,12 +1,14 @@
-<svg width="724" height="724" viewBox="0 0 724 724" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
-  <title id="title">pan-scm-sdk icon</title>
-  <desc id="desc">A minimalist cloud icon with a code symbol, in the Gruvbox palette.</desc>
+<svg width="2172" height="724" viewBox="0 0 2172 724" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">pan-scm-sdk logo</title>
+  <desc id="desc">A minimalist cloud icon with a code symbol, followed by the pan-scm-sdk wordmark, in the Gruvbox palette.</desc>
   <defs>
     <linearGradient id="cloudStroke" x1="108" y1="110" x2="706" y2="492" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#fabd2f"/>
       <stop offset="1" stop-color="#8ec07c"/>
     </linearGradient>
   </defs>
+
+  <!-- Icon: cloud + SDK/code motif -->
   <g id="cloud-sdk-icon" stroke-linecap="round" stroke-linejoin="round">
     <path
       d="M283 490H214C151 490 100 439 100 376C100 313 151 262 214 262C222 176 291 109 379 109C476 109 553 187 553 283C580 262 620 260 652 282C693 311 714 358 704 407C694 457 654 490 598 490H356"
@@ -16,4 +18,14 @@
     <path d="M464 272L524 323L464 374" stroke="#ebdbb2" stroke-width="32"/>
     <path d="M421 260L385 386" stroke="#fabd2f" stroke-width="28"/>
   </g>
+
+  <!-- Wordmark: mono, gruvbox -->
+  <text
+    x="742"
+    y="449"
+    font-family="'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace"
+    font-size="181"
+    font-weight="700"
+    letter-spacing="-6"
+    dominant-baseline="alphabetic"><tspan fill="#d5c4a1">pan-</tspan><tspan fill="#fabd2f">scm</tspan><tspan fill="#928374">-</tspan><tspan fill="#8ec07c">sdk</tspan></text>
 </svg>
