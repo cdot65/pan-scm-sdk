@@ -1,30 +1,260 @@
-/**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
- */
+/* ============================================================
+   Gruvbox Docs — Docusaurus theme (dark, hard contrast)
+   Source design system: claude.ai/design "Gruvbox Docs Design System"
+   Drop this in as src/css/custom.css (or @import it from there).
+   Maps the gruvbox token set onto Infima's --ifm-* variables and
+   styles the Docusaurus chrome (navbar, sidebar, TOC, admonitions,
+   code, pagination) to match the design system.
+   ============================================================ */
 
-/* Brand palette: Material "deep purple" to match the former MkDocs theme. */
+/* ---- Webfonts: IBM Plex Sans (body) · IBM Plex Serif (headings) · JetBrains Mono (code/labels) ---- */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:wght@500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap');
+
+/* ============================================================
+   1. Raw Gruvbox palette (dark, hard contrast) + semantic aliases
+   ============================================================ */
 :root {
-  --ifm-color-primary: #673ab7;
-  --ifm-color-primary-dark: #5d34a5;
-  --ifm-color-primary-darker: #58319c;
-  --ifm-color-primary-darkest: #492981;
-  --ifm-color-primary-light: #7445c4;
-  --ifm-color-primary-lighter: #7d50c8;
-  --ifm-color-primary-lightest: #9670d2;
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  /* Backgrounds */
+  --gb-bg0-hard: #1d2021;
+  --gb-bg0:      #282828;
+  --gb-bg0-soft: #32302f;
+  --gb-bg1:      #3c3836;
+  --gb-bg2:      #504945;
+  --gb-bg3:      #665c54;
+  --gb-bg4:      #7c6f64;
+  /* Foregrounds */
+  --gb-fg0: #fbf1c7;
+  --gb-fg1: #ebdbb2;
+  --gb-fg2: #d5c4a1;
+  --gb-fg3: #bdae93;
+  --gb-fg4: #a89984;
+  --gb-gray: #928374;
+  /* Bright accents */
+  --gb-red-bright:    #fb4934;
+  --gb-green-bright:  #b8bb26;
+  --gb-yellow-bright: #fabd2f;
+  --gb-blue-bright:   #83a598;
+  --gb-purple-bright: #d3869b;
+  --gb-aqua-bright:   #8ec07c;
+  --gb-orange-bright: #fe8019;
+  /* Neutral accents */
+  --gb-red:    #cc241d;
+  --gb-green:  #98971a;
+  --gb-yellow: #d79921;
+  --gb-blue:   #458588;
+  --gb-purple: #b16286;
+  --gb-aqua:   #689d6a;
+  --gb-orange: #d65d0e;
+  /* Faded tints (admonition fills) */
+  --gb-red-faded:    #722529;
+  --gb-green-faded:  #4c4a17;
+  --gb-yellow-faded: #5a4111;
+  --gb-blue-faded:   #2e4045;
+  --gb-purple-faded: #4a2f3c;
+  --gb-aqua-faded:   #34402f;
+  --gb-orange-faded: #5a2f12;
+
+  /* Effects */
+  --gb-shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+  --gb-shadow-md: 0 4px 12px rgba(0,0,0,0.45);
+  --gb-shadow-lg: 0 12px 32px rgba(0,0,0,0.55);
+  --gb-focus-ring: 0 0 0 3px rgba(250,189,47,0.35);
+  --gb-edge-top: inset 0 1px 0 rgba(255,255,255,0.04);
+  --gb-ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* For readability concerns, choose a lighter palette in dark mode. */
+/* ============================================================
+   2. Infima mapping — the actual "conversion"
+   Gruvbox is dark-only, so we apply the same palette to the root
+   and to [data-theme='dark']; the toggle is disabled in config.
+   ============================================================ */
+:root,
 [data-theme='dark'] {
-  --ifm-color-primary: #b39ddb;
-  --ifm-color-primary-dark: #9f81d0;
-  --ifm-color-primary-darker: #9573ca;
-  --ifm-color-primary-darkest: #7549b6;
-  --ifm-color-primary-light: #c7b9e6;
-  --ifm-color-primary-lighter: #d1c5eb;
-  --ifm-color-primary-lightest: #efeaf8;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  /* Primary = gruvbox yellow (CTAs, active nav, focus) */
+  --ifm-color-primary:          #fabd2f;
+  --ifm-color-primary-dark:     #f9b50f;
+  --ifm-color-primary-darker:   #f0ad06;
+  --ifm-color-primary-darkest:  #c68f05;
+  --ifm-color-primary-light:    #ffc94d;
+  --ifm-color-primary-lighter:  #ffd166;
+  --ifm-color-primary-lightest: #ffdd8c;
+
+  /* Semantic colors → Docusaurus admonitions
+     note=secondary · tip=success · info=info · warning=warning · danger=danger */
+  --ifm-color-secondary: var(--gb-blue-bright);
+  --ifm-color-success:   var(--gb-green-bright);
+  --ifm-color-info:      var(--gb-aqua-bright);
+  --ifm-color-warning:   var(--gb-yellow-bright);
+  --ifm-color-danger:    var(--gb-red-bright);
+
+  /* Surfaces — flat, stepped (no gradients/blur) */
+  --ifm-background-color:          var(--gb-bg0-hard);
+  --ifm-background-surface-color:  var(--gb-bg0-soft);
+  --ifm-color-content:             var(--gb-fg1);
+  --ifm-color-content-secondary:   var(--gb-fg4);
+  --ifm-heading-color:             var(--gb-fg0);
+  --ifm-hr-border-color:           var(--gb-bg2);
+
+  /* Type */
+  --ifm-font-family-base: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --ifm-font-family-monospace: "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  --gb-font-serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --ifm-heading-font-family: var(--gb-font-serif); /* serif headings over the sans body */
+  --ifm-font-size-base: 18px;            /* design body size */
+  --ifm-line-height-base: 1.75;          /* relaxed prose leading */
+  --ifm-heading-font-weight: 600;        /* serif reads heavy; 600 over 700 */
+  --ifm-h1-font-size: 2.441rem;
+  --ifm-h2-font-size: 1.953rem;
+  --ifm-h3-font-size: 1.5rem;
+
+  /* Links = gruvbox blue, hover → aqua */
+  --ifm-link-color: var(--gb-blue-bright);
+  --ifm-link-hover-color: var(--gb-aqua-bright);
+  --ifm-link-hover-decoration: underline;
+
+  /* Code */
+  --ifm-code-background: var(--gb-bg1);
+  --ifm-code-color: var(--gb-aqua-bright);
+  --ifm-code-font-size: 0.875em;
+  --ifm-pre-background: var(--gb-bg0);
+  --ifm-code-border-radius: 3px;
+
+  /* Geometry — square-ish corners, hairline borders */
+  --ifm-global-radius: 5px;
+  --ifm-card-border-radius: 8px;
+  --ifm-global-border-width: 1px;
+  --ifm-toc-border-color: var(--gb-bg2);
+  --ifm-color-emphasis-200: var(--gb-bg1);
+  --ifm-color-emphasis-300: var(--gb-bg2);
+
+  /* Navbar */
+  --ifm-navbar-height: 60px;
+  --ifm-navbar-background-color: var(--gb-bg0);
+  --ifm-navbar-link-color: var(--gb-fg2);
+  --ifm-navbar-link-hover-color: var(--gb-fg0);
+
+  /* Sidebar / menu */
+  --ifm-menu-color: var(--gb-fg3);
+  --ifm-menu-color-active: var(--gb-fg0);
+  --ifm-menu-color-background-active: var(--gb-bg1);
+  --ifm-menu-color-background-hover: var(--gb-bg1);
+
+  /* Footer */
+  --ifm-footer-background-color: var(--gb-bg0);
+  --ifm-footer-color: var(--gb-fg3);
+  --ifm-footer-link-color: var(--gb-fg2);
+  --ifm-footer-title-color: var(--gb-fg0);
+
+  /* Shadows (subtle on dark) */
+  --ifm-global-shadow-lw: var(--gb-shadow-sm);
+  --ifm-global-shadow-md: var(--gb-shadow-md);
+  --ifm-global-shadow-tl: var(--gb-shadow-lg);
+
+  /* Transitions — quick, no bounce */
+  --ifm-transition-fast: 120ms;
+  --ifm-transition-slow: 280ms;
+
+  /* DocSearch / search input accents */
+  --docsearch-primary-color: var(--gb-yellow-bright);
+}
+
+/* ============================================================
+   3. Chrome details that tokens alone don't cover
+   ============================================================ */
+
+html, body {
+  background: var(--gb-bg0-hard);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Serif headings: normal tracking (the sans -0.02em is too tight for serif) */
+h1, h2, h3, h4, h5, h6 { font-family: var(--gb-font-serif); letter-spacing: -0.01em; text-wrap: balance; }
+p, li { text-wrap: pretty; }
+
+/* Navbar: flat, hairline bottom border, 1px top highlight */
+.navbar {
+  box-shadow: var(--gb-edge-top);
+  border-bottom: 1px solid var(--gb-bg2);
+}
+.navbar__title { font-family: var(--ifm-font-family-monospace); letter-spacing: -0.02em; }
+
+/* Active sidebar item: yellow accent bar (3px) instead of full fill emphasis */
+.menu__link--active:not(.menu__link--sublist) {
+  box-shadow: inset 3px 0 0 var(--gb-yellow-bright);
+  color: var(--gb-fg0);
+}
+
+/* TOC active = yellow */
+.table-of-contents__link--active,
+.table-of-contents__link--active code { color: var(--gb-yellow-bright); }
+.table-of-contents { font-size: 0.8125rem; }
+
+/* Eyebrow / breadcrumb feel: mono, wide tracking */
+.breadcrumbs__item, .theme-doc-version-badge {
+  font-family: var(--ifm-font-family-monospace);
+}
+
+/* Inline code: bordered chip, aqua text */
+:not(pre) > code {
+  border: 1px solid var(--gb-bg2);
+  padding: 0.12em 0.4em;
+}
+
+/* Code blocks: hairline border, mono, snug leading */
+.theme-code-block, pre[class*="language-"] {
+  border: 1px solid var(--gb-bg2);
+  box-shadow: var(--gb-edge-top);
+}
+.theme-code-block-highlighted-line { background: rgba(250,189,47,0.10); }
+
+/* Admonition left rail = 3px accent bar (matches design "accent bars") */
+.theme-admonition, .alert {
+  border: 1px solid var(--gb-bg2);
+  border-left-width: 3px;
+  border-radius: var(--ifm-global-radius);
+  box-shadow: var(--gb-edge-top);
+}
+.theme-admonition .admonition-heading,
+.alert .admonition-heading {
+  text-transform: uppercase;
+  font-family: var(--ifm-font-family-monospace);
+  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+}
+
+/* Buttons: primary lightens toward bright tint on hover (no scale bounce) */
+.button.button--primary {
+  --ifm-button-color: var(--gb-bg0-hard);
+  color: var(--gb-bg0-hard);
+}
+.button.button--primary:hover { background-color: var(--gb-yellow-bright); filter: brightness(1.06); }
+
+/* Cards: soft surface, 1px border, faint shadow, top edge */
+.card {
+  background: var(--gb-bg0-soft);
+  border: 1px solid var(--gb-bg2);
+  box-shadow: var(--gb-shadow-sm), var(--gb-edge-top);
+  transition: transform var(--ifm-transition-fast) var(--gb-ease),
+              box-shadow var(--ifm-transition-fast) var(--gb-ease);
+}
+a.card:hover { transform: translateY(-2px); box-shadow: var(--gb-shadow-md), var(--gb-edge-top); }
+
+/* Focus ring = yellow */
+a:focus-visible, button:focus-visible, .menu__link:focus-visible,
+input:focus-visible, .navbar__link:focus-visible {
+  outline: none;
+  box-shadow: var(--gb-focus-ring);
+  border-radius: var(--ifm-global-radius);
+}
+
+/* Selection + scrollbars (gruvbox surface stack) */
+::selection { background: rgba(250,189,47,0.25); }
+* { scrollbar-color: var(--gb-bg3) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb {
+  background: var(--gb-bg3);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
