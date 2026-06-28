@@ -1,8 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-> Companion file: [`AGENTS.md`](AGENTS.md) carries the same guidance for other coding agents. Keep the two in sync — if you change one, mirror the change in the other.
+This file provides guidance to coding agents working in this repository. It is kept in sync with [`CLAUDE.md`](CLAUDE.md) — the two carry the same guidance, so edits to one must be mirrored in the other.
 
 ## Project Overview
 

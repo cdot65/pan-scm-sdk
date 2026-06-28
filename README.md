@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://cdot65.github.io/pan-scm-sdk/">
-    <img src="https://raw.githubusercontent.com/cdot65/pan-scm-sdk/main/docs-site/static/img/logo.svg" alt="pan-scm-sdk" width="200">
+    <img src="https://raw.githubusercontent.com/cdot65/pan-scm-sdk/main/docs-site/static/img/logo-banner.svg" alt="pan-scm-sdk" width="440">
   </a>
 </p>
 

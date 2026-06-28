@@ -926,3 +926,204 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 - **Initial Release**: Developer version of `pan-scm-sdk`
 
 For more detailed information on each release, visit the [GitHub repository](https://github.com/cdot65/pan-scm-sdk/releases) or check the [commit history](https://github.com/cdot65/pan-scm-sdk/commits/main).
+
+---
+
+# Changelog
+
+The entries below follow the [Keep a Changelog](https://keepachangelog.com/) format and track engineering-level changes (migrated from the former root `CHANGELOG.md`).
+
+## [Unreleased]
+
+## [0.15.0] - 2026-06-11
+
+### Added
+
+- **GlobalProtect Infrastructure Settings**: New `scm.infrastructure_settings` service. Endpoint: `/config/mobile-agent/v1/infrastructure-settings`. Folder+name addressed CRUD (no `/{id}` paths) scoped to the Mobile Users folder.
+- **GlobalProtect Global Settings**: New `scm.global_settings` service. Endpoint: `/config/mobile-agent/v1/global-settings`. Singleton resource with `get()` and `update()` only.
+- **GlobalProtect Agent Profiles (Application Settings)**: New `scm.agent_profile` service. Endpoint: `/config/mobile-agent/v1/agent-profiles`. Folder+name addressed CRUD with paginated list; full nested app-settings model (connect method, tunnel MTU, and related structures).
+- **GlobalProtect Tunnel Profiles (Tunnel Settings)**: New `scm.tunnel_profile` service. Endpoint: `/config/mobile-agent/v1/tunnel-profiles`. Folder+name addressed CRUD with paginated list.
+- **GlobalProtect Forwarding Profiles**: New `scm.forwarding_profile` service. Endpoint: `/config/mobile-agent/v1/forwarding-profiles`. UUID-based CRUD with oneOf profile types (PAC file, GlobalProtect proxy, ZTNA agent) plus basic/ZTNA forwarding and block rules.
+- **GlobalProtect Forwarding Profile Destinations**: New `scm.forwarding_profile_destination` service. Endpoint: `/config/mobile-agent/v1/forwarding-profile-destinations`. UUID-based CRUD with FQDN and IP destination entries.
+- **GlobalProtect Forwarding Profile Source Applications**: New `scm.forwarding_profile_source_application` service. Endpoint: `/config/mobile-agent/v1/forwarding-profile-source-applications`. UUID-based CRUD.
+- **GlobalProtect Forwarding Profile User Locations**: New `scm.forwarding_profile_user_location` service. Endpoint: `/config/mobile-agent/v1/forwarding-profile-user-locations`. UUID-based CRUD.
+- **GlobalProtect Forwarding Profile Regional and Custom Proxies**: New `scm.forwarding_profile_regional_and_custom_proxy` service. Endpoint: `/config/mobile-agent/v1/forwarding-profile-regional-and-custom-proxies`. UUID-based CRUD.
+- ~430 new tests across mobile_agent services and models; docs pages for every new service and model set.
+
+### Changed
+
+- **Authentication Settings spec alignment** (non-breaking): `move()` now targets the spec path `/{name}:move` and its model accepts an optional `folder`; `create()` sends `folder` as a query parameter; `list()`/`fetch()` gain a `name` filter and pagination. Existing id-based `get()`/`update()`/`delete()` are unchanged (tracked for live-API verification in [#360](https://github.com/cdot65/pan-scm-sdk/issues/360)).
+
+## [0.14.0] - 2026-04-21
+
+### Added
+- **Device updates**: `scm.device.update()` wraps `PUT /config/setup/v1/devices/{id}`, enabling label/snippet attachment, folder moves, and display-name/description edits on enrolled devices. Request body follows the upstream `devices-put` schema exactly.
+- `labels` and `snippets` fields surfaced on `DeviceBaseModel` (and therefore `DeviceResponseModel`), replacing the prior `extra="allow"` pass-through.
+
+### Changed
+- **`DeviceUpdateModel`** rewritten as a standalone model matching the `devices-put` schema: accepts only `id`, `display_name`, `folder`, `description`, `labels`, `snippets`. Previously inherited `DeviceBaseModel`, which exposed read-only fields (`serial_number`, `hostname`, `is_connected`, `family`, `model`, etc.) that the API does not accept on PUT. Callers that were populating the unused update model will need to drop those read-only fields.
+
+## [0.12.0] - 2026-02-24
+
+### Added
+- **Authentication Profiles**: New `scm.authentication_profile` service for managing authentication profiles that define auth methods (local DB, SAML, LDAP, RADIUS, TACACS+, Kerberos). Endpoint: `/config/identity/v1/authentication-profiles`. Full CRUD. Complex oneOf method schema with lockout, MFA, and SSO configuration.
+- **LDAP Server Profiles**: New `scm.ldap_server_profile` service for managing LDAP server connection profiles. Endpoint: `/config/identity/v1/ldap-server-profiles`. Full CRUD. Server array with address/port, bind DN/password, SSL, LDAP type (Active Directory/eDirectory/Sun/Other).
+- **RADIUS Server Profiles**: New `scm.radius_server_profile` service for managing RADIUS server connection profiles. Endpoint: `/config/identity/v1/radius-server-profiles`. Full CRUD. Server array with address/port/secret, oneOf protocol (CHAP/PAP/EAP-TTLS/PEAP variants).
+- **TACACS+ Server Profiles**: New `scm.tacacs_server_profile` service for managing TACACS+ server connection profiles. Endpoint: `/config/identity/v1/tacacs-server-profiles`. Full CRUD. Server array with address/port/secret, protocol (CHAP/PAP).
+- **SAML Server Profiles**: New `scm.saml_server_profile` service for managing SAML Identity Provider server profiles. Endpoint: `/config/identity/v1/saml-server-profiles`. Full CRUD. Entity ID, SSO URL, certificate, SSO/SLO bindings.
+- **Kerberos Server Profiles**: New `scm.kerberos_server_profile` service for managing Kerberos server connection profiles. Endpoint: `/config/identity/v1/kerberos-server-profiles`. Full CRUD. Server array with host/port.
+- New `scm/config/identity/` service category for identity and authentication services.
+- Added 392 new tests across 18 test files with comprehensive coverage.
+
+## [0.11.0] - 2026-02-24
+
+### Added
+- **File Blocking Profiles**: New `scm.file_blocking_profile` service for managing file blocking profiles for data filtering policy. Endpoint: `/config/security/v1/file-blocking-profiles`. Full CRUD operations. Includes nested rules with action (alert/block/continue), application, direction (download/upload/both), and file type configuration.
+- **URL Access Profiles**: New `scm.url_access_profile` service for managing URL filtering profiles with category-based access control. Endpoint: `/config/security/v1/url-access-profiles`. Full CRUD operations. Includes URL category lists (alert/allow/block/continue/redirect), credential enforcement settings, inline categorization, safe search enforcement, and HTTP header logging options.
+- **App Override Rules**: New `scm.app_override_rule` service for managing application override rules for custom app identification. Endpoint: `/config/security/v1/app-override-rules`. Full CRUD with rulebase (pre/post) support, `:move` operation for rule reordering. Zone/address/port/protocol-based matching with application override.
+- Added 307 new tests (103 model validation + 204 service tests) across 9 test files with comprehensive coverage.
+- Added documentation for all 3 new services and their models.
+
+## [0.10.3] - 2026-02-24
+
+### Added
+- **Decryption Rules**: New `scm.decryption_rule` service for managing SSL/TLS decryption policy rules. Endpoint: `/config/security/v1/decryption-rules`. Full CRUD with rulebase (pre/post) support, `:move` operation for rule reordering, and SSL forward proxy / inbound inspection type configuration. Action enum supports `decrypt` and `no-decrypt`.
+- **Authentication Rules**: New `scm.authentication_rule` service for managing identity-based authentication policy rules. Endpoint: `/config/identity/v1/authentication-rules`. Full CRUD with rulebase (pre/post) support, `:move` operation, authentication enforcement profile linking, and session timeout configuration (1-1440 minutes).
+- Added 374 new tests (160 model validation + 214 service tests) across 4 test files with 100% code coverage.
+
+## [0.10.2] - 2026-02-23
+
+### Fixed
+- **Zone Protection Profiles**: Remove invalid top-level `alarm_rate`, `activate_rate`, `maximal_rate` fields from all 6 flood models (`TcpSynFlood`, `UdpFlood`, `SctpInitFlood`, `IcmpFlood`, `Icmpv6Flood`, `OtherIpFlood`). E2E testing against the live SCM API confirmed these fields only work inside the nested `red`/`syn_cookies` sub-models (as `FloodRed.alarm_rate`), not at the top level. Top-level rate fields were silently discarded by the API. (#246)
+- **Zone Protection Profiles**: Add rate ordering validation (`alarm_rate <= activate_rate <= maximal_rate`) to `FloodRed` and `FloodSynCookies` sub-models.
+
+## [0.10.1] - 2026-02-23
+
+### Fixed
+- **Zone Protection Profiles**: Add missing `alarm_rate`, `activate_rate`, and `maximal_rate` fields to all 6 flood protection models (`TcpSynFlood`, `UdpFlood`, `SctpInitFlood`, `IcmpFlood`, `Icmpv6Flood`, `OtherIpFlood`). The SCM API accepts these fields at the top level of each flood type, but the SDK's Pydantic models rejected them with `extra="forbid"`. (#246)
+- **Zone Protection Profiles**: Add rate ordering validation (`alarm_rate <= activate_rate <= maximal_rate`) to all flood models including `FloodRed` and `FloodSynCookies`.
+
+## [0.10.0] - 2026-02-20
+
+### Added
+- **QoS Profile**: New `scm.qos_profile` service for managing QoS profiles for traffic shaping and bandwidth allocation. Supports full CRUD operations against `/config/network/v1/qos-profiles`. Includes aggregate bandwidth and class bandwidth type configuration.
+- **QoS Rule**: New `scm.qos_rule` service for managing QoS policy rules that apply QoS profiles to traffic. Supports list, get, update, and fetch operations (no-POST pattern) against `/config/network/v1/qos-rules`. Includes `:move` operation for rule reordering with destination (top/bottom/before/after) and rulebase (pre/post) support.
+- **DNS Proxy**: New `scm.dns_proxy` service for managing DNS proxy configurations for DNS interception and forwarding. Supports full CRUD operations against `/config/network/v1/dns-proxies`. Includes domain servers, static entries, TCP/UDP query settings, and cache configuration with proper alias handling for hyphenated API keys.
+- **PBF Rule**: New `scm.pbf_rule` service for managing Policy-Based Forwarding rules for application-aware routing. Supports full CRUD operations against `/config/network/v1/pbf-rules`. Includes forward/discard/no-PBF action types, enforce symmetric return, and source/destination matching.
+- Added 254 new tests (131 model validation + 99 service tests + 24 move operation tests) across 12 test files
+
+## [0.9.0] - 2026-02-20
+
+### Added
+- **BGP Filtering Profile**: New `scm.bgp_filtering_profile` service for managing BGP filtering profiles with inbound/outbound filter lists, network filters, route maps, and conditional advertisement. Supports full CRUD operations against `/config/network/v1/bgp-filtering-profiles`. Includes multicast oneOf pattern (inherit vs explicit filter configuration).
+- **BGP Redistribution Profile**: New `scm.bgp_redistribution_profile` service for managing BGP redistribution profiles that control route redistribution between protocols (static, OSPF, connected). Supports full CRUD operations against `/config/network/v1/bgp-redistribution-profiles`. All three protocol redistributions can coexist (non-mutually-exclusive).
+- **BGP Route Map**: New `scm.bgp_route_map` service for managing BGP route maps with sequenced entries containing match/set criteria for import/export policy control. Supports full CRUD operations against `/config/network/v1/bgp-route-maps`. Complex match criteria (AS path, communities, origin, metric, peer, IPv4) and set actions (local preference, weight, metric, communities, aggregator).
+- **BGP Route Map Redistribution**: New `scm.bgp_route_map_redistribution` service for managing BGP route map redistribution rules with protocol-specific crossover patterns. Supports full CRUD operations against `/config/network/v1/bgp-route-map-redistributions`. 31 Pydantic model classes implementing 2-level oneOf discrimination across 7 crossover variants (BGP->OSPF, BGP->RIB, OSPF->BGP, OSPF->RIB, Connected/Static->BGP, Connected/Static->OSPF, Connected/Static->RIB).
+- Added 336 new tests (220 model validation + 116 service tests) across 8 test files
+
+## [0.8.0] - 2026-02-18
+
+### Added
+- **Route Access List**: New `scm.route_access_list` service for managing route access lists that filter routes by network/mask. Supports get, update, list, and fetch operations (no-POST pattern) against `/config/network/v1/route-access-lists`.
+- **Route Prefix List**: New `scm.route_prefix_list` service for managing route prefix lists with prefix-based route filtering including ge/le constraints. Supports get, update, list, and fetch operations against `/config/network/v1/route-prefix-lists`.
+- **BGP Authentication Profile**: New `scm.bgp_auth_profile` service for managing BGP authentication profiles (MD5 authentication for BGP sessions). Supports get, update, list, and fetch operations against `/config/network/v1/bgp-auth-profiles`.
+- **OSPF Authentication Profile**: New `scm.ospf_auth_profile` service for managing OSPF authentication profiles with MD5 key list and simple password authentication modes (mutually exclusive). Supports get, update, list, and fetch operations against `/config/network/v1/ospf-auth-profiles`.
+- **BGP Address Family Profile**: New `scm.bgp_address_family_profile` service for managing BGP address family profiles with IPv4/IPv6 unicast/multicast configuration including allowas_in, maximum_prefix, next_hop, remove_private_AS, send_community, and ORF settings. Supports get, update, list, and fetch operations against `/config/network/v1/bgp-address-family-profiles`.
+- Added 269 new tests (165 model validation + 104 service tests) across 10 test files
+
+## [0.7.0] - 2026-02-18
+
+### Added
+- **Logical Router**: New `scm.logical_router` service for managing logical routers - the most complex networking service with VRF-based routing configuration. Supports full CRUD operations (create, get, update, delete, list, fetch) against the `/config/network/v1/logical-routers` endpoint.
+  - 93 Pydantic model classes covering VRF, static routes (IPv4/IPv6), OSPF, BGP, ECMP, RIP, and administrative distance configuration
+  - 20 `model_validator` implementations for oneOf discriminator patterns (nexthop types, OSPF area types, ECMP algorithms, BGP peer group types, etc.)
+  - IPv4 static routes support 8 nexthop types: receive, discard, ip_address, ipv6_address, fqdn, next_lr, next_vr, tunnel
+  - IPv6 static routes support 7 nexthop types (no ip_address)
+  - BGP configuration with peer groups, peers, aggregate routes, redistribution rules, and policy import/export
+  - OSPF configuration with areas (normal/stub/NSSA), interfaces, virtual links, authentication profiles, and export rules
+  - ECMP with 4 algorithm options: ip_modulo, ip_hash, weighted_round_robin, balanced_round_robin
+  - RIP with interface-level configuration including mode, split horizon, and distribute lists
+  - Multicast and OSPFv3 configurations accepted as `Dict[str, Any]` for forward compatibility
+  - `routing_stack` filter support on `list()` for filtering by "legacy" or "advanced" routing stack
+- Added 134 new tests (106 model validation + 28 service CRUD tests)
+
+## [0.6.0] - 2026-02-17
+
+### Added
+- **Interface Management Profile**: New `scm.interface_management_profile` service for managing interface management profiles (HTTPS, SSH, ping, SNMP access control). Full CRUD with kebab-case field alias support.
+- **Zone Protection Profile**: New `scm.zone_protection_profile` service for managing zone protection profiles with deeply nested flood protection, scan protection, packet-based attack protection, IPv6 protection, and non-IP protocol filtering.
+- **DHCP Interface**: New `scm.dhcp_interface` service for configuring DHCP server and relay settings on interfaces, with server/relay mutual exclusivity validation.
+- **IPsec Tunnel**: New `scm.ipsec_tunnel` service for managing IPsec tunnel objects, completing the VPN stack alongside existing IKE crypto, IKE gateway, and IPsec crypto profile services.
+
+### Changed
+- Added 233 new tests across 8 test files (4 service tests + 4 model tests)
+- All new ResponseModels use `extra="ignore"` pattern established in v0.5.0
+
+## [0.5.1] - 2026-02-17
+
+### Fixed
+- **DeviceResponseModel & ApplicationResponseModel**: Restored `extra="allow"` on these two models that intentionally expose undocumented API fields via `__pydantic_extra__`. The v0.5.0 migration incorrectly changed them to `extra="ignore"` which silently dropped extra fields.
+
+## [0.5.0] - 2026-02-17
+
+### Fixed
+- **EthernetInterface.list()**: Added missing `slot: Optional[int]` field to `EthernetInterfaceBaseModel` that caused `ValidationError` when the API returned slot data (PA-5000/PA-7000 series)
+- **tag.list()**: Fixed validation errors caused by `extra="forbid"` rejecting unknown fields in API responses
+- **snippet.associate_folder()**: Now raises `NotImplementedError` immediately instead of making a failing API call and masking the 404 error
+
+### Changed
+- **Response Model Resilience**: Migrated all 50 `*ResponseModel` classes from `extra="forbid"` to `extra="ignore"` so the SDK gracefully handles new fields added by the SCM API. `*CreateModel` and `*UpdateModel` classes retain `extra="forbid"` for strict input validation.
+- Updated 41 test methods to validate the new `extra="ignore"` behavior on response models
+
+## [0.4.0] - 2024-12-20
+
+### Added
+- Bearer token authentication support for stateless automation scenarios
+- New `access_token` parameter in Scm and ScmClient constructors
+- Example scripts demonstrating bearer token usage
+- Unit and integration tests for bearer token functionality
+- Support for Ansible and other automation frameworks
+
+### Changed
+- Comprehensive documentation updates for setup services (device, folder, label, snippet, variable)
+- All documentation now uses unified ScmClient interface pattern
+- Update examples use fetch → dot notation → update workflow
+- Added Default column to all model attribute tables
+- Added Filter Parameters tables documenting server-side and client-side filters
+- Expanded Related Models sections with links to all model types
+- Added Variable Types and Enum documentation throughout
+
+### Fixed
+- Documentation inconsistencies between config class and model docs
+- Corrected parameter types in Core Methods tables
+
+## [0.3.14] - 2025-02-28
+
+### Added
+- Unified client interface that allows attribute-based access to services
+- New example demonstrating the unified client pattern
+- New `ScmClient` class as an alias for `Scm`
+- Added comprehensive tests for the unified client functionality
+
+### Changed
+- Updated documentation to demonstrate both traditional and unified client patterns
+- Updated version number in pyproject.toml
+
+## [0.3.13] - 2025-02-22
+
+### Added
+- Support for HTTP Server Profiles
+- Integration with CI/CD
+- More tests
+
+## [0.3.12] - 2025-02-15
+
+### Fixed
+- DNS Security profiles list method fixed
+
+## [0.3.11] - 2025-02-04
+
+### Added
+- Added Anti Spyware Profile model
+- Improved error handling
+- Various bug fixes

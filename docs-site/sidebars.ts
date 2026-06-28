@@ -14,8 +14,19 @@ const sidebars: SidebarsConfig = {
         {type: 'doc', id: 'about/getting-started', label: "Getting Started"},
         {type: 'doc', id: 'about/troubleshooting', label: "Troubleshooting"},
         {type: 'doc', id: 'about/contributing', label: "Contributing"},
+        {type: 'doc', id: 'about/code-of-conduct', label: "Code of Conduct"},
+        {type: 'doc', id: 'about/security', label: "Security Policy"},
+        {type: 'doc', id: 'about/support', label: "Support"},
         {type: 'doc', id: 'about/release-notes', label: "Release Notes"},
         {type: 'doc', id: 'about/license', label: "License"},
+      ],
+    },
+    {
+      type: 'category',
+      label: "Development",
+      items: [
+        {type: 'doc', id: 'about/sdk-styling-guide', label: "SDK Service Styling Guide"},
+        {type: 'doc', id: 'about/pydantic-models-guide', label: "Pydantic Models Guide"},
       ],
     },
     {

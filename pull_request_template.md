@@ -1,6 +1,6 @@
 ### Checklist for This Pull Request
 
-🚨Please adhere to the [guidelines for contributing](./CONTRIBUTING.md) to this repository.
+🚨Please adhere to the [guidelines for contributing](https://cdot65.github.io/pan-scm-sdk/about/contributing) to this repository.
 
 - [ ] Ensure you are submitting your pull request to **a branch dedicated to a specific topic/feature/bugfix**. Avoid using the master branch for pull requests.
 - [ ] Target your pull request to the **main development branch** in the `https://github.com/cdot65/pan-scm-sdk` repository (do NOT target the Palo Alto Networks repo!).
